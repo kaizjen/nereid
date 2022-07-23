@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="nereid://css/global.css">
+  <link rel="stylesheet" href="nereid://css/theme.css">
+  <style>
+    body {
+      background: var(--fds-acrylic-background-default);
+      color: var(--fds-text-primary);
+      margin: 0;
+			font-family: system-ui;
+      overflow: hidden;
+    }
+    * {
+      scroll-behavior: smooth;
+    }
+    .combo-box {
+      /* fixing the fluent element */
+      min-width: 4cm;
+    }
+    .s-option {
+      padding-block: 8px;
+      padding-inline: 16px; /* 16 to match fluent's ListItem */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .separator {
+      margin-inline: 20px;
+      margin-block: 10px;
+      height: 1px;
+      background: var(--default-gray); /* in settings.svelte */
+    }
+  </style>
+</head>
+
+<body>
+
+  <script type="module">
+    import Main from 'nereid://js/settings.svelte'
+
+    const app = new Main({
+      target: document.body
+    })
+  </script>
+
+</body>
+
+</html>

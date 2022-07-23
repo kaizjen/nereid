@@ -1,0 +1,70 @@
+{
+  welcomePhase: 0,
+  i18n: null,
+  ui: {
+    theme: "dark",
+    defaultZoomFactor: 1,
+    chromeZoomFactor: 0.9,
+    showBookmarks: false,
+    backgroundImage: "${userdata}/background_images/${theme}/${size}/"
+  },
+  search: {
+    available: [
+      {
+        name: "Google",
+        searchURL: "https://www.google.com/search?q=%s",
+        suggestURL: "https://www.google.com/complete/search?client=chrome&q=%s",
+        suggestAlgorithm: "google-like"
+      },
+      {
+        name: "Startpage",
+        searchURL: "https://www.startpage.com/do/search?query=%s&cat=web",
+        suggestURL: "https://www.startpage.com/suggestions?q=%s&segment=startpage.udog",
+        suggestAlgorithm: "startpage-like"
+      },
+      {
+        name: "Wikipedia (en)",
+        searchURL: "https://en.wikipedia.org/wiki/%s",
+        suggestURL: "https://en.wikipedia.org/w/api.php?action=opensearch&limit=10&format=json&search=%s",
+        suggestAlgorithm: "google-like"
+      }
+    ],
+    selectedIndex: 0
+  },
+  privacy: {
+    httpsOnly: false,
+    useSuggestions: true,
+    hideSessionForSuggestions: true,
+    alwaysClearBrowsingData: false,
+    denyCrossOriginPermissions: false,
+    defaultPermissions: {
+      popups: null,
+      "media.video": null,
+      "media.audio": null,
+      displayCapture: null,
+      DRM: false,
+      geolocation: null,
+      notifications: null,
+      midi: null,
+      pointerLock: false,
+      openExternal: null,
+      idleDetection: null,
+      fullscreen: true
+    },
+    sitePermissions: {}
+  },
+  behaviour: {
+    onStart: {
+      type: "last-tabs"
+    },
+    maxRecentTabs: 10,
+    downloadPath: null,
+    a11yEnabled: null,
+    spellChecker: {
+      enabled: true,
+      languages: [
+        "en-US"
+      ]
+    }
+  }
+}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nereid</title>
+  <link rel="stylesheet" href="//lib/theme.css">
+  <style>
+    body {
+      background: transparent;
+      color: var(--accent-text);
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+      font-family: system-ui;
+      overflow: hidden;
+    }
+    
+    span.protocol {
+      color: var(--trivial-text);
+    }
+    span.host {
+      color: var(--accent-text);
+    }
+    span.port {
+      color: #c1dfff;
+    }
+    span.page {
+      color: var(--trivial-text);
+    }
+
+    *::selection {
+      background: var(--accent-color);
+      color: inherit;
+    }
+    .tool {
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-inline: 1px;
+      border-radius: 4px;
+    }
+    .tool:hover {
+      background: var(--tool-hover);
+    }
+    .tool:active {
+      background: var(--tool-active);
+    }
+    .dropdown-box {
+      padding-block: 8px;
+      padding-inline: 12px;
+      background: var(--active-background);
+      color: var(--accent-text);
+      display: flex;
+      align-items: center;
+      padding-left: 22px;
+    }
+  </style>
+</head>
+<body>
+  <script type="module">
+    import Main from './Main.svelte.js';
+    
+    const app = new Main({
+      target: document.body
+    })
+  </script>
+</body>
+</html>

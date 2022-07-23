@@ -1,0 +1,94 @@
+::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #a9a9a938;
+  border-radius: 100px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: #a9a9a96b;
+}
+::-webkit-scrollbar-thumb:active {
+  background-color: #ffffff94;
+}
+
+::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+
+button {
+  appearance: none;
+  border: 0;
+  font-family: inherit;
+  font-style: inherit;
+  font-weight: inherit;
+  text-rendering: auto;
+  color: inherit;
+  background: transparent;
+  font-size: inherit;
+  padding: 0;
+}
+*:focus-visible {
+  outline: none;
+  box-shadow: 0px 0px 1px 2px #247ecd5e;
+}
+img {
+  -webkit-user-drag: none;
+}
+a {
+  color: inherit;
+  cursor: default;
+  text-decoration: none;
+}
+
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --base-background: #aab0b6;
+    --active-background: #dddfe2;
+    --private-theme: #bbb0df;
+
+    --dialog-background: var(--active-background);
+
+    --trivial-color: #96a0b1;
+    --trivial-text: #000000ab;
+    --accent-text: black;
+    --accent-color: #247ecd;
+    --accent-hover: #44a8ff;
+    --accent-active: #9dd0fc;
+    --button-background: #00000036;
+    --button-hover: #0000004d;
+    --button-active: #0000001a;
+    --tool-hover: #00000021;
+    --tool-active: #00000046;
+
+    --separator-color: #adadad8c;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --base-background: #21252b;
+    --active-background: #4f5660;
+    --private-theme: #684a86;
+
+    --dialog-background: var(--base-background);
+
+    --trivial-color: #838383;
+    --trivial-text: #ffffffab;
+    --accent-text: white;
+    --accent-color: #247ecd;
+    --accent-hover: #69b4f7;
+    --accent-active: #9dd0fc;
+    --button-background: #ffffff2e;
+    --button-hover: #ffffff42;
+    --button-active: #ffffff5e;
+    --tool-hover: #ffffff30;
+    --tool-active: #ffffff1f;
+
+    --separator-color: #8080808c;
+  }
+}

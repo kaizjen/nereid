@@ -1,0 +1,47 @@
+::selection {
+  background: #7a7a7a91;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --default-gray: #c9c9c9;
+  }
+  ::selection {
+    background: #00000044;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --default-gray: gray;
+  }
+  ::selection {
+    background: #ffffff66;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background: inherit;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #a9a9a938;
+  border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #a9a9a96b;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background-color: #ffffff94;
+}
+
+header {
+  padding-inline: 20px;
+  padding-block: 4px;
+  border-bottom: 1px solid var(--default-gray);
+}
+
+br {
+  user-select: none;
+}

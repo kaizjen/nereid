@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "nereid://js/fluent-svelte": ["../fluent-svelte-raw/"]
+    }
+  }
+}

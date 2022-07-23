@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Private mode</title>
+	<link rel="stylesheet" href="nereid://css/global.css">
+	<style media="screen">
+		body {
+			width: 100%;
+			height: 100%;
+			margin: 0;
+			background: #200020;
+			color: white;
+			font-family: system-ui;
+			font-size: 14px;
+		}
+		.ghost {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			margin-top: 40px;
+		}
+		img {
+		  width: 12%;
+		  position: relative;
+		}
+		.desc {
+		  width: 30%;
+		  text-align: center;
+		}
+		.more {
+		  display: flex;
+		  margin-top: 25px;
+		}
+		.cell {
+		  margin: 8px;
+		}
+	</style>
+</head>
+<body>
+	<div class="ghost">
+		<h1>You are in Private mode</h1>
+		<img src="nereid://res/ghost.svg" alt="">
+		<div class="desc">
+			That means your actions will not be visible to other users of this PC. What happens in Private, stays in Private.
+		</div>
+		<div class="more">
+			<div class="cell">
+				<h5>Your actions may be visible to</h5>
+				<ul>
+					<li>Sites that you visit</li>
+					<li>Your internet provider</li>
+					<li>Your network administrator</li>
+					<li>Your roommate, who decided to look over your shoulder</li>
+				</ul>
+			</div>
+			<div class="cell">
+				<h5>After closing the last Private tab, Nereid will delete </h5>
+				<ul>
+					<li>What sites you visited</li>
+					<li>Cookie files</li>
+					<li>Local site storage</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome!</title>
+  <link rel="stylesheet" href="nereid://css/global.css">
+  <link rel="stylesheet" href="nereid://css/theme.css">
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: var(--fds-solid-background-base);
+      color: var(--fds-text-primary);
+      font-family: var(--fds-font-family-small);
+    }
+  </style>
+</head>
+<body>
+  <script type="module">
+    import Welcome from "nereid://js/welcome.svelte.js";
+
+    window.app = new Welcome({
+      target: document.body
+    })
+  </script>
+</body>
+</html>

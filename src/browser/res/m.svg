@@ -1,0 +1,6 @@
+<svg viewBox="0 0 500 500" width="36" height="36" xmlns="http://www.w3.org/2000/svg">
+  <defs></defs>
+  <ellipse style="fill: none; stroke: rgb(36, 126, 205); paint-order: fill; stroke-width: 140px;" cx="250" cy="250" rx="150" ry="150"></ellipse>
+  <path style="fill: none; stroke: rgb(68, 168, 255); stroke-width: 50px; stroke-linecap: round; stroke-linejoin: round;" d="M 63.881 419.558 C 180.652 406.94 419.122 198.969 431.389 76.498"></path>
+  <ellipse style="fill-rule: nonzero; fill: rgb(255, 255, 255);" cx="250" cy="250" rx="100" ry="100"></ellipse>
+</svg>

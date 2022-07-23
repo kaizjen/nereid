@@ -1,0 +1,525 @@
+# When translating, it's best to leave the name unchanged
+name: Nereid
+unimplemented: This feature is unimplemented
+common:
+  downloads: Downloads
+  settings: Settings
+  extensions: Extensions
+  bookmarks: Bookmarks
+  history: History
+  about: About Nereid
+  ok: OK
+  cancel: Cancel
+  loading: Loading...
+  done: Done
+  bookmarkFolders:
+    bookmarkBar: Bookmarks panel
+    startPanel: Start panel
+  permissions:
+    status:
+      allow: Allow
+      deny: Deny
+      ignore: Ignore
+      ask: Ask
+      useDefault: Use default
+      defaultMark: (Default)
+    geolocation:
+      name: Geolocation (not working)
+      desc: Provides access to your percise position
+      prompt: ${hostname} wants to access your geolocation
+    fullscreen:
+      name: Fullscreen
+      desc: The ability to show the page in fullscreen mode
+      prompt: ${hostname} wants to use the fullscreen mode
+    popups:
+      name: Pop-up windows
+      desc: Allows to show pop-up windows
+      prompt: ${hostname} wants to pop-up a window
+    media.video:
+      name: Webcam access
+      desc: Allows to access the webcam
+      prompt: ${hostname} wants to access your webcam
+    media.audio:
+      name: Microphone access
+      desc: Allows to access the microphone
+      prompt: ${hostname} wants to access your microphone
+    displayCapture:
+      name: Capturing the display
+      desc: Allows to record your screen
+      prompt: ${hostname} wants to record your screen
+    DRM:
+      name: DRM
+      desc: Allows to play content protected by Digital Rights Management
+      prompt: ${hostname} wants to play DRM-protected content
+    notifications:
+      name: Notifications
+      desc: Allows to show notifications
+      prompt: ${hostname} wants to be able to show notifications
+    midi:
+      name: Use MIDI devices
+      desc: Allows to use MIDI devices
+      prompt: ${hostname} wants to use MIDI devices
+    pointerLock:
+      name: Pointer lock
+      desc: Allows to control your mouse cursor
+      prompt: ${hostname} wants to lock your mouse cursor
+    openExternal:
+      name: Opening external apps
+      desc: Allows opening an app on your device. Allowing this means the site will be able to open almost any app without asking.
+      prompt: ${hostname} wants to open "${app}"
+    idleDetection:
+      name: Idle detection
+      desc: Allows to detect when the user is idle
+      prompt: ${hostname} wants to be able to detect when you are idle
+navigation:
+  back: Back
+  forward: Forward
+  reload: Reload
+ui:
+  popups:
+    alert: Message from ${site}
+    confirm: Confirm your action on ${site}
+    prompt: Enter your input on ${site}
+    permission:
+      alt: "Permission: ${name}"
+      appIcon: ${app} icon
+  tools:
+    load-stop: Stop loading
+    load-refresh: Refresh
+    downloads:
+      title: Downloads
+      current: "Current download:"
+      actions:
+        resume: Resume
+        pause: Pause
+        cancel: Cancel
+        again: Download again
+        delete: Delete the download
+      status-completed: Completed
+      status-interrupted: Interrupted / cancelled
+      empty: No downloads
+      open-downloads: More
+      open-folder: Open folder
+    more: More options
+  tabs:
+    private: Private tab
+    playingAudio: Playing audio
+    muted: Muted
+  addressBar-placeholder: Type a search query or a URL
+  security:
+    title: Security
+    message-secure: Your connection is secure
+    message-internal: This is an internal Nereid page
+    message-local: This is a local or a shared file
+    message-insecure: Your connection is not secure
+    description-secure: |
+      The information you provide (such as passwords or credit cards) will be securely sent to this site and cannot be intercepted.
+      Always be sure you're on the intended site before entering any information.
+    description-insecure: It is recommended you do not send information such as passwords or credit cards to this site, because it can be intercepted.
+    button-viewCertificate: View certificate
+    button-cookieFiles: Cookie files
+    button-siteSettings: Site settings
+    permissions: Permissions of ${site}
+  zoom:
+    altMessage: Zoom is ${zoom}%
+    infoMessage: "Zoom: ${zoom}%"
+    reset: Reset Zoom
+  hints:
+    prev-search: Previous search on ${site}
+    url: URL
+    search: ${engine} search
+  inPageSearch:
+    placeholder: Find in page...
+    prev: Previous
+    next: Next
+    caseSensitive: Case sensitive
+  bookmarkBar:
+    suggestion: Place your favorites here, in the bookmarks panel
+    edit: Edit
+    delete: Delete
+windows:
+  cookieViewer:
+    title: Cookie files of ${hostname}
+    remove: Delete cookie
+    copyJSON: Copy JSON
+    props:
+      name: Name
+      value: Value
+      domain: Domain
+      hostOnly: Is host-only
+      path: Path
+      secure: Is secure
+      httpOnly: Is HTTP-only
+      session: Is a session cookie
+      expirationDate: Expires on
+      sameSite: Send for
+    sameSite:
+      no_restriction: Any context, including 3rd-party requests
+      strict: Only first-party requests
+      unspecified: N/A
+      lax: 1st-party requests, or when navigating to the domain (Lax)
+  certificateViewer:
+    title: Certificate of ${hostname}
+    status-valid: This certificate is valid
+    status-invalid: This certificate is invalid
+    issuer: "Issuer: ${name}"
+    subject: "Subject: ${name}"
+    timePeriod: Valid from ${start} to ${expiry}
+    details: Details
+    serialNumber: Serial number
+    fingerprint: Fingerprint
+    data: Contents
+    owner: Issuer's certificate
+    root: This certificate is the root certificate.
+net-error:
+  common:
+    local:
+      - An unknown local error has occured
+      - Something went wrong on this device, for example the browser ran out of memory or a firewall blocked the request
+    connection:
+      - An unknown connection error has occured
+      - Something went wrong while connecting to the server, for example the connection was refused or you have connected to another network
+    certificate:
+      - A certificate error has occured
+      - We can't trust the certificate of the host <b>${host}</b>.
+    http:
+      - An unknown HTTP error has occured
+      - This could mean that the URL (${url}) is invalid or the server sent an incorrect response. Check the spelling of the URL and try again.
+    cache:
+      - The cache seems to be corrupted
+      - This could mean that your OS has rejected a cache operation or the cache was corrupted.
+      - Reload ignoring cache
+    unknown:
+      - An unknown error has occured
+      - "That's all we know. Well, we also know this error code:"
+  noSiteAccess:
+    - We can't get access to this site.
+    - |
+      Here's what you can do:<br>
+      <ul><li>Check if there are any typos in the host name <b>"${hostname}"</b>.</li>
+      <li>Run network diagnostics</li>
+      <li>Change DNS over HTTPS settings</li>
+  noFileAccess:
+    - We can't get access to this file.
+    - Perhaps, file at '<b>${path}</b>' was moved or deleted
+  fileTooBig:
+    - This file is too big
+    - That thing is massive! Do you think I can handle opening it? # very funny btw
+  denied:
+    - Access denied
+    - Permission to access a file or a shared resource was denied.
+  virus:
+    - This file is infected with a virus
+    - The file at '<b>${path}</b>' is infected. It is recommended that you delete it.
+  requestBlocked:
+    - This request was blocked.
+    - Perhaps, an extension prevented the request.
+  netChange:
+    - The network changed.
+    - Perhaps, you connected to another Wi-Fi or Ethernet network.
+  blockedByResponse:
+    - This page refused to be displayed like that.
+    - The server sent a response that prevents this page from being displayed, for example, in a frame on another page.
+  blockedbyCSP:
+    - The request was blocked by Content Security Policy.
+    - <a target='-blank' href='https://en.wikipedia.org/wiki/Content_Security_Policy' class='btn'>Learn more about CSP. (Wikipedia)</a>
+  closed:
+    - Connection closed.
+  reset:
+    - The connection was reset.
+    - |
+      Something prevented Nereid from connecting to the host. Maybe your firewall blocked the request,
+      or your internet provider might've blocked the connection, or the server unexpectedly stopped.
+  refused:
+    - Connection refused.
+  failed:
+    - Connection failed.
+  internetLost:
+    - The internet connection has been lost.
+  SSL:
+    - An SSL error occured.
+    - That means we couldn't establish a secure connection with the website.
+  invalidIP:
+    - The IP address is invalid.
+    - Check if your provider is competent enough or clear your DNS cache.
+  unreachableIP:
+    - We couldn't reach that IP address.
+    - That's all we know.
+  noHTTPS:
+    - This site cannot establish a secure connection.
+    - Perhaps, there was a mismatch of the SSL version used by the client and the server. Also, check if this site supports HTTPS connection at all.
+  invalidURL:
+    - The URL is invalid
+    - The page at '<b>${url}</b>' doesn't exist or was moved to another address.
+menu:
+  common:
+    newWindow: New window
+    newTab: New tab
+    newPrivateTab: New Private tab
+    quit: Quit
+  tray:
+    state-ready: ${this.name} is ready
+    state-processing: ${this.name} is running background processes...
+  tabs:
+    close: Close tab
+    openClosed: Open closed tab
+    hardReload: Hard refresh
+  tools: Tools
+  devTools: Developer tools
+  currentTab: This tab
+  recentlyClosedTabs: Recently closed
+  openFile: Open file...
+  findInPage: Find in page...
+  about: About
+  fullscreen: Enter fullscreen
+  emojiPanel: Show emoji panel
+  zoom:
+    in: Zoom in
+    out: Zoom out
+    0: Actual size
+    info: "Zoom: ${zoom}%"
+  appMenu:
+    file: File
+    edit: Edit
+    view: View
+    tab: Tab
+    window: Window
+  contextMenu:
+    openLink: Open link
+    search: Search in ${engine}
+    open:
+      newTab: Open in new tab
+      newPrivateTab: Open in new private tab
+      newWindow: Open in new window
+      thisTab: Open in this tab
+    copyLink: Copy link address
+    savePageAs: Save page as...
+    savePage_dialog: Save page (${page})
+    print: Print
+    viewSourceCode: View source code
+    openDevTools: Inspect
+    image:
+      viewInNewTab: View image in new tab
+      copy: Copy image
+      copyURL: Copy image address
+      saveAs: Save image as...
+      saving:
+        dialog: Save image
+        error-title: Failed to download image
+        error-notAnImage: This is not an image.
+        error-alreadyExists: File with that name already exists.
+    frame:
+      reload: Reload frame
+      viewSourceCode: View frame's source code
+  tabMenu:
+    create-newTab: Create new tab
+    create-newPrivateTab: Create new private tab
+    reloadAll: Reload all tabs
+    copyURL: Copy URL
+    duplicate: Duplicate tab
+    sound-mute: Mute tab
+    sound-unmute: Unmute tab
+    close-this: Close tab
+    close-others: Close other tabs
+    close-right: Close tabs to the right
+  window:
+    minimize: Minimize
+    unmaximize: Restore
+    maximize: Maximize
+    close: Close window
+pages:
+  welcome:
+    common:
+      next: Next
+    welcome: Welcome
+    begin: Begin
+    language:
+      title: Choose your language
+      note: |
+        Note: not all languages are supported by Nereid. If you pick an unsupported language, you will be additionally prompted to select
+        the language of Nereid. The websites will still be displayed in your selected language, but Nereid's interface will be in one that
+        you have selected for it specifically.
+      noTranslation: "Nereid is not translated to your language. Pick a language for Nereid:"
+      restartNotice: Nereid will restart when you apply the change
+    themes:
+      title: Choose your theme
+      note: This theme will be applied to Nereid's UI and some of the websites you visit.
+      light: Light
+      dark: Dark
+      system: Same as system
+    TOS:
+      title: Terms of service
+      note: Please read this carefully. It is, suprisingly, actually important
+      button-decline: Decline
+      button-accept: Accept
+    final:
+      message: Looks like everything is set up!
+      motivationalButton: Let's go!
+  settings:
+    searchInSettings: Search settings...
+    appearance:
+      title: Appearance
+      label-theme: Theme
+      theme-dark: Dark
+      theme-light: Light
+      theme-system: Same as system
+      bookmarkBar: Show bookmarks panel
+      pageZoom: "Default page zoom:"
+      uiZoom: "Nereid's UI zoom:"
+    privacy:
+      title: Privacy
+      clearData:
+        title: Clear your data...
+        description: Clear history, cookies, and other data...
+        dialog:
+          title: Choose what to erase
+          cache: Site cache
+          cookies: Cookies
+          storages: Databases and local storage
+          history: All history
+          downloads: All downloads
+          notice: The pages for history and downloads provide more control over what to clear.
+          permissions: Site permissions
+          clear-button: Clear
+      siteSettings:
+        title: Manage site settings
+        description: Permissions, local storage, cookies
+        dialog:
+          main:
+            viewSites: View sites
+            viewSites-desc: Manage site settings by site
+            permissions: Permissions
+            permissions-desc: Default settings for permissions
+          sites:
+            title: Sites
+            more: More sites...
+            with-permissions: Sites with permissions
+          sitePage:
+            invalidURL: Invalid URL
+            hostPlaceholder: Enter a host
+          permissions:
+            title: Default permissions
+      denyCrossOriginPermissions:
+        title: Deny cross origin permissions
+        description: Sites embedded in other sites won't be able to request permissions
+      useHintingService:
+        title: Use the default search engine hinting service
+        description: That will send requests to its server each time you're typing in the search bar. Requests will not be sent in private mode.
+      hideSessionForHints:
+        title: Hide your session while getting hints
+        description: Hiding your session prevents some tracking, but can make hints less personalized.
+      httpsOnly: Only use secure connections (HTTPS)
+    search:
+      title: Search engines
+      dialogs:
+        edit: Edit search engine
+        add: New search engine
+        name: "Name:"
+        searchURL: 'Search URL (with "%s" instead of search query):'
+        suggestURL: "Suggestion query URL:"
+        noEmpty: Must not be empty
+        emptyDisablesHints: Leave empty to disable hints
+        save: Save changes
+        delete:
+          title: Confirm your choice
+          prompt: Are you sure you want to delete the search engine ${engine}?
+          delete-button: Delete
+      defaultSE: Default search engine
+      manage: Manage search engines
+      host: "Host:"
+      button-edit: Edit
+      button-delete: Delete
+      button-add: Add a new search engine
+    on-start:
+      title: When Nereid starts
+      newTab: Open a new tab
+      previousTabs: Open the tabs from the previous session
+      specificPage: Open a specific page
+      specificPageURL: The URL of the page that should open
+      button-save: Save
+    downloads:
+      title: Downloads
+      subtitle: "Save downloaded files to:"
+      ask: Ask each time
+      choose: Choose the location
+      dialog:
+        title: Choose the downloads path
+        button-choose: Choose
+      noPath: No path selected
+      button-select: Select folder
+      openFolder: Open downloads folder
+      allDownloads: View all downloads
+    languages:
+      title: Languages
+      label-all: "Selected language:"
+      notice: Nereid is not translated to all languages supported by Chromium. Here you can select a language Nereid supports.
+      label-nereid: "Nereid's language:"
+      dialog: Select a language
+      restart-notification: You need to restart Nereid to apply the change
+      restart-button: Restart
+  history:
+    button-clear: Clear history...
+    deleteEntry: Delete entry
+    empty: Empty
+    favicon: Site's icon
+    dialog:
+      title: Clear browsing history
+      clear-button: Clear now
+      clearOnThisPage-button: Delete all on this page
+      timePeriod: Or clear based on a period of time
+      option-hour: Past hour
+      option-day: Past 24 hours
+      option-week: Past 7 days
+      option-all: All time
+  bookmarks:
+    folders: Folders
+    button-addFolder: New folder...
+    button-addBookmark: New bookmark...
+    addFolder:
+      placeholder: Folder name
+      button-add: Add
+      error-alreadyExists: This folder name is already taken
+      error-empty: Folder name cannot be empty
+      error-illegalName: Illegal folder name
+    folder:
+      rename: Rename folder
+      confirmDelete: Are you sure you want to delete this folder?
+      button-confirm: Delete
+      delete: Delete folder
+    bookmark:
+      name: Name
+      url: URL
+      button-delete: Delete bookmark
+      button-edit: Edit bookmark
+      button-create: Create
+  about:
+    nereidVersion: "Version: ${version}"
+    otherVersions: Versions
+    paths:
+      userData: User data path
+      cache: Cache path
+      app: Installation path
+    FOSSNotice: Nereid uses the open-source ${electron} and ${chromium} projects.
+    licenses:
+      electron: Electron's license
+      chromium: Chromium's licenses
+    otherLicenses: Other licenses
+LocalizedTOS: |
+  Hello. Nereid is free to use and modify.
+  This agreement (that you're reading right now) permits you to use Nereid and modify its code freely.
+  The author of this software is released from any liability or responsibility from any damage done by this software.
+
+  [IMPORTANT]
+  As per the closed alpha version of this software, Nereid will send data to its online services without warning.
+  Said data includes: your OS version and tag, your hardware identifdiers, crash reports, other error and log information.
+  These reports should exclude any sensitive data, like the sites you visit or your history, even though in some edge cases, or due to a bug this data may be still sent sometimes.
+
+  The software is licensed under an MIT License, which reads as follows:
+
+  Copyright (c) 2022 @wheezard
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

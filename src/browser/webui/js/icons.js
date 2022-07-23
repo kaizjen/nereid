@@ -1,0 +1,10 @@
+export { default as ArrowBack } from "./icons/ArrowBack.svelte.js"
+export { default as ArrowFwd } from "./icons/ArrowFwd.svelte.js"
+export { default as Delete } from "./icons/Delete.svelte.js"
+export { default as Edit } from "./icons/Edit.svelte.js"
+export { default as Add } from "./icons/Add.svelte.js"
+
+export { default as Settings } from "./icons/Settings.svelte.js"
+export { default as History } from "./icons/History.svelte.js"
+export { default as Bookmarks } from "./icons/Bookmarks.svelte.js"
+export { default as About } from "./icons/About.svelte.js"
