@@ -2,5 +2,5 @@ node_modules
 src/browser/out
 src/js
 src/i18n/final/**
-src/browser/nereid/js
+src/browser/webui/js
 package-lock.json
