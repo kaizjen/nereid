@@ -500,7 +500,7 @@ export function attach(win: TabWindow, tab: Tab) {
     if (tab.private) {
       // If in private mode, better not to fetch a favicon (the less requests - the better)
       tab.faviconURL = null;
-      sendUpdate('favicon', `n-res://${nativeTheme.shouldUseDarkColors ? 'dark' : 'light'}/tab_privatemode.svg`);
+      sendUpdate('favicon', `n-res://${nativeTheme.shouldUseDarkColors ? 'dark' : 'light'}/private.svg`);
       return;
     }
     
