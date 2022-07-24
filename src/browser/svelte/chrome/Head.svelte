@@ -5,9 +5,9 @@
     background: var(--base-background);
   }
   #nereid-icn {
-    width: 28px;
-    height: 28px;
-    margin: 4px;
+    width: 24px;
+    height: 24px;
+    margin: 6px;
   }
   .traffic-lights {
     white-space: nowrap;
