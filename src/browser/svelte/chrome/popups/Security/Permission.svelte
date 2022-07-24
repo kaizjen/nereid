@@ -83,7 +83,7 @@
 <div class="permission">
   <div class="main">
     {#if !didFail}
-      <img src="n-res://{$colorTheme}/perm_{name}.svg" alt="{_.NAME(name)}" on:error={() => didFail = true}>
+      <img src="n-res://{$colorTheme}/permissions/{name}.svg" alt="{_.NAME(name)}" on:error={() => didFail = true}>
     {/if}
     <span class="title">
       {_.NAME(name)}
@@ -94,7 +94,7 @@
         style:border-radius={isDefault ? `${BORDER_RADIUS_VALUE} 0 0 ${BORDER_RADIUS_VALUE}` : ''}
       >
         <button on:click={clickF(true)} class:granted={value == true}>
-          <img src="n-res://{value == true ? 'dark' : $colorTheme}/permstatus_granted.svg"
+          <img src="n-res://{value == true ? 'dark' : $colorTheme}/checkmark.svg"
             alt={_.status.ALLOW + ' ' + (defaultValue == true ? _.status.DEFAULT_MARK : '')}
             title={_.status.ALLOW + ' ' + (defaultValue == true ? _.status.DEFAULT_MARK : '')}
           >
@@ -109,7 +109,7 @@
         }
       >
         <button on:click={clickF(null)} class:default={isDefault}>
-          <img src="n-res://{value == null ? 'dark' : $colorTheme}/permstatus_default.svg"
+          <img src="n-res://{value == null ? 'dark' : $colorTheme}/default.svg"
             alt={_.status.DEFAULT + ' ' +
               `(${defaultValue == true ? _.status.ALLOW : defaultValue == false ? _.status.DENY : _.status.ASK})`
             }
@@ -124,7 +124,7 @@
         style:border-radius={isDefault ? `0 ${BORDER_RADIUS_VALUE} ${BORDER_RADIUS_VALUE} 0` : ''}
       >
         <button on:click={clickF(false)} class:denied={value == false}>
-          <img src="n-res://{value == false ? 'dark' : $colorTheme}/permstatus_denied.svg"
+          <img src="n-res://{value == false ? 'dark' : $colorTheme}/denied.svg"
             alt={_.status.DENY + ' ' + (defaultValue == false ? _.status.DEFAULT_MARK : '')}
             title={_.status.DENY + ' ' + (defaultValue == false ? _.status.DEFAULT_MARK : '')}
           >

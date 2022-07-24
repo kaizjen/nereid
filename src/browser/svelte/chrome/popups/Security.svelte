@@ -131,10 +131,10 @@
 <div class="dialog" in:fly={window.flyoutProperties}>
   <div class="info" class:secure={tab.security === true}>
     <img src={
-      tab.security === true ? `n-res://${$colorTheme}/sec_https.svg` : 
-      tab.security == 'internal' ? `n-res://${$colorTheme}/m.svg` : 
-      tab.security == 'local' ? `n-res://${$colorTheme}/sec_local.svg` :
-      `n-res://${$colorTheme}/sec_http.svg`
+      tab.security === true ? `n-res://${$colorTheme}/secure.svg` : 
+      tab.security == 'internal' ? `n-res://${$colorTheme}/nereid.svg` : 
+      tab.security == 'local' ? `n-res://${$colorTheme}/file.svg` :
+      `n-res://${$colorTheme}/insecure.svg`
     } alt="">
     <span>{
       tab.security === true ? _.msg.SECURE : 
@@ -149,10 +149,10 @@
     </div>
     <div class="separator"></div>
     {#if tab.security === true}
-      <button on:click={showCertificate}><img src="n-res://{$colorTheme}/secdialog_certificate.svg" alt=""> {_.btn.CERT}</button>
+      <button on:click={showCertificate}><img src="n-res://{$colorTheme}/certificate.svg" alt=""> {_.btn.CERT}</button>
     {/if}
-    <button on:click={showCookies}><img src="n-res://{$colorTheme}/secdialog_cookie.svg" alt=""> {_.btn.COOKIE}</button>
-    <button on:click={siteSettings}><img src="n-res://{$colorTheme}/secdialog_sitesetts.svg" alt=""> {_.btn.SETTS}</button>
+    <button on:click={showCookies}><img src="n-res://{$colorTheme}/cookie.svg" alt=""> {_.btn.COOKIE}</button>
+    <button on:click={siteSettings}><img src="n-res://{$colorTheme}/sitesettings.svg" alt=""> {_.btn.SETTS}</button>
 
     {#if hostname in sitePermissions}
       <h3 class="perm-title">{_.PERMISSIONS(hostname)}</h3>

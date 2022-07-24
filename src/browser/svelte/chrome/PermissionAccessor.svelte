@@ -121,7 +121,7 @@
     <Button on:click={sendAllow} style="margin-right: 10px;">{_.ALLOW}</Button>
     <Button on:click={sendDeny}>{_.DENY}</Button>
     <button class="tool" style="margin-left: 20px" on:click={sendIndifferent}>
-      <img src="n-res://{$colorTheme}/tab_close.svg" alt={_.IGNORE} title={_.IGNORE}>
+      <img src="n-res://{$colorTheme}/cross.svg" alt={_.IGNORE} title={_.IGNORE}>
     </button>
   </div>
 {/if}

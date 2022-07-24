@@ -250,10 +250,10 @@
   <button use:hover on:click={() => securityDialog = !securityDialog} style="display: contents;">
     <img alt={_.SECURITY} id="sec"
       src={
-        tab.security === true ? `n-res://${$colorTheme}/sec_https.svg` : 
-        tab.security == 'internal' ? `n-res://${$colorTheme}/sec_m.svg` : 
-        tab.security == 'local' ? `n-res://${$colorTheme}/sec_local.svg` :
-        `n-res://${$colorTheme}/sec_http.svg`
+        tab.security === true ? `n-res://${$colorTheme}/secure.svg` : 
+        tab.security == 'internal' ? `n-res://${$colorTheme}/nereid-monochrome.svg` : 
+        tab.security == 'local' ? `n-res://${$colorTheme}/file.svg` :
+        `n-res://${$colorTheme}/insecure.svg`
       }
     >
   </button>
@@ -294,7 +294,7 @@
   >
     <img
       class="tab-state"
-      src="n-res://{$colorTheme}/state_zoom{$globalZoom - $config?.ui.defaultZoomFactor > 0 ? 'in' : 'out'}.svg"
+      src="n-res://{$colorTheme}/zoom{$globalZoom - $config?.ui.defaultZoomFactor > 0 ? 'in' : 'out'}.svg"
       alt={_.ALT_ZOOM({ zoom: Math.round($globalZoom * 100) })}
     >
   </button>

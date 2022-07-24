@@ -1,5 +1,8 @@
 <style>
-  .rotated {
+  .up {
+    transform: rotate(-90deg);
+  }
+  .down {
     transform: rotate(90deg);
   }
   .case-toggle {
@@ -173,16 +176,16 @@
       {/if}
     </span>
     <button class="tool" on:click={findNextF(false)}>
-      <img src="n-res://{$colorTheme}/nav_back.svg" class="rotated" alt="{_.PREV}">
+      <img src="n-res://{$colorTheme}/arrow.svg" class="up" alt="{_.PREV}">
     </button>
     <button class="tool" on:click={findNextF(true)}>
-      <img src="n-res://{$colorTheme}/nav_fwd.svg" class="rotated" alt="{_.NEXT}">
+      <img src="n-res://{$colorTheme}/arrow.svg" class="down" alt="{_.NEXT}">
     </button>
     <button class="tool" style="margin-left: 10px" on:click={() => {
       tabsWithSearchActive.splice(tabsWithSearchActive.indexOf(index), 1);
       tabsWithSearchActive = tabsWithSearchActive;
     }}>
-      <img src="n-res://{$colorTheme}/tab_close.svg" alt="{_.DONE}">
+      <img src="n-res://{$colorTheme}/cross.svg" alt="{_.DONE}">
     </button>
   </div>
 {/if}

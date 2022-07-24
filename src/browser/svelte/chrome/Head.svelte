@@ -267,7 +267,7 @@
 
 <div class="head">
   <img
-    alt="" src="n-res://{$colorTheme}/m.svg" id="nereid-icn"
+    alt="" src="n-res://{$colorTheme}/nereid.svg" id="nereid-icn"
     style:margin-left={isOnMac ? '3.8cm' /* approximate traffic lights width */ : ''}
   >
   <div class="tabhead">
@@ -294,15 +294,15 @@
           role="tab"
         >
           {#if tab.private && !(id == currentTab)}
-            <img src="n-res://{$colorTheme}/tab_privatemode.svg" alt={_.PRIVATE_TAB} class="favicon decoy">
+            <img src="n-res://{$colorTheme}/private.svg" alt={_.PRIVATE_TAB} class="favicon decoy">
           {:else}
-            <img alt="" src={tab.isLoading ? `n-res://${$colorTheme}/tab_waiting.svg` : (tab.favicon ?? `n-res://${$colorTheme}/tab_webpage.svg`)} class="favicon">
+            <img alt="" src={tab.isLoading ? `n-res://${$colorTheme}/clock.svg` : (tab.favicon ?? `n-res://${$colorTheme}/webpage.svg`)} class="favicon">
             {#if tab.isPlaying || tab.isMuted}
               <img
                 role="button"
                 tabindex="0"
                 alt={tab.isMuted ? _.MUTED : _.AUDIBLE }
-                src="n-res://{$colorTheme}/tab_{tab.isMuted ? 'muted' : 'audible'}.svg"
+                src="n-res://{$colorTheme}/{tab.isMuted ? 'mute' : 'sound'}.svg"
                 on:click={toggleMuteF(tab)}
                 on:mousedown|stopPropagation={()=>{}}
                 class="audio-control"
@@ -316,13 +316,13 @@
             on:mousedown|stopPropagation={()=>null}
             on:click={() => { console.log('clicked close'); ipcRenderer.send('closeTab', id) }}
           >
-            <img alt="Close tab" src="n-res://{$colorTheme}/tab_close.svg" >
+            <img alt="Close tab" src="n-res://{$colorTheme}/cross.svg" >
           </button>
         </div>
       {/each}
       </div>
       <button id="addtab" on:click={newTab}>
-        <img alt="" src="n-res://{$colorTheme}/tab_plus.svg">
+        <img alt="" src="n-res://{$colorTheme}/plus.svg">
       </button>
     </div>
     <div
@@ -331,8 +331,8 @@
       style:visibility={isOnLinux ? '' : 'hidden'}
       style:display={isOnMac ? 'none' : ''}
     >
-      <img alt="" src="n-res://{$colorTheme}/win_minimize.svg" on:click={winActionF('min')}>
-      <img alt="" src="n-res://{$colorTheme}/win_restore.svg" on:click={winActionF('max')} width="24" height="24">
-      <img alt="" src="n-res://{$colorTheme}/win_close.svg" id="close" on:click={winActionF('close')}>
+      <img alt="" src="n-res://{$colorTheme}/minimize.svg" on:click={winActionF('min')}>
+      <img alt="" src="n-res://{$colorTheme}/restore.svg" on:click={winActionF('max')} width="24" height="24">
+      <img alt="" src="n-res://{$colorTheme}/cross.svg" id="close" on:click={winActionF('close')}>
   </div>
 </div>

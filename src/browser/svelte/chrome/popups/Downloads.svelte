@@ -154,7 +154,7 @@
             downloadInfo = downloadInfo;
           }
         }}>
-          <img src="n-res://{$colorTheme}/tools_dls_{downloadInfo.paused ? 'resume' : 'pause'}.svg"
+          <img src="n-res://{$colorTheme}/{downloadInfo.paused ? 'play' : 'pause'}.svg"
           alt="{downloadInfo.paused ? _.act.RESUME : _.act.PAUSE}">
         </button>
         <button class="mini-btn" on:click={() => {
@@ -162,7 +162,7 @@
           downloadsProm = downloadsAPI.get().then(allDls => allDls.slice(0, 8));
           // update the already done downloads
         }}>
-          <img src="n-res://{$colorTheme}/tools_dls_cancel.svg" alt={_.act.CANCEL}>
+          <img src="n-res://{$colorTheme}/stop.svg" alt={_.act.CANCEL}>
         </button>
       </div>
     </div>
@@ -185,14 +185,14 @@
             <button class="mini-btn" on:click={() => {
               downloadsAPI.create(index)
             }}>
-              <img src="n-res://{$colorTheme}/tools_dls_redownload.svg" alt={_.act.AGAIN}>
+              <img src="n-res://{$colorTheme}/redo.svg" alt={_.act.AGAIN}>
             </button>
             <button class="mini-btn" on:click={async() => {
               await downloadsAPI.delete(index);
               downloads.splice(index, 1);
               downloads = downloads; // update
             }}>
-              <img src="n-res://{$colorTheme}/tools_dls_delete.svg" alt={_.act.DELETE}>
+              <img src="n-res://{$colorTheme}/cross.svg" alt={_.act.DELETE}>
             </button>
           </div>
         </div>

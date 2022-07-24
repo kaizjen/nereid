@@ -68,7 +68,7 @@ to: <b sel>{cert.validExpiry}</b>s</pre>
 
 {#if cert.issuerCert}
   <div class="issCert">
-    <img src="n-res://{theme}/secdialog_certificate.svg" alt="">
+    <img src="n-res://{theme}/certificate.svg" alt="">
     <h3>{tt('owner')}</h3>
   </div>
   <svelte:self {tt} cert={cert.issuerCert} />

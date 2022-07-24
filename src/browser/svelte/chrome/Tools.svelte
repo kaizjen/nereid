@@ -23,6 +23,9 @@
   .nav.disabled:hover {
     background: transparent;
   }
+  .rotated {
+    transform: rotate(180deg);
+  }
 </style>
 
 <script>
@@ -71,23 +74,23 @@
 </script>
 
 <div class:private={tab.private}>
-  <button class="tool nav" class:disabled={!tab.nav?.canGoBack} on:click={navBack}><img alt={_.BACK} src="n-res://{$colorTheme}/nav_back.svg"></button>
-  <button class="tool nav" class:disabled={!tab.nav?.canGoFwd} on:click={navFwd}><img alt={_.FWD} src="n-res://{$colorTheme}/nav_fwd.svg"></button>
-  <button class="tool nav" on:click={refresh}><img alt={tab.isLoading ? _.STOPLOAD : _.REFRESHLOAD} src={tab.isLoading ? `n-res://${$colorTheme}/nav_stop.svg` : `n-res://${$colorTheme}/nav_refresh.svg`}></button>
+  <button class="tool nav" class:disabled={!tab.nav?.canGoBack} on:click={navBack}><img alt={_.BACK} src="n-res://{$colorTheme}/arrow.svg" class="rotated"></button>
+  <button class="tool nav" class:disabled={!tab.nav?.canGoFwd} on:click={navFwd}><img alt={_.FWD} src="n-res://{$colorTheme}/arrow.svg"></button>
+  <button class="tool nav" on:click={refresh}><img alt={tab.isLoading ? _.STOPLOAD : _.REFRESHLOAD} src={tab.isLoading ? `n-res://${$colorTheme}/cross.svg` : `n-res://${$colorTheme}/redo.svg`}></button>
   <AddressBar {tab} />
   <button
     class="tool"
     style="background: linear-gradient(to right, #23db646b {downloadPercent}%, transparent 0%);"
     on:click={() => downloadsDialog = !downloadsDialog}
   >
-    <img src="n-res://{$colorTheme}/tools_downloads.svg" alt={_.DOWNLOADS}>
+    <img src="n-res://{$colorTheme}/downloads.svg" alt={_.DOWNLOADS}>
   </button>
   <button class="tool" on:click={(e) => {
     let { bottom, left } = e.currentTarget.getBoundingClientRect()
     ipcRenderer.send('chrome:browserMenu', {
       x: left, y: bottom
     })
-  }}><img alt={_.MORE} src="n-res://{$colorTheme}/tools_more.svg"></button>
+  }}><img alt={_.MORE} src="n-res://{$colorTheme}/more.svg"></button>
   {#if downloadsDialog}
     <Downloads bind:open={downloadsDialog} {downloadPercent} {downloadInfo} />
   {/if}
