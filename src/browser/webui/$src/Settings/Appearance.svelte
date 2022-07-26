@@ -81,7 +81,7 @@
   > {t('pages.settings.appearance.bookmarkBar')} </Checkbox>
 </div>
 <div class="s-option">
-  <TextBlock> {t('pages.settings.appearance.pageZoom')} </TextBlock>
+  <TextBlock style="width: 30%"> {t('pages.settings.appearance.pageZoom')} </TextBlock>
   <Slider
     suffix="%"
     bind:value={defaultPageZoom_proxy}
@@ -89,7 +89,7 @@
   />
 </div>
 <div class="s-option">
-  <TextBlock> {t('pages.settings.appearance.uiZoom')} </TextBlock>
+  <TextBlock style="width: 30%"> {t('pages.settings.appearance.uiZoom')} </TextBlock>
   <Slider
     suffix="%"
     bind:value={chromeZoom_proxy}
