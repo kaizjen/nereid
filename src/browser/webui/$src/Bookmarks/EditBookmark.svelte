@@ -12,16 +12,35 @@
 
   export let name = '';
   export let url = '';
+
+  function isValidURL(url) {
+    try {
+      new URL(url);
+      return true;
+
+    } catch (_) {
+      return false;
+    }
+  }
+
+  let urlProxy = url;
+
+  $: if (isValidURL(urlProxy)) {
+    url = urlProxy
+  }
 </script>
 
 <ContentDialog bind:open append={document.body} {title}>
   <TextBox bind:value={name} placeholder={tt('bookmark.name')} /><br>
-  <TextBox bind:value={url} placeholder={tt('bookmark.url')} />
+  <TextBox bind:value={urlProxy} placeholder={tt('bookmark.url')} />
   <svelte:fragment slot="footer">
     <Button on:click={() => open = false}>
       {t('common.cancel')}
     </Button>
-    <Button variant="accent" on:click={() => dispatch('click', { name, url })}>
+    <Button disabled={!isValidURL(urlProxy)} variant="accent" on:click={() => {
+      if (urlProxy != url) return;
+      dispatch('click', { name, url })
+    }}>
       {buttonText}
     </Button>
   </svelte:fragment>
