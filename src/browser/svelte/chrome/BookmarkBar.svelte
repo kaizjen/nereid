@@ -24,7 +24,6 @@
     transition: .1s;
     display: flex;
     align-items: center;
-    justify-content: center;
     margin-inline: 4px;
   }
   .bookmark:hover {
@@ -33,6 +32,11 @@
   }
   .bookmark:active {
     background: var(--button-active);
+  }
+  .bookmark span {
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .icon {
     width: 16px;
