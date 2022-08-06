@@ -10,6 +10,7 @@
     margin-left: 6px;
     margin-right: 6px;
     box-shadow: 0px 0px 0px 1px #ffffff40;
+    padding-right: 2px;
   }
   #addressbar:hover {
     box-shadow: none;
@@ -25,16 +26,19 @@
     background: inherit;
   }
   #sec {
-    width: 15px;
+    width: 20px;
     height: 15px;
     padding: 8px;
     cursor: default;
     border-radius: 4px;
     transition: 0.15s;
   }
+  .ab-btn {
+    display: contents;
+  }
   .tab-state {
     height: 20px;
-    width: 20px;
+    width: 25px;
     padding: 5px;
     border-radius: 4px;
     transition: 0.15s;
@@ -89,12 +93,15 @@
   import Security from "./popups/Security.svelte"
   import { getContext } from "svelte/internal"
   import ZoomPopup from "./popups/Zoom.svelte";
+  import Bookmark from "./popups/Bookmark.svelte";
 
   const { t } = window;
   const _ = {
     PLACEHOLDER: t('ui.addressBar-placeholder'),
     SECURITY: t('ui.security.title'),
-    ALT_ZOOM: data => t('ui.zoom.altMessage', data)
+    ALT_ZOOM: data => t('ui.zoom.altMessage', data),
+    BOOKMARK_ADD: t('ui.bookmarks.add'),
+    BOOKMARK_ADD_OR_RM: t('ui.bookmarks.addOrRemove'),
   }
 
   const URLParse = getContext('URLParse')
@@ -124,6 +131,7 @@
   let abignore = false;
 
   let config = getContext('config');
+  let bookmarks = getContext('bookmarks');
   let globalZoom = getContext('globalZoom');
   const colorTheme = getContext('colorTheme');
 
@@ -131,9 +139,8 @@
 
   let securityDialog = false;
   let zoomDialog = false;
-  $: anyDialog = securityDialog || zoomDialog;
-
-  $: if (!securityDialog) { setTop(false) }
+  let bookmarkDialog = false;
+  $: anyDialog = securityDialog || zoomDialog || bookmarkDialog;
 
   function hover(node) {
     node.addEventListener('mouseover', () => {
@@ -245,9 +252,19 @@
     isFirstTimeSelecting = true
   }
 
+
+  let isInBookmarks = false;
+  $: for (const folder in $bookmarks) {
+    isInBookmarks = false;
+    const elements = $bookmarks[folder];
+    if (elements.find(v => new URL(v.url).href == url.href)) {
+      isInBookmarks = true;
+      break;
+    }
+  }
 </script>
 <div class:abignore id="addressbar" class:focus={isActive}>
-  <button use:hover on:click={() => securityDialog = !securityDialog} style="display: contents;">
+  <button use:hover on:click={() => securityDialog = !securityDialog} class="ab-btn">
     <img alt={_.SECURITY} id="sec"
       src={
         tab.security === true ? `n-res://${$colorTheme}/secure.svg` : 
@@ -287,18 +304,31 @@
     }}
   >
   {#if $globalZoom != $config?.ui.defaultZoomFactor}
+    <button
+      class="ab-btn"
+      on:click={() => zoomDialog = true}
+      use:hover
+    >
+      <img
+        class="tab-state"
+        src="n-res://{$colorTheme}/zoom{$globalZoom - $config?.ui.defaultZoomFactor > 0 ? 'in' : 'out'}.svg"
+        alt={_.ALT_ZOOM({ zoom: Math.round($globalZoom * 100) })}
+        title={_.ALT_ZOOM({ zoom: Math.round($globalZoom * 100) })}
+      >
+    </button>
+  {/if}
   <button
-    style="display: contents;"
-    on:click={() => zoomDialog = true}
+    class="ab-btn"
+    on:click={() => bookmarkDialog = true}
     use:hover
   >
     <img
       class="tab-state"
-      src="n-res://{$colorTheme}/zoom{$globalZoom - $config?.ui.defaultZoomFactor > 0 ? 'in' : 'out'}.svg"
-      alt={_.ALT_ZOOM({ zoom: Math.round($globalZoom * 100) })}
+      src="n-res://{$colorTheme}/bookmark{isInBookmarks ? '-selected' : ''}.svg"
+      alt={isInBookmarks ? _.BOOKMARK_ADD_OR_RM : _.BOOKMARK_ADD}
+      title={isInBookmarks ? _.BOOKMARK_ADD_OR_RM : _.BOOKMARK_ADD}
     >
   </button>
-  {/if}
 </div>
 <div class="wrapper" style="z-index: {anyDialog ? '9' : '-1'};">
   {#if securityDialog}
@@ -306,6 +336,9 @@
   {/if}
   {#if zoomDialog}
     <ZoomPopup level={$globalZoom} bind:open={zoomDialog} />
+  {/if}
+  {#if bookmarkDialog}
+    <Bookmark bind:open={bookmarkDialog} {tab} bookmarks={$bookmarks} />
   {/if}
 </div>
 

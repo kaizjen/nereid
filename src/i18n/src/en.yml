@@ -120,6 +120,12 @@ ui:
     button-cookieFiles: Cookie files
     button-siteSettings: Site settings
     permissions: Permissions of ${site}
+  bookmarks:
+    add: Add to bookmarks...
+    addOrRemove: Add or remove bookmark...
+    list: Folders
+    addToFolder: Add to folder
+    removeFromFolder: Remove from folder
   zoom:
     altMessage: Zoom is ${zoom}%
     infoMessage: "Zoom: ${zoom}%"

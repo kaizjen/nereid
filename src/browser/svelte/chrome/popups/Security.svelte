@@ -1,24 +1,4 @@
 <style>
-  .blocker {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    z-index: 9;
-    top: 0;
-    left: 0;
-  }
-  .dialog {
-    z-index: 10;
-    background: var(--dialog-background);
-    border: 1px solid var(--trivial-color);
-    display: block;
-    position: absolute;
-    border-radius: 8px;
-    max-width: 380px;
-    padding: 12px;
-    top: calc(100% + 10px);
-    cursor: default;
-  }
   .info {
     display: flex;
     font-weight: bold;
@@ -167,4 +147,4 @@
   {/if}
 </div>
 
-<div class="blocker" on:click={() => isOpen = false}></div>
+<div class="blocker" on:click={() => {setTop(false); isOpen = false;}}></div>

@@ -311,6 +311,29 @@ export function init() {
     tabManager.setMutedTab(win, win.tabs[tabID], isMuted)
   })
 
+  ipcMain.handle('getPageImageURL', async(e, imageType: 'preview' | 'thumbnail' | 'favicon', tabUID: number) => {
+    const tab = tabManager.getTabByUID(tabUID);
+    if (!tab) return;
+
+    if (imageType == 'favicon') return tab.faviconURL;
+
+    const code = `document.querySelector('meta[property="og:image"]')?.getAttribute('content')`;
+    const ogImage = await tab.webContents.mainFrame.executeJavaScript(code).catch(e => console.log('getPageImageURL failed:', e));
+    if (ogImage) return ogImage;
+
+    switch (imageType) {
+      case 'preview': {
+        const screenshot = await tab.webContents.capturePage();
+        return 'data:image/png;base64,' + screenshot.toPNG().toString('base64')
+      }
+      case 'thumbnail': {
+        return tab.faviconURL;
+      }
+    
+      default: return null
+    }
+  })
+
   ipcMain.on('getHints', async (e, query: string) => {
     // MAYBE: move getHints to another place?
     console.log('querying hints for %o', query);

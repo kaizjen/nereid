@@ -1,27 +1,11 @@
 <style>
-  .blocker {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    z-index: 9;
-    top: 0;
-    left: 0;
-  }
   .dialog {
-    z-index: 10;
-    background: var(--dialog-background);
-    border: 1px solid var(--trivial-color);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     position: absolute;
-    border-radius: 8px;
-    max-width: 380px;
-    padding: 12px;
-    top: calc(100% + 10px);
     right: 0;
-    cursor: default;
   }
   .title {
     display: flex;
@@ -58,7 +42,7 @@
   <div class="title">
     <img
       style="margin-right: 8px;"
-      src="n-res://{$colorTheme}/state_zoom{level - $config?.ui.defaultZoomFactor > 0 ? 'in' : 'out'}.svg"
+      src="n-res://{$colorTheme}/zoom{level - $config?.ui.defaultZoomFactor > 0 ? 'in' : 'out'}.svg"
       alt={_.ALT({ zoom: Math.round(level * 100) })}
     >
     <b> {_.INFO({ zoom: Math.round(level * 100) })} </b>

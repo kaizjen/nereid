@@ -50,6 +50,7 @@
     display: flex;
     overflow-x: overlay;
     overflow-y: hidden;
+    height: 100%;
   }
   .tab {
     padding: 8px;

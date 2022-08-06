@@ -9,7 +9,7 @@
     justify-content: center;
     padding-top: 25px
   }
-  .dialog {
+  .popup {
     background: var(--dialog-background);
     z-index: 9;
     display: inline-block;
@@ -33,19 +33,7 @@
     margin-bottom: 20px;
   }
   input {
-    display: block;
-    background: transparent;
-    border: 1px solid var(--trivial-color);
-    width: -webkit-fill-available;
-    padding: 8px;
-    border-radius: 6px;
     margin-bottom: 20px;
-    color: var(--accent-text);
-  }
-  input:focus-visible {
-    outline: none;
-    box-shadow: 0px 0px 0px 2px var(--accent-color);
-    border-color: var(--accent-color);
   }
 </style>
 <script>
@@ -99,7 +87,7 @@
 </script>
 
 <div class="blocker">
-  <div class="dialog" transition:scale={{ duration: 150, start: 0.93 }}>
+  <div class="popup" transition:scale={{ duration: 150, start: 0.93 }}>
     <span class="title">
       {
         dialog.type == 'alert' ? 
@@ -113,7 +101,7 @@
       {message}
     </span>
     {#if dialog.type == 'prompt'}
-      <input type="text" bind:value>
+      <input class="input" type="text" bind:value>
     {/if}
     <Button callToAction={true} on:click={sendYes}>
       {t('common.ok')}

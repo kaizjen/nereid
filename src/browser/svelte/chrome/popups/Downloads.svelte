@@ -1,21 +1,5 @@
 <style>
-  .blocker {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    z-index: 9;
-    top: 0;
-    left: 0;
-  }
   .dialog {
-    z-index: 10;
-    background: var(--dialog-background);
-    border: 1px solid var(--trivial-color);
-    display: block;
-    position: absolute;
-    border-radius: 8px;
-    max-width: 380px;
-    padding: 12px;
     top: 110%;
     right: 0;
     overflow: hidden;

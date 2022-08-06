@@ -70,6 +70,9 @@
   let config = writable()
   setContext('config', config)
 
+  let bookmarks = writable()
+  setContext('bookmarks', bookmarks)
+
   let globalZoom = writable(1);
   setContext('globalZoom', globalZoom)
 
@@ -92,6 +95,9 @@
 
   ipcRenderer.on('userData/config', (_e, conf) => {
     $config = conf;
+  })
+  ipcRenderer.on('userData/bookmarks', (_e, bms) => {
+    $bookmarks = bms;
   })
   setContext('downloads', {
     get() {
