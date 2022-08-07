@@ -38,8 +38,9 @@
   }
   .tab-state {
     height: 20px;
-    width: 25px;
+    width: 20px;
     padding: 5px;
+    padding-inline: 8px;
     border-radius: 4px;
     transition: 0.15s;
     cursor: default;
