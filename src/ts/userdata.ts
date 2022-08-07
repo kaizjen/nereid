@@ -285,7 +285,7 @@ export let lastlaunch = {
 
 
 function filterEntries(array: History) {
-  return array.filter($.uniqBy((e1, e2) => e1.tabUID == e2.tabUID && e1.sessionUUID == e2.sessionUUID))
+  return array.filter($.uniqBy((e1, e2) => e1.tabUID == e2.tabUID && e1.sessionUUID == e2.sessionUUID && e1.url == e2.url))
 }
 let historyLock: Promise<void> | null = null
 export let history = {
