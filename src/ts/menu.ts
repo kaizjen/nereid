@@ -548,7 +548,7 @@ export async function showContextMenu(win: TabWindow | false, tab: Tab, opts: El
     let selectedSE = searchConfig.available[searchConfig.selectedIndex]
 
     if ($.isValidURL(opts.selectionText)) {
-      if (!opts.selectionText.startsWith('http:')) {
+      if (!opts.selectionText.startsWith('http:') && !opts.selectionText.startsWith('https:')) {
         opts.selectionText = `http://${opts.selectionText}`
       }
 
