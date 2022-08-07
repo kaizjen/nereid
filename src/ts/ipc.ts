@@ -213,7 +213,7 @@ export function init() {
     
     win.setSheetOffset(win.chromeHeight);
 
-    win.currentTab?.setBounds({ x: 0, y: win.chromeHeight, width: win.getContentBounds().width, height: win.getContentBounds().height - win.chromeHeight })
+    setCurrentTabBounds(win)
   })
   ipcMain.on('chrome:setTop', (e, isTop: boolean) => {
     let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
