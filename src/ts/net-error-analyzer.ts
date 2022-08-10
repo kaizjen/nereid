@@ -14,13 +14,14 @@ export function handleNetError(
 ) {
   if (errCode == -3 || errCode == -1) { return null; } // The load was cancelled by user or an async API isn't done yet
 
-  console.log('net error:', errCode, errorDescription);
+  console.log('net error:', errCode, errorDescription, { framePID, frameRID });
   let frame: WebFrameMain;
   try {
     frame = webFrameMain.fromId(framePID, frameRID);
     
   } catch (e) {
     // sometimes throws an error, ignore
+    return;
   }
 
   let errInfo = {

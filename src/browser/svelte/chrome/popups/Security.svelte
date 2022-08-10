@@ -76,8 +76,16 @@
     PERMISSIONS: site => t('ui.security.permissions', { site })
   }
 
+  function getHostname(url) {
+    try {
+      return (new URL(url)).hostname
+    } catch (_) {
+      return `<invalid url>`;
+    }
+  }
+
   let hostname;
-  $: hostname = (new URL(tab.url)).hostname;
+  $: hostname = getHostname(tab.url);
 
   let defaultPermissions;
   $: defaultPermissions = $config.privacy.defaultPermissions;
