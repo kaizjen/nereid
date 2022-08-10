@@ -21,7 +21,8 @@
     height: 100%;
   }
   .content {
-    width: 20cm;
+    max-width: 20cm;
+    flex-grow: 1;
   }
   .addFolder {
     margin: 5px;
