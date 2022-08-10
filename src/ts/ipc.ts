@@ -510,7 +510,7 @@ export function init() {
       try {
         return await fn(...args)
       } catch (error) {
-        return { isError: true, error: error.stack }
+        return { isError: true, error: error.stack ?? error }
       }
     })
   }
