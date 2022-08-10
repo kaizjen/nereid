@@ -498,6 +498,20 @@ pages:
       button-delete: Delete bookmark
       button-edit: Edit bookmark
       button-create: Create
+  newtab:
+    startPanel:
+      addItem: Add a site
+      button-edit: Edit
+      button-delete: Delete
+      edit-panel: Edit "${name}"
+      add-panel: Add a new site
+      button-save: Save
+      delete:
+        title: Are you sure you want to delete "${name}"?
+        button-delete: Delete
+      edit:
+        name: Name
+        url: URL
   about:
     nereidVersion: "Version: ${version}"
     otherVersions: Versions
