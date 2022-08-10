@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="24" height="24">
-  <ellipse style="fill: none; paint-order: fill; stroke: rgb(255, 255, 255); stroke-width: 120px;" cx="250" cy="250" rx="160" ry="160" />
-  <line style="stroke: rgb(255, 255, 255); fill: none; stroke-width: 50px; stroke-linecap: round;" x1="362.093" y1="146.626" x2="448.28" y2="57.746" />
-  <line style="stroke: rgb(255, 255, 255); fill: none; stroke-width: 50px; stroke-linecap: round;" x1="55.8" y1="452.88" x2="141.987" y2="364" />
+  <ellipse style="fill: none; paint-order: fill; stroke: ${color}; stroke-width: 120px;" cx="250" cy="250" rx="160" ry="160" />
+  <line style="stroke: ${color}; fill: none; stroke-width: 50px; stroke-linecap: round;" x1="362.093" y1="146.626" x2="448.28" y2="57.746" />
+  <line style="stroke: ${color}; fill: none; stroke-width: 50px; stroke-linecap: round;" x1="55.8" y1="452.88" x2="141.987" y2="364" />
 </svg>
