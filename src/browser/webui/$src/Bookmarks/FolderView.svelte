@@ -55,7 +55,7 @@
   }
 
   async function addNew({ detail: { name, url } }) {
-    bookmarks.unshift({ name, url });
+    bookmarks.push({ name, url });
     await window.nereid.userdata.bookmarks.setFolder({ folder: selectedFolder, value: bookmarks });
     bookmarks = bookmarks;
     addDialog = false;

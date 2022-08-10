@@ -114,7 +114,7 @@
         name: bookmarkTitle,
         iconURL, thumbnailURL,
       });
-      folder.unshift({
+      folder.push({
         url: bookmarkURL,
         name: bookmarkTitle,
         iconURL, thumbnailURL,
