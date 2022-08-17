@@ -1,7 +1,7 @@
 <style>
   #addressbar {
     width: -webkit-fill-available;
-    transition: 0.1s;
+    transition: box-shadow 0.1s;
     border-radius: 3px;
     display: flex;
     cursor: text;
@@ -9,7 +9,7 @@
     -webkit-app-region: no-drag;
     margin-left: 6px;
     margin-right: 6px;
-    box-shadow: 0px 0px 0px 1px #ffffff40;
+    box-shadow: 0px 0px 0px 1px #ffffff5c;
     padding-right: 2px;
   }
   #addressbar:hover {
@@ -20,18 +20,10 @@
     box-shadow: 0px 0px 0px 2px var(--accent-color);
   }
   #addressbar:not(.abignore):hover {
-    background: #00000042;
+    background: #00000026;
   }
   #addressbar.focus:hover {
     background: inherit;
-  }
-  #sec {
-    width: 20px;
-    height: 15px;
-    padding: 8px;
-    cursor: default;
-    border-radius: 4px;
-    transition: 0.15s;
   }
   .ab-btn {
     display: contents;
@@ -42,13 +34,18 @@
     padding: 5px;
     padding-inline: 8px;
     border-radius: 4px;
-    transition: 0.15s;
+    transition: 0.10s;
     cursor: default;
   }
-  #sec:hover, .tab-state:hover {
+  .sec {
+    width: 20px;
+    height: 15px;
+    padding: 8px;
+  }
+  .tab-state:hover {
     background: var(--button-hover);
   }
-  #sec:active, .tab-state:active {
+  .tab-state:active {
     background: var(--button-active);
   }
   #ab-txt {
@@ -266,7 +263,7 @@
 </script>
 <div class:abignore id="addressbar" class:focus={isActive}>
   <button use:hover on:click={() => securityDialog = !securityDialog} class="ab-btn">
-    <img alt={_.SECURITY} id="sec"
+    <img alt={_.SECURITY} class="tab-state sec"
       src={
         tab.security === true ? `n-res://${$colorTheme}/secure.svg` : 
         tab.security == 'internal' ? `n-res://${$colorTheme}/nereid-monochrome.svg` : 

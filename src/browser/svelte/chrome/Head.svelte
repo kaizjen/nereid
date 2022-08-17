@@ -54,7 +54,7 @@
   }
   .tab {
     padding: 8px;
-    transition: 0.1s;
+    transition: 0.06s;
     display: inline-block;
     position: relative;
     white-space: nowrap;
@@ -66,10 +66,11 @@
     flex-shrink: 0;
   }
   .tab:hover {
-    background: #ffffff29;
+    background: #ffffff17;
   }
   .tab.selected {
     background: var(--active-background);
+    border-radius: 4px 4px 0px 0px;
   }
   .tabhead :global(.tab.dragover) {
     opacity: 0.5;
@@ -108,16 +109,17 @@
     flex-grow: 1;
   }
   .close-tab {
-    padding: 3px;
-    transition: 0.15s;
-    border-radius: 50%;
+    padding: 2px;
+    transition: 0.05s;
+    border-radius: 4px;
     display: flex;
   }
   .close-tab:hover {
-    background: var(--button-hover);/* #ffffff34; */
+    background: var(--button-hover);
   }
   .close-tab:active {
-    background: var(--button-active)/* #ffffff91; */
+    background: var(--button-active);
+    transition: 0s;
   }
   .tab > span {
     text-overflow: ellipsis;
@@ -129,14 +131,15 @@
     padding: 4px;
     margin-left: 2px;
     border-radius: 4px;
-    transition: 0.2s;
+    transition: 0.1s;
     display: flex;
   }
   #addtab:hover {
-    background: var(--button-hover)/* #ffffff40 */;
+    background: var(--button-hover);
   }
   #addtab:active {
-    background: var(--button-active); /* #ffffff78; */
+    background: var(--button-active);
+    transition: 0s;
   }
 </style>
 
