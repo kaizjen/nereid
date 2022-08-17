@@ -75,7 +75,7 @@
     <Button on:click={() => deleteDialog = false}>
       {t('common.cancel')}
     </Button>
-    <Button variant="accent" on:click={() => deleteDialog = false + dispatch('delete')}>
+    <Button variant="accent" on:click={() => {deleteDialog = false; dispatch('delete')}}>
       {t('pages.newtab.startPanel.delete.button-delete')}
     </Button>
   </svelte:fragment>
