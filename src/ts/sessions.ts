@@ -166,7 +166,9 @@ async function getProtocol(req: Electron.ProtocolRequest, respond: (response: El
       respond({ statusCode: 500 });
       return;
     }
-    respond({ data: response.body })
+    respond({ data: response.body, headers: {
+      "Content-Type": response.headers.get("Content-Type") ?? "text/plain"
+    } })
     
   } catch (err) {
     respond({ data: err + '', error: -2 })
