@@ -66,7 +66,7 @@
     width: 100%;
     font-size: 15px;
     font-family: inherit;
-    padding-left: 7px;
+    padding-left: 9px;
   }
   #ab-input:focus-visible {
     box-shadow: none; /* box-shadow defined for all elements in index.html */
