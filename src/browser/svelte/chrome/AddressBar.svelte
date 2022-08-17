@@ -202,6 +202,7 @@
           clickHintF(hint)();
           inputRef.blur();
         }
+        hints = [];
         break;
       }
       case 'ArrowUp': {
