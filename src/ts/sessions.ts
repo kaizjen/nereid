@@ -160,12 +160,17 @@ async function getProtocol(req: Electron.ProtocolRequest, respond: (response: El
     url = url.replace('//', '')
   }
 
-  const response = await fetch(url, { session: session.fromPartition(NO_HEADERS_PARTITION), useSessionCookies: false });
-  if (typeof response.body == 'string') {
-    respond({ statusCode: 500 });
-    return;
+  try {
+    const response = await fetch(url, { session: session.fromPartition(NO_HEADERS_PARTITION), useSessionCookies: false });
+    if (typeof response.body == 'string') {
+      respond({ statusCode: 500 });
+      return;
+    }
+    respond({ data: response.body })
+    
+  } catch (err) {
+    respond({ data: err + '', error: -2 })
   }
-  respond({ data: response.body })
 }
 
 export function registerSession(ses: Session) {
