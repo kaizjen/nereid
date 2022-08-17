@@ -72,7 +72,7 @@ a {
 @media (prefers-color-scheme: dark) {
   :root {
     --base-background: #21252b;
-    --active-background: #4f5660;
+    --active-background: #424d5c; /* #4f5660 */
     --private-theme: #684a86;
 
     --dialog-background: var(--base-background);
