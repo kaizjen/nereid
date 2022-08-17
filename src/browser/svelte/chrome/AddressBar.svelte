@@ -280,7 +280,7 @@
     <span class="protocol">{url.protocol ?? ''}{url.slashes ? '//' : ''}</span>
     <span class="host">{url.hostname ?? ''}</span>
     <span class="port">{url.port ?? ''}</span>
-    <span class="page">{decodeURI(url.path)}</span>
+    <span class="page">{url.path}</span>
   </button>
   <input
     on:blur={() => {
