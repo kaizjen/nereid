@@ -106,7 +106,7 @@ export function init() {
         
         let q = params[0];
 
-        if ($.isValidURL(q)) {
+        if ($.isValidURL(q) && !q.includes(' ')) {
           win.currentTab.lastNavigationReason = 'input-url'
           if (URLParse(q).protocol) {
             wc.loadURL(q)
@@ -341,6 +341,7 @@ export function init() {
     let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
     if (!win) return;
 
+    let _searchTemp = userData.config.get().search;
     let hints: ({
       internal: 'url'
       title?: string
@@ -350,9 +351,14 @@ export function init() {
       text: string
       type: string
     })[] = [];
+    hints.push({
+      internal: 'search',
+      text: query,
+      type: t('ui.hints.search', { engine: _searchTemp.available[_searchTemp.selectedIndex].name })
+    })
     if ($.isValidURL(query)) {
       hints.push({
-        url: URLParse(query).protocol ? query : 'http://' + query,
+        url: URLParse(query).protocol ? query : ('http://' + query),
         internal: 'url'
       })
     }
@@ -373,13 +379,22 @@ export function init() {
       let matches = instance.search(query);
 
       let merged = matches
-        .map(({ item }) => ({
-          title: item.title,
-          url: item.url,
-          internal: 'url' as 'url'
-        }))
+        .map(({ item }) => {
+          if (item.reason.startsWith('searched:')) {
+            return {
+              internal: 'search' as const,
+              text: item.reason.slice("searched:".length),
+              type: t('ui.hints.prev-search', { site: URLParse(item.url).hostname })
+            }
+          }
+          return {
+            title: item.title,
+            url: item.url,
+            internal: 'url' as const
+          }
+        })
         .filter($.uniqBy((val1, val2) => val1.title == val2.title && val2.url == val2.url))
-        ;
+      ;
 
       if (merged.length > 5) {
         merged.length = 5
@@ -394,7 +409,6 @@ export function init() {
       let { privacy } = userData.config.get();
       if (!privacy.useSuggestions) break block;
 
-      let _searchTemp = userData.config.get().search;
       let searchEngine = _searchTemp.available[_searchTemp.selectedIndex]
       if (win.currentTab.private || query.startsWith('nereid:')) break block;
 
@@ -415,7 +429,7 @@ export function init() {
       )
 
       let suggestions = (await suggestAlgorithm(response)).map(text => ({
-        text, internal: 'search' as 'search', type: `${searchEngine.name} search`
+        text, internal: 'search' as const, type: t('ui.hints.search', { engine: searchEngine.name })
       }))
 
       hints.push(...suggestions);
