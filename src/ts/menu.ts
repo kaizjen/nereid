@@ -61,7 +61,7 @@ const tabs_windows: Electron.MenuItemConstructorOptions[] = [
         private: true
       })
     },
-    accelerator: 'CmdOrCtrl+Shift+T',
+    accelerator: 'CmdOrCtrl+P',
     id: 'new-tab-p'
   },
   SEPARATOR,
@@ -82,7 +82,7 @@ const tabs_windows: Electron.MenuItemConstructorOptions[] = [
 
       openClosedTab(win)
     },
-    accelerator: 'CmdOrCtrl+Shift+W',
+    accelerator: 'CmdOrCtrl+Shift+T',
     id: 'open-closed'
   },
   SEPARATOR,
@@ -688,7 +688,7 @@ export async function showContextMenu(win: TabWindow | false, tab: Tab, opts: El
   addItem({ label: $t('print'), click() {
     // TODO: print page
     dialog.showErrorBox("Not implemented", "Not implemented")
-  }, accelerator: 'Ctrl+P' })
+  }, accelerator: 'Ctrl+Shift+P' })
   addItem(SEPARATOR)
   addItem({ label: $t('viewSourceCode'), click() { createContextTab({ url: `view-source:${tab.webContents.getURL()}` }) } })
   addItem({ label: $t('openDevTools'), click() { tab.webContents.openDevTools() }, accelerator: 'Ctrl+Shift+I' })
@@ -720,7 +720,7 @@ export function menuOfTab(win: TabWindow, tab: Tab) {
       url: $.newTabUrl
     })
   } })
-  addItem({ label: $t('create-newPrivateTab'), accelerator: 'CmdOrCtrl+Shift+T', click() {
+  addItem({ label: $t('create-newPrivateTab'), accelerator: 'CmdOrCtrl+P', click() {
     createContextTab({ url: $.newTabUrl, private: true })
   } })
   addItem(SEPARATOR)
