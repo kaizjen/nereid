@@ -156,13 +156,13 @@ expose('[NEREID]', {
   },
   extendWindow: {
     prompt(t, defaultValue) {
-      return ipcRenderer.sendSync('tab:prompt', t, defaultValue)
+      return requestMainSync('prompt', t, defaultValue)
     },
     alert(message) {
-      return ipcRenderer.sendSync('tab:alert', message)
+      return requestMainSync('alert', message)
     },
     confirm(message) {
-      return ipcRenderer.sendSync('tab:confirm', message)
+      return requestMainSync('confirm', message)
     }
   }
 })
