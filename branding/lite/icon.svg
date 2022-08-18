@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <svg viewBox="0 0 500 500" width="500" height="500" xmlns="http://www.w3.org/2000/svg">
-  <ellipse style="fill: none; paint-order: fill; stroke-width: 140px; stroke: rgb(144, 14, 176);" cx="250" cy="250" rx="150" ry="150"/>
-  <path style="fill: none; stroke-width: 50px; stroke-linecap: round; stroke-linejoin: round; stroke: rgb(131, 46, 235);" d="M 63.881 419.558 C 180.652 406.94 419.122 198.969 431.389 76.498"/>
+  <defs>
+    <linearGradient gradientUnits="userSpaceOnUse" x1="250" y1="100" x2="250" y2="400" id="gradient-0" gradientTransform="matrix(0.683595, -0.729863, 0.802005, 0.751164, -119.788661, 240.646734)">
+      <stop offset="0" style="stop-color: rgba(144, 14, 176, 1)"/>
+      <stop offset="1" style="stop-color: rgb(128, 0, 255);"/>
+    </linearGradient>
+  </defs>
+  <ellipse style="fill: none; paint-order: fill; stroke-width: 140px; stroke: url(#gradient-0);" cx="250" cy="250" rx="150" ry="150"/>
+  <path style="fill: none; stroke-width: 50px; stroke-linecap: round; stroke-linejoin: round; stroke: url(#gradient-0);" d="M 47.329 431.972 C 172.208 418.136 427.235 190.097 440.355 55.808"/>
   <ellipse style="fill-rule: nonzero; fill: rgb(255, 255, 255);" cx="250" cy="250" rx="100" ry="100"/>
 </svg>
