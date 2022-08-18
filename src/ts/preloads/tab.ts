@@ -137,10 +137,6 @@ function requestMainSync(id: string, ...args: any[]) {
 }
 
 webFrame.insertCSS(`
-body {
-  background: white;
-  color: black;
-}
 @media (prefers-color-scheme: dark) {
   :root { color-scheme: dark }
 }
