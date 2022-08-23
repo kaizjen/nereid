@@ -37,21 +37,39 @@ function nereidProtocol(req: Electron.ProtocolRequest, respond: (response: strin
   // Internal URLs:
   switch (parsed.hostname) {
     case '.svelte': {
-      if (pathModule.extname(parsed.pathname) == '') {
-        respond({
+      const base = `${__dirname}/../../node_modules/svelte`
+      let path: string;
+      if (parsed.pathname == '/') {
+        /*
+          For an unknown to mankind reason, the ES6 module spec does not respect redirects at all.
+          If you have a file importing "/location" that redirects to "/location/index.js" and a file importing
+          "/location/index.js" directly, the module resolver TREATS THEM AS DIFFERENT FILES! THE MODULE
+          RESOLVER ONLY CARES ABOUT WHAT STRING YOU IMPORT, AND DOES NOT EVEN UNDERSTAND THAT YOU LITERAlLY REDIRECTED TO THE
+          SAME FILE.
+          So, this workaround basically makes it so that the "svelte" module ("nereid://.svelte/") now imports
+          stuff from internal modules using the nereid: protocol, which kinda helps.
+          Still, this is why the modules suck so much >:(
+        */
+        return respond({
           statusCode: 308,
           headers: {
-            Location: parsed.protocol + '//' + pathModule.normalize(finalPath + '/index.mjs')
-            // I could've implemented this by just sending the right file,
-            // but `import` will think that these files are different, which causes serious problems
+            Location: `${parsed.protocol}//.svelte.hack.js/`
           }
         })
 
-        return;
-      }
+      } else if (parsed.pathname == '/internal/index.mjs') {
+        return respond({
+          statusCode: 308,
+          headers: {
+            Location: `${parsed.protocol}//.svelte/internal`
+          }
+        })
 
-      let path = `${__dirname}/../../node_modules/svelte/${pathModule.extname(parsed.pathname) == '' ? (parsed.pathname + '/index.mjs') : parsed.pathname
-        }`
+      } else {
+        path = `${base}/${
+          pathModule.extname(parsed.pathname) == '' ? (parsed.pathname + '/index.mjs') : parsed.pathname
+        }`;
+      }
       respond(pathModule.normalize(path))
       console.log(
         'module required:', req.url,
@@ -648,6 +666,10 @@ app.once('ready', () => {
 
     if (finalPath.endsWith('/')) {
       finalPath = finalPath.slice(0, -1)
+    }
+
+    if (finalPath.endsWith('.svelte')) {
+      finalPath += '.js';
     }
 
     respond({

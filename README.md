@@ -10,17 +10,12 @@
 
 ```bash
 npm start # Starts the electron app
-npm run chr:build # Compiles svelte code from the chrome (nereid ui)
-npm run chr:start # Does the previous step and runs the app
-npm run ts:build # tsc
-npm run ts:start
-npm run webui:build # Compiles the "nereid://" pages
-npm run webui:start
-npm run build # Runs all the previous build commands
+npm run build # Builds the whole project
 npm run dev # Builds and runs the app
 npm run dev-inspect # Builds and runs the app with --inspect flag
 npm run localize # Transpiles YAML locale files into JSON ones
 npm run begin # Installes and fixes all dependencies, builds the project. Should be used instead of `npm install`
+npm run watch # Starts 3 watch scripts.
 ```
 
 ## Getting started
@@ -41,6 +36,6 @@ Localization sources (in `src/i18n/src/`) are in human-readable but slow YAML fo
 
 Nereid is written using Typescript and Svelte. To start the app, you need to compile all the sources: `npm run build`.
 
+### Workflow
 
-
-Other docs coming soon
+When you run `npm run watch`, it will watch for any changes to the sources, and will rebuild your project every time you make a change.

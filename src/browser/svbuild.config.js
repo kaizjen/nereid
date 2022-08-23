@@ -10,7 +10,7 @@ const config = {
     sveltePath: 'nereid://.svelte'
   },
   moduleOptions: {
-    root: './js/modules',
+    root: './modules',
     buildModules: true,
     buildSvelte: false,
     modulesSrc: 'node_modules'

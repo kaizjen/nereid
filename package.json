@@ -5,17 +5,12 @@
   "main": "src/js/main.js",
   "scripts": {
     "start": "electron .",
-    "chr:build": "cd src/browser && svbuild && cd ../..",
-    "chr:start": "cd src/browser && svbuild && cd ../.. && npm start",
-    "ts:build": "tsc",
-    "ts:start": "tsc && npm start",
-    "webui:build": "cd src/browser/webui && svbuild && cd ../../..",
-    "webui:start": "cd src/browser/webui && svbuild && cd ../../.. && npm start",
-    "build": "npm run ts:build && npm run chr:build && npm run webui:build",
+    "build": "node src/i18n/transform.js && tsc && svbuild -c src/browser/svbuild.config.js && svbuild -c src/browser/webui/svbuild.config.js",
     "dev": "npm run build && electron .",
     "dev-inspect": "npm run build && electron . --inspect",
     "localize": "node src/i18n/transform.js",
-    "begin": "npm install && node svlc/hack_empty_svelte_styles.js && cd src/browser/nereid && npm install && svbuild && cd ../../.. && npm run build && npm run localize"
+    "begin": "npm install && node svlc/hack_empty_svelte_styles.js && cd src/browser/webui && npm install && svbuild && cd ../../.. && npm run build",
+    "watch": "ilo tsc --watch + svbuild --watch -c src/browser/svbuild.config.js + svbuild --watch -c src/browser/webui/svbuild.config.js"
   },
   "private": true,
   "author": "wheezard",
@@ -33,7 +28,8 @@
   "license": "MIT",
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",
-    "svbuild": "^0.0.5",
+    "ilo-mute": "^1.0.0",
+    "svbuild": "^2.0.1",
     "typescript": "^4.7.3",
     "yaml": "^1.10.2"
   }
