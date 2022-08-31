@@ -392,7 +392,7 @@ export const appMenu = Menu.buildFromTemplate([
       SEPARATOR,
       {
         label: t('menu.devTools'),
-        accelerator: 'Ctrl+Shift+I',
+        accelerator: 'CmdOrCtrl+Shift+I',
         click(_, win) {
           let wc = obtainWebContents(win)
           wc.toggleDevTools()
@@ -406,7 +406,7 @@ export const appMenu = Menu.buildFromTemplate([
     submenu: [
       {
         label: t('navigation.reload'),
-        accelerator: "Ctrl+R",
+        accelerator: "CmdOrCtrl+R",
         click(_, win) {
           let wc = obtainWebContents(win)
           wc.reload()
@@ -414,12 +414,29 @@ export const appMenu = Menu.buildFromTemplate([
       },
       {
         label: t('menu.tabs.hardReload'),
-        accelerator: "Ctrl+Shift+R",
+        accelerator: "CmdOrCtrl+Shift+R",
         click(_, win) {
           let wc = obtainWebContents(win)
           wc.reloadIgnoringCache()
         }
       },
+      SEPARATOR,
+      {
+        label: t('menu.tabs.onePageUp'),
+        accelerator: "CmdOrCtrl+Backspace",
+        click(_, win) {
+          let wc = obtainWebContents(win);
+          const url = wc.getURL();
+          if (!url.startsWith('http')) return;
+
+          const parsed = $.URLParse(url);
+          const newPathname = pathModule.posix.dirname(parsed.pathname);
+          const newURL = (new URL(newPathname, parsed.href)).href;
+          if (newURL == parsed.href) return;
+          wc.loadURL(newURL);
+        }
+      },
+      SEPARATOR,
       tabs_windows.find(i => i.id == 'close-tab')
     ]
   },

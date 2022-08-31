@@ -270,6 +270,7 @@ menu:
     close: Close tab
     openClosed: Open closed tab
     hardReload: Hard refresh
+    onePageUp: Go one page up
   tools: Tools
   devTools: Developer tools
   currentTab: This tab
