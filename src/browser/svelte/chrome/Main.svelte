@@ -286,6 +286,14 @@
     ipcRenderer.send('chrome:setTop', false)
   })
 
+  let wco = {}
+  ipcRenderer.on('wco', (_e, bounds) => {
+    console.log('WCO bounds', bounds);
+    wco.left = bounds.left + 'px'
+    wco.right = bounds.right + 'px'
+    wco = wco;
+  })
+
 </script>
 
 <!--svelte:head>
@@ -293,7 +301,11 @@
 </svelte:head-->
 
 <div
-  style="display: contents;{ tabs[currentTab]?.private ? "--active-background: var(--private-theme)" : '' }"
+  style="
+    display: contents;{ tabs[currentTab]?.private ? "--active-background: var(--private-theme);" : '' }
+    --titlebar-left: {wco.left};
+    --titlebar-right: {wco.right};
+  "
 >
 
 <Head {tabs} {currentTab} />

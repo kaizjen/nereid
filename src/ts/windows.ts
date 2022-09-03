@@ -1,7 +1,7 @@
 // This file is for all types of windows
 
 import type { TabWindow, TabOptions, Tab, Configuration, Bookmarks } from "./types";
-import { app, BrowserView, BrowserWindow, BrowserWindowConstructorOptions, nativeTheme, screen } from "electron";
+import { app, BrowserView, BrowserWindow, BrowserWindowConstructorOptions, ipcMain, nativeTheme, screen } from "electron";
 import * as tabManager from "./tabs";
 import * as _url from "url";
 import * as pathModule from "path";
@@ -75,6 +75,12 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
 
     minHeight: 400,
     minWidth: 600,
+    webPreferences: {
+      preload: `${__dirname}/preloads/internal.js`,
+      nodeIntegration: true,
+      contextIsolation: false,
+      partition: INTERNAL_PARTITION,
+    }
   }) as TabWindow;
   
   w.winID = windows.push(w) - 1;
@@ -166,8 +172,32 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
     bookmarks.unlisten(onBookmarksChange);
   })
 
-  // immediately crash the original renderer of the window, so it doesnt take any memory.
-  w.webContents.forcefullyCrashRenderer();
+
+  await w.webContents.loadURL('data:text/html,')
+  w.webContents.on('ipc-message', (_e, _ch, arg) => {
+    let vars: { left: number, right: number } = JSON.parse(arg);
+    
+    // immediately crash the original renderer of the window, so it doesnt take any memory.
+    w.webContents.forcefullyCrashRenderer();
+    
+    function proceed() {
+      chromeBV.webContents.send('wco', {
+        left: vars.left,
+        right: w.getContentBounds().width - vars.right
+      })
+    }
+
+    if (chromeBV.webContents.isLoading()) {
+      chromeBV.webContents.on('did-finish-load', proceed)
+    } else proceed()
+  })
+
+  await w.webContents.mainFrame.executeJavaScript(`
+    requestAnimationFrame(() => {
+      nereid.ipcRenderer.send('geometrybegin', JSON.stringify(navigator.windowControlsOverlay.getTitlebarAreaRect()))
+    })
+  `);
+
 
   // The chrome of Nereid is a BrowserView called `chromeBV`
   let chromeBV = new BrowserView({

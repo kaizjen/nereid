@@ -3,6 +3,9 @@
     -webkit-app-region: drag;
     display: flex;
     background: var(--base-background);
+
+    padding-left: var(--titlebar-left);
+    padding-right: var(--titlebar-right);
   }
   #nereid-icn {
     width: 24px;
@@ -40,7 +43,7 @@
     overflow: hidden;
     flex-grow: 1;
     height: 36px;
-    margin-right: 20px;
+    margin-right: 40px; /* For some reason, the titlebar is calculated incorrectly (on windows), so we add 20 px to fix that */
   }
   .tabhead > * {
     -webkit-app-region: no-drag;
@@ -272,7 +275,6 @@
 <div class="head">
   <img
     alt="" src="n-res://{$colorTheme}/nereid.svg" id="nereid-icn"
-    style:margin-left={isOnMac ? '3.8cm' /* approximate traffic lights width */ : ''}
   >
   <div class="tabhead">
     <div
@@ -332,8 +334,7 @@
     <div
       class="traffic-lights"
       style:pointer-events={isOnLinux ? '' : 'none'}
-      style:visibility={isOnLinux ? '' : 'hidden'}
-      style:display={isOnMac ? 'none' : ''}
+      style:display={isOnLinux ? '' : 'none'}
     >
       <img alt="" src="n-res://{$colorTheme}/minimize.svg" on:click={winActionF('min')}>
       <img alt="" src="n-res://{$colorTheme}/restore.svg" on:click={winActionF('max')} width="24" height="24">
