@@ -34,7 +34,7 @@
     return t(`pages.history.${str}`, ...args)
   }
 
-  const fmt = Intl.DateTimeFormat()
+  const fmt = Intl.DateTimeFormat('en-US')
 
   const ENTRIES_BY_PAGE = 50;
   let currentPage = 0;
