@@ -1,4 +1,3 @@
-# When translating, it's best to leave the name unchanged
 name: Nereid
 unimplemented: This feature is unimplemented
 common:
@@ -65,7 +64,8 @@ common:
       prompt: ${hostname} wants to lock your mouse cursor
     openExternal:
       name: Opening external apps
-      desc: Allows opening an app on your device. Allowing this means the site will be able to open almost any app without asking.
+      desc: Allows opening an app on your device. Allowing this means the site will be
+        able to open almost any app without asking.
       prompt: ${hostname} wants to open "${app}"
     idleDetection:
       name: Idle detection
@@ -112,10 +112,13 @@ ui:
     message-internal: This is an internal Nereid page
     message-local: This is a local or a shared file
     message-insecure: Your connection is not secure
-    description-secure: |
-      The information you provide (such as passwords or credit cards) will be securely sent to this site and cannot be intercepted.
+    description-secure: >
+      The information you provide (such as passwords or credit cards) will be
+      securely sent to this site and cannot be intercepted.
+
       Always be sure you're on the intended site before entering any information.
-    description-insecure: It is recommended you do not send information such as passwords or credit cards to this site, because it can be intercepted.
+    description-insecure: It is recommended you do not send information such as
+      passwords or credit cards to this site, because it can be intercepted.
     button-viewCertificate: View certificate
     button-cookieFiles: Cookie files
     button-siteSettings: Site settings
@@ -181,42 +184,50 @@ net-error:
   common:
     local:
       - An unknown local error has occured
-      - Something went wrong on this device, for example the browser ran out of memory or a firewall blocked the request
+      - Something went wrong on this device, for example the browser ran out of
+        memory or a firewall blocked the request
     connection:
       - An unknown connection error has occured
-      - Something went wrong while connecting to the server, for example the connection was refused or you have connected to another network
+      - Something went wrong while connecting to the server, for example the
+        connection was refused or you have connected to another network
     certificate:
       - A certificate error has occured
       - We can't trust the certificate of the host <b>${host}</b>.
     http:
       - An unknown HTTP error has occured
-      - This could mean that the URL (${url}) is invalid or the server sent an incorrect response. Check the spelling of the URL and try again.
+      - This could mean that the URL (${url}) is invalid or the server sent an
+        incorrect response. Check the spelling of the URL and try again.
     cache:
       - The cache seems to be corrupted
-      - This could mean that your OS has rejected a cache operation or the cache was corrupted.
+      - This could mean that your OS has rejected a cache operation or the cache
+        was corrupted.
       - Reload ignoring cache
     unknown:
       - An unknown error has occured
       - "That's all we know. Well, we also know this error code:"
   noSiteAccess:
     - We can't get access to this site.
-    - |
+    - >
       Here's what you can do:<br>
+
       <ul><li>Check if there are any typos in the host name <b>"${hostname}"</b>.</li>
+
       <li>Run network diagnostics</li>
+
       <li>Change DNS over HTTPS settings</li>
   noFileAccess:
     - We can't get access to this file.
     - Perhaps, file at '<b>${path}</b>' was moved or deleted
   fileTooBig:
     - This file is too big
-    - That thing is massive! Do you think I can handle opening it? # very funny btw
+    - That thing is massive! Do you think I can handle opening it?
   denied:
     - Access denied
     - Permission to access a file or a shared resource was denied.
   virus:
     - This file is infected with a virus
-    - The file at '<b>${path}</b>' is infected. It is recommended that you delete it.
+    - The file at '<b>${path}</b>' is infected. It is recommended that you
+      delete it.
   requestBlocked:
     - This request was blocked.
     - Perhaps, an extension prevented the request.
@@ -225,16 +236,21 @@ net-error:
     - Perhaps, you connected to another Wi-Fi or Ethernet network.
   blockedByResponse:
     - This page refused to be displayed like that.
-    - The server sent a response that prevents this page from being displayed, for example, in a frame on another page.
+    - The server sent a response that prevents this page from being displayed,
+      for example, in a frame on another page.
   blockedbyCSP:
     - The request was blocked by Content Security Policy.
-    - <a target='-blank' href='https://en.wikipedia.org/wiki/Content_Security_Policy' class='btn'>Learn more about CSP. (Wikipedia)</a>
+    - <a target='-blank'
+      href='https://en.wikipedia.org/wiki/Content_Security_Policy'
+      class='btn'>Learn more about CSP. (Wikipedia)</a>
   closed:
     - Connection closed.
   reset:
     - The connection was reset.
-    - |
-      Something prevented Nereid from connecting to the host. Maybe your firewall blocked the request,
+    - >
+      Something prevented Nereid from connecting to the host. Maybe your
+      firewall blocked the request,
+
       or your internet provider might've blocked the connection, or the server unexpectedly stopped.
   refused:
     - Connection refused.
@@ -253,7 +269,8 @@ net-error:
     - That's all we know.
   noHTTPS:
     - This site cannot establish a secure connection.
-    - Perhaps, there was a mismatch of the SSL version used by the client and the server. Also, check if this site supports HTTPS connection at all.
+    - Perhaps, there was a mismatch of the SSL version used by the client and
+      the server. Also, check if this site supports HTTPS connection at all.
   invalidURL:
     - The URL is invalid
     - The page at '<b>${url}</b>' doesn't exist or was moved to another address.
@@ -281,9 +298,9 @@ menu:
   fullscreen: Enter fullscreen
   emojiPanel: Show emoji panel
   zoom:
+    "0": Actual size
     in: Zoom in
     out: Zoom out
-    0: Actual size
     info: "Zoom: ${zoom}%"
   appMenu:
     file: File
@@ -342,15 +359,19 @@ pages:
     begin: Begin
     language:
       title: Choose your language
-      note: |
-        Note: not all languages are supported by Nereid. If you pick an unsupported language, you will be additionally prompted to select
+      note: >
+        Note: not all languages are supported by Nereid. If you pick an
+        unsupported language, you will be additionally prompted to select
+
         the language of Nereid. The websites will still be displayed in your selected language, but Nereid's interface will be in one that
+
         you have selected for it specifically.
       noTranslation: "Nereid is not translated to your language. Pick a language for Nereid:"
       restartNotice: Nereid will restart when you apply the change
     themes:
       title: Choose your theme
-      note: This theme will be applied to Nereid's UI and some of the websites you visit.
+      note: This theme will be applied to Nereid's UI and some of the websites you
+        visit.
       light: Light
       dark: Dark
       system: Same as system
@@ -385,7 +406,8 @@ pages:
           storages: Databases and local storage
           history: All history
           downloads: All downloads
-          notice: The pages for history and downloads provide more control over what to clear.
+          notice: The pages for history and downloads provide more control over what to
+            clear.
           permissions: Site permissions
           clear-button: Clear
       siteSettings:
@@ -411,10 +433,12 @@ pages:
         description: Sites embedded in other sites won't be able to request permissions
       useHintingService:
         title: Use the default search engine hinting service
-        description: That will send requests to its server each time you're typing in the search bar. Requests will not be sent in private mode.
+        description: That will send requests to its server each time you're typing in
+          the search bar. Requests will not be sent in private mode.
       hideSessionForHints:
         title: Hide your session while getting hints
-        description: Hiding your session prevents some tracking, but can make hints less personalized.
+        description: Hiding your session prevents some tracking, but can make hints less
+          personalized.
       httpsOnly: Only use secure connections (HTTPS)
     search:
       title: Search engines
@@ -459,7 +483,8 @@ pages:
     languages:
       title: Languages
       label-all: "Selected language:"
-      notice: Nereid is not translated to all languages supported by Chromium. Here you can select a language Nereid supports.
+      notice: Nereid is not translated to all languages supported by Chromium. Here
+        you can select a language Nereid supports.
       label-nereid: "Nereid's language:"
       dialog: Select a language
       restart-notification: You need to restart Nereid to apply the change
@@ -525,22 +550,33 @@ pages:
       electron: Electron's license
       chromium: Chromium's licenses
     otherLicenses: Other licenses
-LocalizedTOS: |
+LocalizedTOS: >
   Hello. Nereid is free to use and modify.
+
   This agreement (that you're reading right now) permits you to use Nereid and modify its code freely.
+
   The author of this software is released from any liability or responsibility from any damage done by this software.
 
+
   [IMPORTANT]
+
   As per the closed alpha version of this software, Nereid will send data to its online services without warning.
+
   Said data includes: your OS version and tag, your hardware identifdiers, crash reports, other error and log information.
+
   These reports should exclude any sensitive data, like the sites you visit or your history, even though in some edge cases, or due to a bug this data may be still sent sometimes.
+
 
   The software is licensed under an MIT License, which reads as follows:
 
+
   Copyright (c) 2022 @wheezard
+
 
   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
+
   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
 
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
