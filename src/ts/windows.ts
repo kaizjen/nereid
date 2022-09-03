@@ -31,6 +31,9 @@ const platform = {
 
 let windows: TabWindow[] = [];
 
+/** Cache the WCO value so it doesn't have to be computed every time */
+let WCO_BOUNDS: { left: number, right: number };
+
 function updateWindowBounds(window: TabWindow) {
   const { x, y, width, height } = window.getBounds()
 
@@ -172,31 +175,33 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
     bookmarks.unlisten(onBookmarksChange);
   })
 
-
-  await w.webContents.loadURL('data:text/html,')
-  w.webContents.on('ipc-message', (_e, _ch, arg) => {
-    let vars: { left: number, right: number } = JSON.parse(arg);
-    
-    // immediately crash the original renderer of the window, so it doesnt take any memory.
-    w.webContents.forcefullyCrashRenderer();
-    
-    function proceed() {
-      chromeBV.webContents.send('wco', {
-        left: vars.left,
-        right: w.getContentBounds().width - vars.right
-      })
-    }
-
-    if (chromeBV.webContents.isLoading()) {
-      chromeBV.webContents.on('did-finish-load', proceed)
-    } else proceed()
-  })
-
-  await w.webContents.mainFrame.executeJavaScript(`
-    requestAnimationFrame(() => {
-      nereid.ipcRenderer.send('geometrybegin', JSON.stringify(navigator.windowControlsOverlay.getTitlebarAreaRect()))
+  if (!WCO_BOUNDS) {
+    await w.webContents.loadURL('data:text/html,')
+    w.webContents.on('ipc-message', (_e, _ch, arg) => {
+      let vars: { left: number, right: number } = JSON.parse(arg);
+  
+      // immediately crash the original renderer of the window, so it doesnt take any memory.
+      w.webContents.forcefullyCrashRenderer();
+  
+      function proceed() {
+        WCO_BOUNDS = {
+          left: vars.left,
+          right: w.getContentBounds().width - vars.right
+        };
+        chromeBV.webContents.send('wco', WCO_BOUNDS)
+      }
+  
+      if (chromeBV.webContents.isLoading()) {
+        chromeBV.webContents.on('did-finish-load', proceed)
+      } else proceed()
     })
-  `);
+  
+    await w.webContents.mainFrame.executeJavaScript(`
+      requestAnimationFrame(() => {
+        nereid.ipcRenderer.send('geometrybegin', JSON.stringify(navigator.windowControlsOverlay.getTitlebarAreaRect()))
+      })
+    `);
+  }
 
 
   // The chrome of Nereid is a BrowserView called `chromeBV`
@@ -218,7 +223,11 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
   if (!app.isPackaged || control.options.open_devtools_for_window?.value) {
     chromeBV.webContents.openDevTools({ mode: 'detach' })
   }
-  
+
+  if (WCO_BOUNDS) {
+    chromeBV.webContents.send('wco', WCO_BOUNDS)
+  }
+
   config.listenCall(onConfigChange);
   bookmarks.listenCall(onBookmarksChange);
 
