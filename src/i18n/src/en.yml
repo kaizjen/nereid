@@ -538,6 +538,16 @@ pages:
       edit:
         name: Name
         url: URL
+  downloads:
+    alt-openFile: Open file "${file}"
+    button-showInFolder: Show in folder
+    alt-button-delete: Remove download
+    downloadedFrom: Downloaded from ${url}
+    menu:
+      copyDownloadURL: Copy download URL
+      copySavePath: Copy file path
+      redownload: Redownload
+    status-interrupted: (Interrupted / cancelled)
   about:
     nereidVersion: "Version: ${version}"
     otherVersions: Versions

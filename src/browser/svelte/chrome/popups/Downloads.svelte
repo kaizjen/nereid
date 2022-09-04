@@ -79,6 +79,7 @@
   const { ipcRenderer, shell, basename } = window.nereid;
   import { fly } from "svelte/transition";
   import Button from "//lib/Button.svelte";
+  import Item from "./Downloads/Item.svelte";
 
   const { t } = window;
   const _ = {
@@ -89,12 +90,6 @@
       RESUME: t('ui.tools.downloads.resume'),
       PAUSE: t('ui.tools.downloads.pause'),
       CANCEL: t('ui.tools.downloads.cancel'),
-      AGAIN: t('ui.tools.downloads.again'),
-      DELETE: t('ui.tools.downloads.delete'),
-    },
-    status: {
-      COMPLETED: t('ui.tools.downloads.status-completed'),
-      INTERRUPTED: t('ui.tools.downloads.status-interrupted')
     },
     EMPTY: t('ui.tools.downloads.empty'),
     OPEN_PAGE: t('ui.tools.downloads.open-downloads'),
@@ -159,27 +154,11 @@
       <div class="empty"> {_.LOADING} </div>
     {:then downloads}
       {#each downloads as download, index}
-        <div class="dl-wrapper">
-          <div class="download">
-            <b>{basename(download.savePath)}</b><br>
-            <span class="url">{download.url}</span><br>
-            <span class="more-info"> {download.status == 'completed' ? _.status.COMPLETED : _.status.INTERRUPTED} </span>
-          </div>
-          <div class="dl-buttons">
-            <button class="mini-btn" on:click={() => {
-              downloadsAPI.create(index)
-            }}>
-              <img src="n-res://{$colorTheme}/redo.svg" alt={_.act.AGAIN}>
-            </button>
-            <button class="mini-btn" on:click={async() => {
-              await downloadsAPI.delete(index);
-              downloads.splice(index, 1);
-              downloads = downloads; // update
-            }}>
-              <img src="n-res://{$colorTheme}/cross.svg" alt={_.act.DELETE}>
-            </button>
-          </div>
-        </div>
+        <Item {download} {index} on:delete={async() => {
+          await downloadsAPI.delete(index);
+          downloads.splice(index, 1);
+          downloads = downloads; // update
+        }} />
       {:else}
         <div class="empty"> {_.EMPTY} </div>
       {/each}

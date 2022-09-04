@@ -42,6 +42,11 @@
         {t('common.bookmarks')}
       </MenuFlyoutItem>
 
+      <MenuFlyoutItem on:click={gotoF('downloads')}>
+        <Icons.Downloads slot="icon" />
+        {t('common.downloads')}
+      </MenuFlyoutItem>
+
       <MenuFlyoutItem on:click={gotoF('about')}>
         <Icons.About slot="icon" />
         {t('common.about')}

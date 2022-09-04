@@ -901,6 +901,12 @@ export function init() {
     }
   })
 
+  onInternal('getFileIcon', async(_e, path) => {
+    let img = await app.getFileIcon(path, { size: 'normal' });
+
+    return img.toPNG().toString('base64')
+  })
+
   onInternal('closeMe', (e) => {
     const win = BrowserWindow.fromWebContents(e.sender) as TabWindow
     if (!win || !isTabWindow(win)) return;

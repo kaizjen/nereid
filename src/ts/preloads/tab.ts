@@ -96,7 +96,8 @@ if (location.protocol == 'nereid:') {
       showItemInFolder: (item) => sendInternal('shell', 'showItemInFolder', item),
       openPath: (path) => sendInternal('shell', 'openPath', path),
       beep: () => sendInternal('shell', 'beep'),
-      readShortcutLink: (linkPath) => sendInternal('shell', 'readShortcutLink', linkPath)
+      readShortcutLink: (linkPath) => sendInternal('shell', 'readShortcutLink', linkPath),
+      getFileIcon: (path) => sendInternal('getFileIcon', path)
     },
     session: {
       clearData: (clearObj) => sendInternal('session', 'clear', clearObj),

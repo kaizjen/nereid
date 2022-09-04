@@ -547,6 +547,16 @@ pages:
       edit:
         name: Имя
         url: URL-адрес
+  downloads:
+    alt-openFile: Открыть ${file}
+    button-showInFolder: Показать в папке
+    alt-button-delete: Убрать загрузку
+    downloadedFrom: Скачан из ${url}
+    menu:
+      copyDownloadURL: Скопировать адрес загрузки
+      copySavePath: Скопировать путь сохранения
+      redownload: Скачать заново
+    status-interrupted: (Прерван)
 LocalizedTOS: >
   Здравствуйте. Nereid - бесплатная программа с открытым исходным кодом.
 
