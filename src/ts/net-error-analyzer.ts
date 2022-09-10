@@ -61,7 +61,7 @@ export function handleNetError(
   } else if (-499 <= errCode && errCode <= -400) {
     errInfo.info = $t('common.cache.0')
     errInfo.detail = $t('common.cache.1') +
-      "<a id='reload-nocache' class='btn'>" + $t('common.cache.2') + "</a>"
+      "<button id='reload-nocache' class='btn'>" + $t('common.cache.2') + "</button>"
     if (isMainFrame) {
       errInfo.moreJS = `document.getElementById('reload-nocache').onclick = () => { PostMainMessage('reloadIgnoringCache') }`
       function onMessagePosted(e) {
