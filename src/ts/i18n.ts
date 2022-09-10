@@ -27,9 +27,9 @@ if (configData.i18n != null) {
   lang = getSupportedLanguage(configData.i18n.lang)
 
 } else {
-  let language = getSupportedLanguage(app.getLocale());
   app.once('ready', () => {
     // You have to call .getLocale() after the 'ready' event on Windows
+    let language = getSupportedLanguage(app.getLocale());
     config.set({
       i18n: { locale: app.getLocale(), lang: language }
     })
@@ -49,24 +49,21 @@ if (configData.i18n != null) {
       
     } catch (e) {
       console.log(`Warning! The translation for the language ${lang} is not available!`);
-      return {};
-    }
-  }
-
-  const resources = {}
-  resources['en'] = {
-    root: parseTranslation('en')
-  };
-  if (lang != 'en') {
-    resources[lang] = {
-      root: parseTranslation(lang)
+      return JSON.parse(
+        fs.readFileSync(
+          pathModule.join(translationsDirectory, 'en.json'), 'utf-8'
+        )
+      );
     }
   }
 
   i18n.init({
-    fallbackLng: 'en',
     lng: lang,
-    resources,
+    resources: {
+      [lang]: {
+        root: parseTranslation(lang)
+      }
+    },
     defaultNS: 'root',
     interpolation: {
       prefix: '${',
