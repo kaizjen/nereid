@@ -110,7 +110,7 @@
 
     isActive = true;
     setTop(true);
-    window.requestAnimationFrame(() => inputRef.focus());
+    window.requestAnimationFrame(() => inputRef?.focus());
   }
 
   let clickHintF;
@@ -125,7 +125,7 @@
   let isActive = false;
   let inputValue = '';
   let hints = [];
-  let inputRef = { blur(){}, focus(){} }; // before it is referenced, initialize as a dummy object
+  let inputRef; // before it is referenced, initialize as a dummy object
   let abignore = false;
 
   let config = getContext('config');
@@ -158,6 +158,7 @@
     if (isActive || !tab) return
     
     inputValue = tab.url;
+    inputRef?.setSelectionRange(0, 0); // the domain should stay in front
 
     if (['nereid://private/', 'nereid://newtab/'].includes(tab?.url)) {
       url = {
@@ -195,13 +196,12 @@
         if (selectedHint == -1) {
           setTop(false);
           ipcRenderer.send('@tab', 'go', inputValue)
-          inputRef.blur();
           
         } else {
           let hint = hints[selectedHint];
           clickHintF(hint)();
-          inputRef.blur();
         }
+        inputRef?.blur();
         hints = [];
         break;
       }
