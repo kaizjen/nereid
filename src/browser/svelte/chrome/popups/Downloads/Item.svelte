@@ -87,7 +87,7 @@
 
   const dispath = createEventDispatcher()
 
-  function openFile(download) {
+  function openFile() {
     shell.openPath(download.savePath);
   }
 
