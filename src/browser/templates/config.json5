@@ -1,4 +1,5 @@
 {
+  v: "0.0.1",
   welcomePhase: 0,
   i18n: null,
   ui: {

@@ -82,6 +82,7 @@ export type Permissions = {
   fullscreen: boolean | null
 }
 export interface Configuration {
+  v: string
   welcomePhase: number
   i18n: {
     locale: string

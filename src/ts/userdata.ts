@@ -129,8 +129,37 @@ try {
 }
 
 (function() {
-  const bool_null: ['boolean', null] = ['boolean', null];
+  if (configContent.v != '0.0.1') {
+    app.prependListener('ready', () => {
+      const { t } = require('./i18n.js')
+
+      let button = dialog.showMessageBoxSync({
+        message: t('configVersionMismatch.title'),
+        buttons: [ t('configVersionMismatch.button-overwrite'), t('configVersionMismatch.button-exit') ],
+        cancelId: 1,
+        defaultId: 1,
+        type: 'error'
+      });
+
+      if (button == 0) {
+        fs.unlinkSync(configPath);
+        fs.unlinkSync(historyPath);
+        fs.unlinkSync(lastlaunchPath);
+        fs.unlinkSync(bookmarksPath);
+        fs.unlinkSync(downloadsPath);
+        app.relaunch();
+        app.exit()
+
+      } else {
+        app.exit()
+      }
+    })
+    return;
+  }
+
+  const bool_null = ['boolean' as const, null];
   let validation = runType(configContent, {
+    v: 'string',
     welcomePhase: 'realnumber',
     i18n: [{
       lang: 'string',

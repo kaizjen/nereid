@@ -1,5 +1,11 @@
 name: Nereid
 unimplemented: This feature is unimplemented
+configVersionMismatch:
+  title: The settings file is for a newer or unsupported version of Nereid, and,
+    therefore, cannot be read. Press "Overwrite" to overwrite the file, losing
+    all settings. Press "Exit" to exit Nereid.
+  button-overwrite: Overwrite
+  button-exit: Exit
 common:
   downloads: Downloads
   settings: Settings
