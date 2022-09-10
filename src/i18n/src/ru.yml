@@ -520,19 +520,6 @@ pages:
       button-delete: Удалить закладку
       button-edit: Изменить закладку
       button-create: Создать
-  about:
-    nereidVersion: Версия ${version}
-    otherVersions: Версии
-    paths:
-      userData: Путь к пользовательским файлам
-      cache: Путь к кэшу
-      app: Путь установки
-    FOSSNotice: Nereid использует ${electron} и ${chromium}, - проекты с открытым
-      исходным кодом.
-    licenses:
-      electron: Лицензия Electron
-      chromium: Лицензии Chromium
-    otherLicenses: Другие лицензии
   newtab:
     startPanel:
       addItem: Добавить сайт
@@ -557,6 +544,35 @@ pages:
       copySavePath: Скопировать путь сохранения
       redownload: Скачать заново
     status-interrupted: (Прерван)
+  about:
+    nereidVersion: Версия ${version}
+    otherVersions: Версии
+    paths:
+      userData: Путь к пользовательским файлам
+      cache: Путь к кэшу
+      app: Путь установки
+    FOSSNotice: Nereid использует ${electron} и ${chromium}, - проекты с открытым
+      исходным кодом.
+    licenses:
+      electron: Лицензия Electron
+      chromium: Лицензии Chromium
+    otherLicenses: Другие лицензии
+  private:
+    title: Приватный режим
+    header: Вы вошли в приватный режим
+    simpleDescription: Это значит, что ваши действия не будут видны другим
+      пользователям этого компьютера.
+    mayBeVisible:
+      header: Ваши действия могут быть видны
+      sites: Сайтам, которые вы посещаете
+      IP: Вашему интернет-провайдеру
+      netAdmin: Вашему администратору сети
+      whoeverElse: Вашему домашнему животному
+    nereidWillDelete:
+      header: "После закрытия последней приватной вкладки, Nereid удалит:"
+      sites: Сайты, которые вы посещали
+      cookies: Файлы куки
+      storage: Локальное хранилище сайтов
 LocalizedTOS: >
   Здравствуйте. Nereid - бесплатная программа с открытым исходным кодом.
 

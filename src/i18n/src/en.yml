@@ -560,6 +560,22 @@ pages:
       electron: Electron's license
       chromium: Chromium's licenses
     otherLicenses: Other licenses
+  private:
+    title: Private mode
+    header: You are in private mode
+    simpleDescription: That means your actions will not be visible to other users of
+      this PC. What happens in Private, stays in Private.
+    mayBeVisible:
+      header: Your actions may be visible to
+      sites: Sites that you visit
+      IP: Your internet provider
+      netAdmin: Your network administrator
+      whoeverElse: Your roommate, who decided to look over your shoulder
+    nereidWillDelete:
+      header: "After closing the last Private tab, Nereid will delete:"
+      sites: What sites you visited
+      cookies: Cookie files
+      storage: Local site storage
 LocalizedTOS: >
   Hello. Nereid is free to use and modify.
 

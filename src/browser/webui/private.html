@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<title>Private mode</title>
+	<title>${title}</title>
 	<link rel="stylesheet" href="nereid://css/global.css">
 	<style media="screen">
 		body {
@@ -41,31 +41,36 @@
 </head>
 <body>
 	<div class="ghost">
-		<h1>You are in Private mode</h1>
+		<h1>${header}</h1>
 		<img src="nereid://res/ghost.svg" alt="">
 		<div class="desc">
-			That means your actions will not be visible to other users of this PC. What happens in Private, stays in Private.
+			${simpleDescription}
 		</div>
 		<div class="more">
 			<div class="cell">
-				<h5>Your actions may be visible to</h5>
+				<h5>${mayBeVisible.header}</h5>
 				<ul>
-					<li>Sites that you visit</li>
-					<li>Your internet provider</li>
-					<li>Your network administrator</li>
-					<li>Your roommate, who decided to look over your shoulder</li>
+					<li>${mayBeVisible.sites}</li>
+					<li>${mayBeVisible.IP}</li>
+					<li>${mayBeVisible.netAdmin}</li>
+					<li>${mayBeVisible.whoeverElse}</li>
 				</ul>
 			</div>
 			<div class="cell">
-				<h5>After closing the last Private tab, Nereid will delete </h5>
+				<h5>${nereidWillDelete.header}</h5>
 				<ul>
-					<li>What sites you visited</li>
-					<li>Cookie files</li>
-					<li>Local site storage</li>
+					<li>${nereidWillDelete.sites}</li>
+					<li>${nereidWillDelete.cookies}</li>
+					<li>${nereidWillDelete.storage}</li>
 				</ul>
 			</div>
 		</div>
 	</div>
-	
+	<script>
+		document.documentElement.innerHTML = document.documentElement.innerHTML.replace(/\${.*}/g, (match) => {
+			console.log(match);
+			return window.nereid.i18n.t('pages.private.' + match.slice(2, -1))
+		})
+	</script>
 </body>
 </html>
