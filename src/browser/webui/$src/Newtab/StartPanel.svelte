@@ -7,6 +7,7 @@
     display: flex;
     justify-content: center;
     color: white;
+    padding-inline: 40px;
   }
   .grow {
     max-width: 30cm;
