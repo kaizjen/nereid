@@ -23,6 +23,7 @@
     cursor: pointer;
     font-weight: bolder;
     padding: 3px;
+    color: inherit;
   }
   .file-link-disabled {
     font-weight: bolder;
