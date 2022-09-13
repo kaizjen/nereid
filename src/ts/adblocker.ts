@@ -76,7 +76,10 @@ export function matchRequest(info: Electron.OnBeforeRequestListenerDetails) {
   }));
 
   if (result.match && info.webContents) {
-    webContentsABMap[info.webContentsId].trackersBlocked.push(result.filter?.hostname || '<unknown tracker>')
+    const { trackersBlocked } = webContentsABMap[info.webContentsId];
+    if (!trackersBlocked.includes(info.url)) {
+      trackersBlocked.push(info.url)
+    }
   }
 
   return {
