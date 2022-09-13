@@ -218,7 +218,8 @@ try {
           'idleDetection?': bool_null,
           'fullscreen?': bool_null,
         }
-      }
+      },
+      adblockerWhitelist: [['string']]
     },
     behaviour: {
       onStart: [

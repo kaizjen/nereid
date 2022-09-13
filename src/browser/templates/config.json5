@@ -52,7 +52,8 @@
       idleDetection: null,
       fullscreen: true
     },
-    sitePermissions: {}
+    sitePermissions: {},
+    adblockerWhitelist: []
   },
   behaviour: {
     onStart: {

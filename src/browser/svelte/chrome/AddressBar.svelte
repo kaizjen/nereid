@@ -92,6 +92,7 @@
   import { getContext } from "svelte/internal"
   import ZoomPopup from "./popups/Zoom.svelte";
   import Bookmark from "./popups/Bookmark.svelte";
+import AdBlocker from "./popups/AdBlocker.svelte";
 
   const { t } = window;
   const _ = {
@@ -100,6 +101,9 @@
     ALT_ZOOM: data => t('ui.zoom.altMessage', data),
     BOOKMARK_ADD: t('ui.bookmarks.add'),
     BOOKMARK_ADD_OR_RM: t('ui.bookmarks.addOrRemove'),
+    ADBLOCK_GOOD: t('ui.adblocker.status-good'),
+    ADBLOCK_BAD: t('ui.adblocker.status-bad'),
+    ADBLOCK_NEUTRAL: t('ui.adblocker.status-neutral'),
   }
 
   const URLParse = getContext('URLParse')
@@ -138,7 +142,8 @@
   let securityDialog = false;
   let zoomDialog = false;
   let bookmarkDialog = false;
-  $: anyDialog = securityDialog || zoomDialog || bookmarkDialog;
+  let adblockerDialog = false;
+  $: anyDialog = securityDialog || zoomDialog || bookmarkDialog || adblockerDialog;
 
   function hover(node) {
     node.addEventListener('mouseover', () => {
@@ -261,6 +266,17 @@
       break;
     }
   }
+
+  let adsDetected = false;
+  let abEnabled = false;
+  $: {
+    tab;
+    void async function () {
+      const info = await ipcRenderer.invoke('getAdblockerInfo');
+      adsDetected = info.trackersBlocked > 0;
+      abEnabled = !$config?.privacy.adblockerWhitelist.includes(url.protocol + ':' + url.hostname);
+    }()
+  }
 </script>
 <div class:abignore id="addressbar" class:focus={isActive}>
   <button use:hover on:click={() => securityDialog = !securityDialog} class="ab-btn">
@@ -316,6 +332,20 @@
       >
     </button>
   {/if}
+  {#if url.protocol.startsWith('http')}
+    <button
+      class="ab-btn"
+      on:click={() => adblockerDialog = true}
+      use:hover
+    >
+      <img
+        class="tab-state"
+        src="n-res://{$colorTheme}/shield{adsDetected ? '-neutral' : abEnabled ? '-good' : '-bad'}.svg"
+        alt={adsDetected ? _.ADBLOCK_NEUTRAL : abEnabled ? _.ADBLOCK_GOOD : _.ADBLOCK_BAD}
+        title={adsDetected ? _.ADBLOCK_NEUTRAL : abEnabled ? _.ADBLOCK_GOOD : _.ADBLOCK_BAD}
+      >
+    </button>
+  {/if}
   <button
     class="ab-btn"
     on:click={() => bookmarkDialog = true}
@@ -338,6 +368,9 @@
   {/if}
   {#if bookmarkDialog}
     <Bookmark bind:open={bookmarkDialog} {tab} bookmarks={$bookmarks} />
+  {/if}
+  {#if adblockerDialog}
+    <AdBlocker bind:open={adblockerDialog} hostname={url.hostname} protocol={url.protocol} />
   {/if}
 </div>
 

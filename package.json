@@ -15,6 +15,7 @@
   "private": true,
   "author": "wheezard",
   "dependencies": {
+    "@cliqz/adblocker": "^1.25.0",
     "argv-parse": "^1.0.1",
     "electron": "^19.0.8",
     "electron-fetch": "^1.7.4",

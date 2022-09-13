@@ -1,6 +1,6 @@
 // This file does everything related to the current session and the electron sessions
 
-import type { CertficateCache, Permissions, Tab, TabWindow } from "./types";
+import type { CertficateCache, Permissions, TabWindow } from "./types";
 import { app, BrowserWindow, ipcMain, protocol, session, Session, screen, nativeTheme } from "electron";
 import * as pathModule from "path"
 import $ from "./vars";
@@ -9,6 +9,7 @@ import * as fs from "fs-extra"
 import { getAllTabWindows, isTabWindow } from './windows'
 import { config, downloads, userdataDirectory, control } from "./userdata";
 import fetch from "electron-fetch";
+import { isAdBlockerReady, matchRequest } from "./adblocker";
 
 const URLParse = $.URLParse;
 
@@ -213,6 +214,15 @@ export function registerSession(ses: Session) {
         redirectURL: url.replace('http:', 'https:')
       })
     }
+  })
+
+  ses.webRequest.onBeforeRequest({ urls: ['*://*/*'] }, (details, callback) => {
+    if (!isAdBlockerReady) return callback({ cancel: false });
+
+    const { redirect, match } = matchRequest(details);
+    if (redirect) return callback({ redirectURL: redirect });
+    if (match) return callback({ cancel: true });
+    return callback({ cancel: false })
   })
 
   ses.setCertificateVerifyProc(async (req, next) => {

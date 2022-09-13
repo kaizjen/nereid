@@ -11,6 +11,7 @@ import * as pathModule from "path"
 import $ from "./vars";
 import type { TabOptions } from "./types";
 import { t, data } from "./i18n";
+import { setup } from "./adblocker";
 
 global.isStarting = true; // some things, like history, shouldn't work while the app is still starting
 
@@ -110,6 +111,9 @@ app.on('ready', () => {
   userData.lastlaunch.set({ launchFailed: false, exitedSafely: false })
   thisProcess.init()
   global.isStarting = false;
+
+  console.log('Starting adblock...')
+  setup().then(() => console.log('Adblock started!'))
 })
 
 let tray: Tray;

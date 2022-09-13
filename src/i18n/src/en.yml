@@ -135,6 +135,25 @@ ui:
     list: Folders
     addToFolder: Add to folder
     removeFromFolder: Remove from folder
+  adblocker:
+    status-good: Ads and trackers are blocked
+    status-bad: Ads and trackers weren't blocked
+    status-neutral: No ads found on the page
+    blockedAmount: "Ads/trackers blocked: ${count}"
+    list: List of trackers
+    switch-off: Turn off adblock on ${hostname}
+    switch-on: Turn on adblock on ${hostname}
+    warnings:
+      active: Sometimes, the adblocker may cause some pages to malfunction. If a page
+        is not being loaded correctly, try turning it off.
+      inactive: Ads and trackers on ${hostname} are not being blocked, because you
+        have whitelisted the website. Unless the adblock is hurting performance
+        or functionality, it is very recommended to turn it on.
+      malfunction: The adblocker failed to load correctly or a critical error occured
+        while it was loading.
+      notReady: The page was loaded before the adblocker, so ads and trackers weren't
+        blocked.
+      button-reload: Reload the page
   zoom:
     altMessage: Zoom is ${zoom}%
     infoMessage: "Zoom: ${zoom}%"

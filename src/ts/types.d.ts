@@ -114,6 +114,7 @@ export interface Configuration {
     sitePermissions: {
       [hostname: string]: Partial<Permissions>
     }
+    adblockerWhitelist: string[]
   }
   behaviour: {
     onStart: {

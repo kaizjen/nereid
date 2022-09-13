@@ -67,6 +67,12 @@
       "value": false,
       "type": "bool",
       "description": "Nereid has a limitation: it cannot return 'prompt' for permission checks. This setting describes what should it tell the site instead: true means allowed, false means denied"
+    },
+    "adblock_cache_expiration": {
+      "default": 2592000000,
+      "value": 2592000000,
+      "type": "num",
+      "description": "How much time (in ms) the adblock cache is valid before Nereid will re-download it."
     }
   }
 }
