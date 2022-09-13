@@ -340,9 +340,9 @@ import AdBlocker from "./popups/AdBlocker.svelte";
     >
       <img
         class="tab-state"
-        src="n-res://{$colorTheme}/shield{adsDetected ? '-neutral' : abEnabled ? '-good' : '-bad'}.svg"
-        alt={adsDetected ? _.ADBLOCK_NEUTRAL : abEnabled ? _.ADBLOCK_GOOD : _.ADBLOCK_BAD}
-        title={adsDetected ? _.ADBLOCK_NEUTRAL : abEnabled ? _.ADBLOCK_GOOD : _.ADBLOCK_BAD}
+        src="n-res://{$colorTheme}/shield{abEnabled ? '-good' : '-bad'}.svg"
+        alt={abEnabled ? _.ADBLOCK_GOOD : _.ADBLOCK_BAD}
+        title={abEnabled ? _.ADBLOCK_GOOD : _.ADBLOCK_BAD}
       >
     </button>
   {/if}

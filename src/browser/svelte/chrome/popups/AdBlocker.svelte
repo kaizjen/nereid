@@ -68,14 +68,12 @@
   export let hostname;
   export let protocol;
 
-  let adsDetected = false;
   let abEnabled = true;
   let isError = false;
   let info = {};
   void async function () {
     info = await ipcRenderer.invoke('getAdblockerInfo');
     isError = (await ipcRenderer.invoke('getAdblockerStatus')).adBlockerError
-    adsDetected = info.trackersBlocked > 0;
     abEnabled = !$config.privacy.adblockerWhitelist.includes(protocol + hostname);
   }()
 
@@ -106,11 +104,11 @@
   <main>
     <div class="biginfo">
       <img
-        src="n-res://{$colorTheme}/shield{adsDetected ? '-neutral' : abEnabled ? '-good' : '-bad'}.svg"
+        src="n-res://{$colorTheme}/shield{info.trackersBlocked == 0 ? '-neutral' : abEnabled ? '-good' : '-bad'}.svg"
         alt=""
       >
       <h2>
-        {adsDetected ? _.NEUTRAL : abEnabled ? _.GOOD : _.BAD}
+        {info.trackersBlocked == 0 ? _.NEUTRAL : (abEnabled ? _.GOOD : _.BAD)}
       </h2>
     </div>
     {#if info.trackersBlocked?.length > 0}

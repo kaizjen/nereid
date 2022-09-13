@@ -1,12 +1,9 @@
 import { FiltersEngine, Request } from "@cliqz/adblocker";
-import { WebContents } from "electron";
 import fetch from "electron-fetch";
 import * as fs from "fs-extra";
 import * as pt from "path";
-import { Tab } from "./types";
 import { config, control, userdataDirectory } from "./userdata";
 import $ from "./vars"
-import { getAllTabWindows } from "./windows";
 
 export let engine: FiltersEngine;
 export let isAdBlockerReady = false;
