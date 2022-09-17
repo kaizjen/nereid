@@ -389,19 +389,19 @@ if (global.isSafeMode) {
 export let control = {
   ...controlContent,
   set(obj: Partial<Details>) {
-    controlContent.flags = obj.flags || controlContent.flags;
+    controlContent.arguments = obj.arguments || controlContent.arguments;
     controlContent.switches = obj.switches || controlContent.switches;
-    Object.assign(controlContent.options, obj.options);
+    controlContent.options = obj.options;
     // The variable `control` is not changing - it's a feature. You're supposed
     // to restart the browser after modifying the flags/switches or options.
 
-    fs.writeFileSync(controlPath, JSON.stringify(controlContent))
+    fs.writeFileSync(controlPath, JSON.stringify(controlContent, null, 2))
   },
   invalidateOptions(): never {
     fs.removeSync(controlPath);
     writeDefaults();
     control.set({
-      flags: controlContent.flags,
+      arguments: controlContent.arguments,
       switches: controlContent.switches
     })
 
@@ -411,6 +411,8 @@ export let control = {
       "They have been replaced with a working version, but Nereid needs to be restarted."
     );
     process.exit();
-  }
+  },
+  /** Needed for accessing even those settings, that aren't in effect yet */
+  dynamicControl: controlContent
 }
 console.timeEnd('userData init');

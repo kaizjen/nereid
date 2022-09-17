@@ -79,6 +79,12 @@ if (location.protocol == 'nereid:') {
         delFolder: (obj: { folder: string }) => sendInternal('userData', 'bookmarks:delFolder', obj),
         addFolder: (obj: { folder: string }) => sendInternal('userData', 'bookmarks:addFolder', obj),
         renFolder: (obj: { folder: string, name: string }) => sendInternal('userData', 'bookmarks:renFolder', obj),
+      },
+      control: {
+        get: () => sendInternal('userData', 'control:get'),
+        setOptions: (obj: any) => sendInternal('userData', 'control:setOptions', obj),
+        setSwitches: (obj) => sendInternal('userData', 'control:setSwitches', obj),
+        setArguments: (obj) => sendInternal('userData', 'control:setArguments', obj),
       }
     },
     interface: {

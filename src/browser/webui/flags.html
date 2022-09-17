@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="nereid://css/global.css">
+  <link rel="stylesheet" href="nereid://css/pretty-inputs.css">
+  <style>
+    body {
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      font-family: system-ui;
+    }
+  </style>
+  <title>Flags</title>
+</head>
+
+<body>
+  <script type="module">
+    import Main from 'nereid://js/flags.svelte'
+
+    const app = new Main({
+      target: document.body
+    })
+  </script>
+
+</body>
+
+</html>

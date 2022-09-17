@@ -1,0 +1,62 @@
+button {
+  appearance: none;
+  border: 1px solid transparent;
+  background: #00a0ff;
+  color: inherit;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 2px;
+}
+button:focus, button:focus-visible {
+  border-color: black;
+  outline: none;
+  box-shadow: 0px 0px 0px 2px #00a0ff;
+}
+input, select {
+  border: 1px solid transparent;
+  background: black;
+  color: inherit;
+  padding: 4px;
+  appearance: none;
+  border-radius: 2px;
+}
+select {
+  appearance: auto;
+  text-align: left;
+}
+input:focus-visible, select:focus-visible {
+  border-color: #00a0ff;
+  outline: none;
+}
+a {
+  text-decoration: none;
+  color: #00a0ff;
+}
+a:hover {
+  text-decoration: underline;
+}
+a:active {
+  opacity: 0.7;
+}
+
+@media (prefers-color-scheme: light) {
+  input {
+    background: white;
+  }
+  button:focus, button:focus-visible {
+    border-color: white;
+  }
+  :root {
+    --bg: #f9f9f9;
+    --text: black
+  }
+}
+@media (prefers-color-scheme: dark) {
+  body {
+    color-scheme: dark;
+  }
+  :root {
+    --bg: rgba(44, 44, 44, 96%);
+    --text: white
+  }
+}

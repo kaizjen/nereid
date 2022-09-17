@@ -736,6 +736,19 @@ export function init() {
         return await userData.bookmarks.set(bookmarks)
       }
 
+      case 'control:get': {
+        return userData.control.dynamicControl;
+      }
+      case 'control:setOptions': {
+        return userData.control.set({...userData.control.dynamicControl, options: obj });
+      }
+      case 'control:setSwitches': {
+        return userData.control.set({...userData.control.dynamicControl, switches: obj });
+      }
+      case 'control:setArguments': {
+        return userData.control.set({...userData.control.dynamicControl, arguments: obj });
+      }
+
       default:
         throw new Error(`[userData] unknown command "${action}"`)
     }

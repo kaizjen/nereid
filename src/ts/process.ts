@@ -45,10 +45,10 @@ const argv = argvParse({
 })
 
 if (!global.isSafeMode) {
-  control.flags.forEach((f) => {
+  control.switches.forEach((f) => {
     app.commandLine.appendArgument(f)
   })
-  control.switches.forEach(({ name, value }) => {
+  control.arguments.forEach(({ name, value }) => {
     app.commandLine.appendSwitch(name, value)
   })
 }

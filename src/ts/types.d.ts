@@ -210,8 +210,8 @@ export type FeatureObject = {
 }
 
 export type Details = {
-  flags: string[]
-  switches: { name: string, value: string }[]
+  switches: string[]
+  arguments: { name: string, value: string }[]
   options: {
     [name: string]: FeatureObject
   }
