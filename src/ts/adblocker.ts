@@ -1,5 +1,5 @@
 import { FiltersEngine, Request } from "@cliqz/adblocker";
-import fetch from "electron-fetch";
+import fetch, { RequestInfo, RequestInit } from "electron-fetch";
 import * as fs from "fs-extra";
 import * as pt from "path";
 import { config, control, userdataDirectory } from "./userdata";
@@ -14,16 +14,16 @@ const expirationValue = Number(control.options.adblock_cache_expiration?.value) 
 export async function setup() {
   try {
     engine = await FiltersEngine.fromPrebuiltAdsAndTracking(fetch, {
-      path: pt.join(userdataDirectory, 'engine.bin'),
+      path: pt.join(userdataDirectory, 'adblockercache.bin'),
       async read(path) {
         const result = await fs.readFile(path, 'utf-8');
         const expires = Number(result.split('\0')[0]);
-  
+
         const data = result.split('\0').slice(1).join('\0');
-  
+
         if (expires <= Date.now()) {
           console.log("Blocklist expired. Re-downloading");
-  
+
           throw "Blocklist expired";
         }
         return Buffer.from(data)
@@ -35,9 +35,10 @@ export async function setup() {
       }
     });
     isAdBlockerReady = true;
-    
-  } catch (_) {
+
+  } catch (err) {
     adBlockerError = true;
+    console.error("Adblocker failed to load correctly. (error: %o)", err);
   }
 }
 
@@ -61,7 +62,7 @@ export function matchRequest(info: Electron.OnBeforeRequestListenerDetails) {
 
   if (pageURL) {
     const { protocol, hostname } = $.URLParse(pageURL)
-  
+
     if (config.get().privacy.adblockerWhitelist.includes(protocol + hostname)) {
       return {}
     }

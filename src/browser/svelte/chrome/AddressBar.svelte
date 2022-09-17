@@ -267,13 +267,12 @@ import AdBlocker from "./popups/AdBlocker.svelte";
     }
   }
 
-  let adsDetected = false;
+  let abError = false;
   let abEnabled = false;
   $: {
     tab;
     void async function () {
-      const info = await ipcRenderer.invoke('getAdblockerInfo');
-      adsDetected = info.trackersBlocked > 0;
+      abError = (await ipcRenderer.invoke('getAdblockerStatus')).adBlockerError
       abEnabled = !$config?.privacy.adblockerWhitelist.includes(url.protocol + ':' + url.hostname);
     }()
   }
@@ -340,9 +339,9 @@ import AdBlocker from "./popups/AdBlocker.svelte";
     >
       <img
         class="tab-state"
-        src="n-res://{$colorTheme}/shield{abEnabled ? '-good' : '-bad'}.svg"
-        alt={abEnabled ? _.ADBLOCK_GOOD : _.ADBLOCK_BAD}
-        title={abEnabled ? _.ADBLOCK_GOOD : _.ADBLOCK_BAD}
+        src="n-res://{$colorTheme}/shield{(abEnabled && !abError) ? '-good' : '-bad'}.svg"
+        alt={(abEnabled && !abError) ? _.ADBLOCK_GOOD : _.ADBLOCK_BAD}
+        title={(abEnabled && !abError) ? _.ADBLOCK_GOOD : _.ADBLOCK_BAD}
       >
     </button>
   {/if}

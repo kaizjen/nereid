@@ -104,11 +104,11 @@
   <main>
     <div class="biginfo">
       <img
-        src="n-res://{$colorTheme}/shield{info.trackersBlocked == 0 ? '-neutral' : abEnabled ? '-good' : '-bad'}.svg"
+        src="n-res://{$colorTheme}/shield{isError ? '-bad' : (info.trackersBlocked == 0 ? '-neutral' : abEnabled ? '-good' : '-bad')}.svg"
         alt=""
       >
       <h2>
-        {info.trackersBlocked == 0 ? _.NEUTRAL : (abEnabled ? _.GOOD : _.BAD)}
+        {isError ? _.BAD : (info.trackersBlocked == 0 ? _.NEUTRAL : (abEnabled ? _.GOOD : _.BAD))}
       </h2>
     </div>
     {#if info.trackersBlocked?.length > 0}
