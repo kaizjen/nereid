@@ -42,10 +42,6 @@
     min-width: fit-content;
     filter: brightness(0.9);
   }
-  .del {
-    text-align: right;
-    margin-top: 10px;
-  }
   .add {
     display: flex;
     padding: 12px;
