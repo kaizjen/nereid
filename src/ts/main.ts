@@ -144,7 +144,12 @@ app.on('window-all-closed', (e: Event) => {
       {
         label: t('menu.common.newWindow'),
         click() {
-          newWindow([{ url: $.newTabUrl }])
+          newWindow(userData.lastlaunch.get().windows[0].map(data => {
+            return {
+              url: data.url,
+              initialFavicon: data.faviconURL
+            }
+          }))
           tray.destroy()
         }
       },
