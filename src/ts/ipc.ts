@@ -917,7 +917,7 @@ export function init() {
         userData: app.getPath('userData'),
         exe: app.getPath('exe'),
         appPath: app.getAppPath(),
-        cache: app.getPath('cache')
+        cache: app.getPath('sessionData')
       },
       name: app.getName(),
       versions: {

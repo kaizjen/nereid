@@ -17,7 +17,7 @@
   "dependencies": {
     "@cliqz/adblocker": "^1.25.0",
     "argv-parse": "^1.0.1",
-    "electron": "^19.0.8",
+    "electron": "^20.0.0",
     "electron-fetch": "^1.7.4",
     "fs-extra": "^10.0.1",
     "fuse.js": "^6.6.1",
