@@ -53,18 +53,6 @@ if (!global.isSafeMode) {
   })
 }
 
-/* for (const arg in argv) {
-  // enable runtime flags
-  if (!arg.startsWith('m:')) continue;
-
-  if (argv[arg] == true) {
-    config.extendFlags(arg)
-    
-  } else {
-    config.extendFlags({ switch: arg, value: argv[arg] })
-  }
-} */
-
 export function init() {
   if (argv.help) {
     console.log('(help)')
