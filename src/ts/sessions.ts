@@ -222,6 +222,18 @@ export function registerSession(ses: Session) {
     const { redirect, match } = matchRequest(details);
     if (redirect) return callback({ redirectURL: redirect });
     if (match) return callback({ cancel: true });
+
+    // faster redirects + tracking protections
+    const url = URLParse(details.url)
+    if (url.hostname.endsWith('google.com') && url.pathname.startsWith('/url')) {
+      let redirectURL = url.searchParams.get('url');
+      if (redirectURL) return callback({ redirectURL })
+    }
+    if (url.hostname.endsWith('youtube.com') && url.pathname.startsWith('/redirect')) {
+      let redirectURL = url.searchParams.get('q');
+      if (redirectURL) return callback({ redirectURL })
+    }
+
     return callback({ cancel: false })
   })
 
