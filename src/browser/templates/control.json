@@ -62,11 +62,12 @@
       "type": "bool",
       "description": "Allows sites to autoplay content without the user explicitly interacting with the autoplayable element. Nereid will still require the user to activate the document."
     },
-    "fake_permission_value_when_ask": {
-      "default": false,
-      "value": false,
-      "type": "bool",
-      "description": "Nereid has a limitation: it cannot return 'prompt' for permission checks. This setting describes what should it tell the site instead: true means allowed, false means denied"
+    "fake_permission_value_on_prompt": {
+      "default": 0,
+      "value": 0,
+      "type": "enum",
+      "elements": ["Deny", "Allow"],
+      "description": "Nereid has a limitation: it cannot return 'prompt' for permission checks. This setting describes what should it tell the site instead."
     },
     "adblock_cache_expiration": {
       "default": 2592000000,

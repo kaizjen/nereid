@@ -24,7 +24,7 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'n-internal', privileges: { standard: true } },
 ]);
 
-const fakeAskValueForPermCheck = !!control.options.fake_permission_value_when_ask?.value
+const fakeAskValueForPermCheck = control.options.fake_permission_value_on_prompt?.value == 1 // 1 is allow
 
 function nereidProtocol(req: Electron.ProtocolRequest, respond: (response: string | Electron.ProtocolResponse) => void) {
   let parsed = URLParse(req.url);
