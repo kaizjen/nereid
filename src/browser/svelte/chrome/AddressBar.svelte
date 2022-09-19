@@ -36,6 +36,7 @@
     border-radius: 4px;
     transition: 0.10s;
     cursor: default;
+    flex-shrink: 0;
   }
   .sec {
     width: 20px;
@@ -92,7 +93,7 @@
   import { getContext } from "svelte/internal"
   import ZoomPopup from "./popups/Zoom.svelte";
   import Bookmark from "./popups/Bookmark.svelte";
-import AdBlocker from "./popups/AdBlocker.svelte";
+  import AdBlocker from "./popups/AdBlocker.svelte";
 
   const { t } = window;
   const _ = {
