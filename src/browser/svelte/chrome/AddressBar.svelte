@@ -303,6 +303,7 @@
     on:blur={() => {
       window.requestAnimationFrame(() => {
         if (!document.activeElement.className.includes('h-link')) { isActive = false; setTop(false) }
+        inputRef.setSelectionRange(0, 0);
       })
     }}
     bind:this={inputRef}
