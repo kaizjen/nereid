@@ -40,7 +40,7 @@ a:active {
 }
 
 @media (prefers-color-scheme: light) {
-  input {
+  input, select {
     background: white;
   }
   button:focus, button:focus-visible {
