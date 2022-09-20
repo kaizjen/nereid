@@ -146,6 +146,15 @@
   let adblockerDialog = false;
   $: anyDialog = securityDialog || zoomDialog || bookmarkDialog || adblockerDialog;
 
+  document.body.addEventListener('keydown', ({ key }) => {
+    if (key.length > 1) return;
+    if (isActive) return;
+    if (!['nereid://private/', 'nereid://newtab/'].includes(tab?.url)) return;
+
+    inputValue += key;
+    activate();
+  })
+
   function hover(node) {
     node.addEventListener('mouseover', () => {
       abignore = true;
