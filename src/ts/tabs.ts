@@ -321,6 +321,7 @@ export function addTab(win: TabWindow, tab: BrowserView, opts: TabOptions) {
   } else {
     win.tabs.push(tab);
   }
+  console.trace('addTab called', opts)
   win.chrome.webContents.send('addTab', opts)
 
   updateSavedTabs()
@@ -461,9 +462,11 @@ export function attach(win: TabWindow, tab: Tab) {
       
       for (let prop in extendWindow) {
         window[prop] = extendWindow[prop]
-        }
+      }
     }());`;
-    frame.executeJavaScript(code);
+    frame.executeJavaScript(code).catch(err => {
+      console.log("Unable to execute content script in %o: %s", frame.url, err);
+    });
   })
   tab.webContents.on('did-start-loading', () => sendUpdate('status', true))
   tab.webContents.on('did-stop-loading', () => sendUpdate('status', false))

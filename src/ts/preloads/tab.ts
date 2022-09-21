@@ -166,16 +166,18 @@ expose('[NEREID]', {
   }
 })
 
-webFrame.executeJavaScript(`(function() {
-  let { extendNavigator, extendWindow } = window['[NEREID]'];
-  
-  for (let prop in extendNavigator) {
-    window.navigator[prop] = extendNavigator[prop]
-  }
-  
-  for (let prop in extendWindow) {
-    window[prop] = extendWindow[prop]
-  }
-  
-  delete window['[NEREID]']; // doesn't work anyway
-}());`)
+try {
+  webFrame.executeJavaScript(`(function() {
+    let { extendNavigator, extendWindow } = window['[NEREID]'];
+    
+    for (let prop in extendNavigator) {
+      window.navigator[prop] = extendNavigator[prop]
+    }
+    
+    for (let prop in extendWindow) {
+      window[prop] = extendWindow[prop]
+    }
+  }());`)
+} catch (error) {
+  // ignore
+}
