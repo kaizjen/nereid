@@ -340,7 +340,7 @@ export function init() {
         return 'data:image/png;base64,' + screenshot.toPNG().toString('base64')
       }
       case 'thumbnail': {
-        return tab.faviconURL;
+        return null;
       }
     
       default: return null
