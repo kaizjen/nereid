@@ -205,6 +205,11 @@
      * @param {DragEvent} e
      */
     return function (e) {
+      if (e.dataTransfer.getData('text/newTab')) {
+        console.log('dropped, new tab', e.dataTransfer.getData('text/tabUID'));
+        ipcRenderer.send('newTab', { position: id })
+        return;
+      }
       console.log('dropped, uid: %o', e.dataTransfer.getData('text/tabUID'));
       let movedUID = Number(e.dataTransfer.getData('text/tabUID') || NaN);
 
@@ -327,7 +332,12 @@
         </div>
       {/each}
       </div>
-      <button id="addtab" on:click={newTab}>
+      <button
+        id="addtab"
+        on:click={newTab}
+        draggable="true"
+        on:dragstart={e => e.dataTransfer.setData('text/newTab', true)}
+      >
         <img alt="" src="n-res://{$colorTheme}/plus.svg">
       </button>
     </div>

@@ -300,6 +300,8 @@ export function init() {
     let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
     if (!win) return;
 
+    if (!('url' in options)) options.url = $.newTabUrl
+
     tabManager.createTab(win, options);
   })
   ipcMain.on('selectTab', (e, id: number) => {
