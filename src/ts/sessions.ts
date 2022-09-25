@@ -233,6 +233,10 @@ export function registerSession(ses: Session) {
       let redirectURL = url.searchParams.get('q');
       if (redirectURL) return callback({ redirectURL })
     }
+    if (url.hostname == 'vk.com' && url.pathname.startsWith('/away.php')) {
+      let redirectURL = url.searchParams.get('to');
+      if (redirectURL) return callback({ redirectURL })
+    }
 
     return callback({ cancel: false })
   })
