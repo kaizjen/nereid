@@ -1,7 +1,6 @@
 <style>
   .dialog {
     right: 10px;
-    padding: 0;
   }
   main {
     padding: 12px;
@@ -36,9 +35,10 @@
 <script>
   const { ipcRenderer, sendInternal } = window.nereid;
 
-  import { getContext } from "svelte"
-  import { fly } from "svelte/transition"
-  import Button from "//lib/Button.svelte"
+  import { getContext } from "svelte";
+  import { fly } from "svelte/transition";
+  import { appear } from "//lib/transition.js";
+  import Button from "//lib/Button.svelte";
 
   const setTop = getContext('setTop');
   const colorTheme = getContext('colorTheme');
@@ -79,7 +79,6 @@
 
   function reload() {
     ipcRenderer.send('@tab', 'refresh');
-    setTop(false)
     open = false;
   }
 
@@ -100,7 +99,7 @@
     reload()
   }
 </script>
-<div class="dialog" in:fly={window.flyoutProperties}>
+<div class="dialog" in:appear={window.flyoutProperties} out:fly={window.flyoutProperties} on:outroend={() => setTop(false)}>
   <main>
     <div class="biginfo">
       <img
@@ -152,4 +151,4 @@
     Powered by Cliqz
   </footer>
 </div>
-<div class="blocker" on:click={() => {setTop(false); open = false}}></div>
+<div class="blocker" on:mousedown={() => open = false}></div>

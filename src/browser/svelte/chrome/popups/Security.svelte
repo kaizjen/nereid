@@ -52,7 +52,8 @@
   export let tab;
   const { ipcRenderer } = window.nereid
   import { getContext } from 'svelte/internal';
-  import { fly } from 'svelte/transition'
+  import { fly } from 'svelte/transition';
+  import { appear } from "//lib/transition.js";
   import Permission from './Security/Permission.svelte';
 
   const { t } = window;
@@ -116,43 +117,45 @@
   }
 </script>
 
-<div class="dialog" in:fly={window.flyoutProperties}>
-  <div class="info" class:secure={tab.security === true}>
-    <img src={
-      tab.security === true ? `n-res://${$colorTheme}/secure.svg` : 
-      tab.security == 'internal' ? `n-res://${$colorTheme}/nereid.svg` : 
-      tab.security == 'local' ? `n-res://${$colorTheme}/file.svg` :
-      `n-res://${$colorTheme}/insecure.svg`
-    } alt="">
-    <span>{
-      tab.security === true ? _.msg.SECURE : 
-      tab.security == 'internal' ? _.msg.INTERNAL : 
-      tab.security == 'local' ? _.msg.LOCAL :
-      _.msg.INSECURE
-    }</span>
-  </div>
-  {#if !['internal', 'local'].includes(tab.security)}
-    <div class="more_info">
-      { tab.security === true ? _.desc.SECURE : _.desc.INSECURE }
+<div class="dialog" in:appear={window.flyoutProperties} out:fly={window.flyoutProperties} on:outroend={() => setTop(false)}>
+  <div class="dialog-content">
+    <div class="info" class:secure={tab.security === true}>
+      <img src={
+        tab.security === true ? `n-res://${$colorTheme}/secure.svg` : 
+        tab.security == 'internal' ? `n-res://${$colorTheme}/nereid.svg` : 
+        tab.security == 'local' ? `n-res://${$colorTheme}/file.svg` :
+        `n-res://${$colorTheme}/insecure.svg`
+      } alt="">
+      <span>{
+        tab.security === true ? _.msg.SECURE : 
+        tab.security == 'internal' ? _.msg.INTERNAL : 
+        tab.security == 'local' ? _.msg.LOCAL :
+        _.msg.INSECURE
+      }</span>
     </div>
-    <div class="separator"></div>
-    {#if tab.security === true}
-      <button on:click={showCertificate}><img src="n-res://{$colorTheme}/certificate.svg" alt=""> {_.btn.CERT}</button>
-    {/if}
-    <button on:click={showCookies}><img src="n-res://{$colorTheme}/cookie.svg" alt=""> {_.btn.COOKIE}</button>
-    <button on:click={siteSettings}><img src="n-res://{$colorTheme}/sitesettings.svg" alt=""> {_.btn.SETTS}</button>
+    {#if !['internal', 'local'].includes(tab.security)}
+      <div class="more_info">
+        { tab.security === true ? _.desc.SECURE : _.desc.INSECURE }
+      </div>
+      <div class="separator"></div>
+      {#if tab.security === true}
+        <button on:click={showCertificate}><img src="n-res://{$colorTheme}/certificate.svg" alt=""> {_.btn.CERT}</button>
+      {/if}
+      <button on:click={showCookies}><img src="n-res://{$colorTheme}/cookie.svg" alt=""> {_.btn.COOKIE}</button>
+      <button on:click={siteSettings}><img src="n-res://{$colorTheme}/sitesettings.svg" alt=""> {_.btn.SETTS}</button>
 
-    {#if hostname in sitePermissions}
-      <h3 class="perm-title">{_.PERMISSIONS(hostname)}</h3>
-      {#each Object.keys(thisPermissions) as key}
-        <Permission name={key} value={thisPermissions[key]} on:change={({ detail }) => {
-          thisPermissions[key] = detail;
-          ipcRenderer.invoke('internal:userData', 'config:set', $config);
-          // TODO: make IPC shared by chrome and nereid:// pages
-        }} defaultValue={defaultPermissions[key]} />
-      {/each}
+      {#if hostname in sitePermissions}
+        <h3 class="perm-title">{_.PERMISSIONS(hostname)}</h3>
+        {#each Object.keys(thisPermissions) as key}
+          <Permission name={key} value={thisPermissions[key]} on:change={({ detail }) => {
+            thisPermissions[key] = detail;
+            ipcRenderer.invoke('internal:userData', 'config:set', $config);
+            // TODO: make IPC shared by chrome and nereid:// pages
+          }} defaultValue={defaultPermissions[key]} />
+        {/each}
+      {/if}
     {/if}
-  {/if}
+  </div>
 </div>
 
-<div class="blocker" on:click={() => {setTop(false); isOpen = false;}}></div>
+<div class="blocker" on:click={() => isOpen = false}></div>

@@ -26,7 +26,8 @@
 
   import { getContext } from "svelte/internal";
   const { ipcRenderer } = window.nereid;
-  import { fly } from 'svelte/transition'
+  import { fly } from 'svelte/transition';
+  import { appear } from "//lib/transition.js";
   import Button from "//lib/Button.svelte";
 
   const setTop = getContext('setTop')
@@ -38,22 +39,23 @@
   
 </script>
 
-<div class="dialog" in:fly={window.flyoutProperties}>
-  <div class="title">
-    <img
-      style="margin-right: 8px;"
-      src="n-res://{$colorTheme}/zoom{level - $config?.ui.defaultZoomFactor > 0 ? 'in' : 'out'}.svg"
-      alt={_.ALT({ zoom: Math.round(level * 100) })}
-    >
-    <b> {_.INFO({ zoom: Math.round(level * 100) })} </b>
+<div class="dialog" in:appear={window.flyoutProperties} out:fly={window.flyoutProperties} on:outroend={() => setTop(false)}>
+  <div class="dialog-content">
+    <div class="title">
+      <img
+        style="margin-right: 8px;"
+        src="n-res://{$colorTheme}/zoom{level - $config?.ui.defaultZoomFactor > 0 ? 'in' : 'out'}.svg"
+        alt={_.ALT({ zoom: Math.round(level * 100) })}
+      >
+      <b> {_.INFO({ zoom: Math.round(level * 100) })} </b>
+    </div>
+    <Button on:click={() => {
+      ipcRenderer.send('@tab', 'setZoom', $config?.ui.defaultZoomFactor);
+      open = false;
+    }}>
+      {_.RESET}
+    </Button>
   </div>
-  <Button on:click={() => {
-    ipcRenderer.send('@tab', 'setZoom', $config?.ui.defaultZoomFactor);
-    setTop(false);
-    open = false;
-  }}>
-    {_.RESET}
-  </Button>
 </div>
 
-<div class="blocker" on:click={() => {setTop(false); open = false}}></div>
+<div class="blocker" on:click={() => open = false}></div>

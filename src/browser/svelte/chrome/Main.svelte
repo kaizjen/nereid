@@ -57,8 +57,8 @@
     };
   })()
 
-  function getScale() {
-    return window.outerWidth / visualViewport.width
+  function easeOutExpo(base = 2) {
+    return t => t === 1.0 ? t : 1.0 - Math.pow(base, -10.0 * t)
   }
 
   setContext('URLParse', URLParse)
@@ -83,7 +83,7 @@
     $colorTheme = m.matches ? 'dark' : 'light';
   })
 
-  window.flyoutProperties = { y: 4, duration: 100, opacity: 0.8 };
+  window.flyoutProperties = { y: -4, duration: 200, easing: easeOutExpo(3), opacity: 0 };
 
   requestAnimationFrame(() => {
     ipcRenderer.send('chrome:setHeight', document.body.getBoundingClientRect().height)

@@ -44,10 +44,11 @@
   }
 </style>
 <script>
-  const { ipcRenderer, sendInternal } = window.nereid
-  import { getContext } from "svelte"
-  import { fly } from "svelte/transition"
-  import Button from "//lib/Button.svelte"
+  const { ipcRenderer, sendInternal } = window.nereid;
+  import { getContext } from "svelte";
+  import { fly } from "svelte/transition";
+  import { appear } from "//lib/transition.js";
+  import Button from "//lib/Button.svelte";
 
   const setTop = getContext('setTop');
   const colorTheme = getContext('colorTheme');
@@ -124,34 +125,36 @@
     sendInternal('userData', 'bookmarks:setFolder', { folder: folderName, value: folder })
   }
 </script>
-<div class="dialog" in:fly={window.flyoutProperties}>
-  <div class="preview-container">
-    <img class="preview" src={previewSrc} alt="">
-  </div>
-  <div>
-    <input class="input" type="text" bind:value={bookmarkTitle}>
-  </div>
-  <b>{_.BMS_LIST}</b>
-  {#each Object.keys(bookmarks) as folderName}
-    {@const folder = bookmarks[folderName]}
-    <button
-      class="folder"
-      on:click={addOrRemoveF(folderName)}
-      title={folder.find(v => compareURLs(v.url, bookmarkURL)) ? _.REMOVE_FROM_FOLDER : _.ADD_TO_FOLDER}
-    >
-      <img
-        src="n-res://{$colorTheme}/{folder.find(v => compareURLs(v.url, bookmarkURL)) ? 'cross' : 'plus'}.svg"
-        alt={folder.find(v => compareURLs(v.url, bookmarkURL)) ? _.REMOVE_FROM_FOLDER : _.ADD_TO_FOLDER}
+<div class="dialog" in:appear={window.flyoutProperties} out:fly={window.flyoutProperties} on:outroend={() => setTop(false)}>
+  <div class="dialog-content">
+    <div class="preview-container">
+      <img class="preview" src={previewSrc} alt="">
+    </div>
+    <div>
+      <input class="input" type="text" bind:value={bookmarkTitle}>
+    </div>
+    <b>{_.BMS_LIST}</b>
+    {#each Object.keys(bookmarks) as folderName}
+      {@const folder = bookmarks[folderName]}
+      <button
+        class="folder"
+        on:click={addOrRemoveF(folderName)}
+        title={folder.find(v => compareURLs(v.url, bookmarkURL)) ? _.REMOVE_FROM_FOLDER : _.ADD_TO_FOLDER}
       >
-      <span>{getFolderName(folderName)}</span>
-    </button>
-  {:else}
-    :(
-  {/each}
-  <div class="footer">
-    <Button on:click={() => {setTop(false); open = false}}>
-      {_.DONE}
-    </Button>
+        <img
+          src="n-res://{$colorTheme}/{folder.find(v => compareURLs(v.url, bookmarkURL)) ? 'cross' : 'plus'}.svg"
+          alt={folder.find(v => compareURLs(v.url, bookmarkURL)) ? _.REMOVE_FROM_FOLDER : _.ADD_TO_FOLDER}
+        >
+        <span>{getFolderName(folderName)}</span>
+      </button>
+    {:else}
+      :(
+    {/each}
+    <div class="footer">
+      <Button on:click={() => {open = false}}>
+        {_.DONE}
+      </Button>
+    </div>
   </div>
 </div>
-<div class="blocker" on:click={() => {setTop(false); open = false}}></div>
+<div class="blocker" on:click={() => {open = false}}></div>
