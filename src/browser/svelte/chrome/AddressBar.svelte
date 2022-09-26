@@ -208,7 +208,7 @@
   function handleKeyUp(e) {
     switch (e.key) {
       case 'Enter': {
-        if (selectedHint == -1) {
+        if (hints[selectedHint]) {
           setTop(false);
           ipcRenderer.send('@tab', 'go', inputValue)
           
