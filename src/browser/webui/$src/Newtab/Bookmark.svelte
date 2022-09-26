@@ -6,6 +6,7 @@
     align-items: center;
     color: white;
     text-decoration: none;
+    width: 5cm;
   }
   @media (prefers-color-scheme: light) {
     .bookmark {
@@ -15,7 +16,7 @@
   }
   .thumbnail {
     background: #00000031;
-    width: 5cm;
+    width: 100%;
     height: 3cm;
     display: flex;
     justify-content: center;
