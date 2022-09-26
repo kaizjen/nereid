@@ -283,7 +283,7 @@
     tab;
     void async function () {
       abError = (await ipcRenderer.invoke('getAdblockerStatus')).adBlockerError
-      abEnabled = !$config?.privacy.adblockerWhitelist.includes(url.protocol + ':' + url.hostname);
+      abEnabled = !$config?.privacy.adblockerWhitelist.includes(url.protocol + url.hostname);
     }()
   }
 </script>
