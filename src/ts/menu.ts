@@ -34,6 +34,16 @@ async function exists(path: string) {
   }
 }
 
+function toggleDevTools(wc: Electron.WebContents) {
+  if (wc.isDevToolsOpened()) {
+    wc.closeDevTools();
+
+  } else {
+    // TODO: remebmer the last state of DevTools, instead of forcing 'bottom'. How do we get the state though?
+    wc.openDevTools({ mode: 'bottom' })
+  }
+}
+
 const SEPARATOR: Electron.MenuItemConstructorOptions = {
   type: 'separator'
 }
@@ -280,7 +290,7 @@ export const appMenu = Menu.buildFromTemplate([
         accelerator: 'F12',
         click(_, win) {
           let wc = obtainWebContents(win)
-          wc.toggleDevTools()
+          toggleDevTools(wc)
         },
         visible: false
       },
@@ -395,7 +405,7 @@ export const appMenu = Menu.buildFromTemplate([
         accelerator: 'CmdOrCtrl+Shift+I',
         click(_, win) {
           let wc = obtainWebContents(win)
-          wc.toggleDevTools()
+          toggleDevTools(wc);
         }
       },
 
@@ -708,7 +718,7 @@ export async function showContextMenu(win: TabWindow | false, tab: Tab, opts: El
   }, accelerator: 'Ctrl+Shift+P' })
   addItem(SEPARATOR)
   addItem({ label: $t('viewSourceCode'), click() { createContextTab({ url: `view-source:${tab.webContents.getURL()}` }) } })
-  addItem({ label: $t('openDevTools'), click() { tab.webContents.openDevTools() }, accelerator: 'Ctrl+Shift+I' })
+  addItem({ label: $t('openDevTools'), click() { toggleDevTools(tab.webContents) }, accelerator: 'Ctrl+Shift+I' })
 
   menu.popup()
 }
