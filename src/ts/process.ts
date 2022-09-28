@@ -1,12 +1,13 @@
 // Manages command-line arguments and second instances
 
 import * as _argvParse from "argv-parse";
-import { control } from "./userdata";
+import * as userData from "./userdata";
 import { app } from 'electron'
 import { getTabWindowByID, newWindow } from './windows'
 import { createTab } from './tabs'
 import * as pathModule from 'path'
 import $ from './vars'
+import { TabOptions } from "./types";
 
 type Spec = {
   [key: string]: {
@@ -45,10 +46,10 @@ const argv = argvParse({
 })
 
 if (!global.isSafeMode) {
-  control.switches.forEach((f) => {
+  userData.control.switches.forEach((f) => {
     app.commandLine.appendArgument(f)
   })
-  control.arguments.forEach(({ name, value }) => {
+  userData.control.arguments.forEach(({ name, value }) => {
     app.commandLine.appendSwitch(name, value)
   })
 }
@@ -57,26 +58,62 @@ export function init() {
   if (argv.help) {
     console.log('(help)')
   }
+  let lastTabs: TabOptions[] = [];
 
-  function actArgv(argv: ReturnType<ArgvParse>, workingDir: string, shouldOpenWindow?: boolean) {
+  let { onStart } = userData.config.get().behaviour;
+  let { windows } = userData.lastlaunch.get()
+  if (windows.length > 0 && windows[0].length > 0 && onStart.type == 'last-tabs') {
+    windows.forEach(tabs => {
+      lastTabs = tabs
+        .filter(t => t.title && t.url) // sometimes the title and url are empty strings; TODO: fix that somehow
+        .map((t, i) => {
+          return {
+            url: t.url,
+            background: i != 0, // only select the first tab
+            initialFavicon: t.faviconURL
+          }
+        });
+      if (lastTabs.length < 1) lastTabs = [{ url: $.newTabUrl }];
+    })
+
+  }
+
+  function actArgv(argv: ReturnType<ArgvParse>, workingDir: string, isAlreadyLaunched?: boolean) {
     if (argv._?.[0]) {
-      let win = getTabWindowByID(0);
+      // Has an argument
       let urlOrPath = argv._?.[0];
       let url: string;
       if (urlOrPath.startsWith('http:') || urlOrPath.startsWith('https:') || urlOrPath.startsWith('nereid:') || urlOrPath.startsWith('ftp:')) {
         url = argv._[0]
-        
+
       } else {
+        // Not a URL, must be a file path
         url = 'file:///' + pathModule.resolve(workingDir, urlOrPath).replaceAll('\\', '/')
       }
-      if (argv['new-window']) {
+      if (!isAlreadyLaunched) {
+        // First time launching, an argument with a url.
+        newWindow([...lastTabs, { url, private: argv.private }])
+
+      } else if (argv['new-window']) {
+        // Second instance, --new-window
         newWindow([{ url, private: argv.private }])
+
       } else {
+        let win = getTabWindowByID(0);
         createTab(win, { url, private: argv.private })
       }
 
-    } else if (shouldOpenWindow) {
-      newWindow([{ url: $.newTabUrl }])
+    } else if (!isAlreadyLaunched) {
+      // This is the first launch, no arguments.
+      if (onStart.type == 'page') {
+        newWindow([ { url: onStart.url } ])
+
+      } else if (onStart.type == 'new-tab') {
+        newWindow([ { url: $.newTabUrl } ])
+
+      } else {
+        newWindow(lastTabs);
+      }
     }
   }
 

@@ -81,35 +81,10 @@ app.on('ready', () => {
     newWindow([ { url: 'nereid://welcome' } ])
 
   } else {
-    let { onStart } = userData.config.get().behaviour;
-    let { windows } = userData.lastlaunch.get()
-  
-    if (windows.length > 0 && windows[0].length > 0 && onStart.type == 'last-tabs') {
-      windows.forEach(tabs => {
-        let allOptions: TabOptions[] = tabs
-          .filter(t => t.title && t.url) // sometimes the title and url are empty strings; TODO: fix that somehow
-          .map((t, i) => {
-            return {
-              url: t.url,
-              background: i != 0, // only select the first tab
-              initialFavicon: t.faviconURL
-            }
-          });
-        if (allOptions.length < 1) allOptions = [{ url: $.newTabUrl }]
-  
-        newWindow(allOptions);
-      })
-  
-    } else if (onStart.type == 'page') {
-      newWindow([ { url: onStart.url } ])
-  
-    } else {
-      newWindow([ { url: $.newTabUrl } ])
-    }
+    thisProcess.init()
   }
-
+  
   userData.lastlaunch.set({ launchFailed: false, exitedSafely: false })
-  thisProcess.init()
   global.isStarting = false;
 
   console.log('Starting adblock...')
