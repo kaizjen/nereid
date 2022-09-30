@@ -724,7 +724,6 @@ export async function showContextMenu(win: TabWindow | false, tab: Tab, opts: El
 }
 
 export function menuOfTab(win: TabWindow, tab: Tab) {
-
   function createContextTab(opts: TabOptions) {
     return createTab(win, Object.assign({
       private: tab.private,
@@ -741,14 +740,14 @@ export function menuOfTab(win: TabWindow, tab: Tab) {
     return t(`menu.tabMenu.${str}`, obj)
   }
 
-  addItem({ label: $t('create-newTab'), accelerator: 'CmdOrCtrl+T', click() {
+  addItem({ label: $t('createNewTab'), accelerator: 'CmdOrCtrl+T', click() {
     createContextTab({
       private: false,
       url: $.newTabUrl
     })
   } })
-  addItem({ label: $t('create-newPrivateTab'), accelerator: 'CmdOrCtrl+P', click() {
-    createContextTab({ url: $.newTabUrl, private: true })
+  addItem({ label: $t('createNewPrivateTab'), accelerator: 'CmdOrCtrl+P', click() {
+    createContextTab({ url: 'nereid://private', private: true })
   } })
   addItem(SEPARATOR)
   addItem({ label: t('navigation.reload'), click() { tab.webContents.reload() } })
@@ -816,6 +815,29 @@ export function menuOfTab(win: TabWindow, tab: Tab) {
   })
 
   menu.popup()
+}
+
+export function menuNewTab(win: TabWindow) {
+  function $t(str: string, obj?: {}) {
+    return t(`menu.tabMenu.${str}`, obj)
+  }
+
+  Menu.buildFromTemplate([
+    {
+      label: $t('createNewTab'),
+      accelerator: 'CmdOrCtrl+T',
+      click() {
+        createTab(win, { url: $.newTabUrl })
+      }
+    },
+    {
+      label: $t('createNewPrivateTab'),
+      accelerator: 'CmdOrCtrl+P',
+      click() {
+        createTab(win, { url: 'nereid://private', private: true })
+      }
+    },
+  ]).popup()
 }
 
 export function menuOfBookmark(win: TabWindow, bookmark: Bookmark, index: number) {

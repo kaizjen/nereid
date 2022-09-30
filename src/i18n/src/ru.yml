@@ -361,8 +361,8 @@ menu:
       reload: Перезагрузить фрейм
       viewSourceCode: Посмотреть исходный код фрейма
   tabMenu:
-    create-newTab: Создать новую вкладку
-    create-newPrivateTab: Создать новую приватную вкладку
+    createNewTab: Создать новую вкладку
+    createNewPrivateTab: Создать новую приватную вкладку
     reloadAll: Перезагрузить все вкладки
     copyURL: Скопировать URL
     duplicate: Дублировать вкладку

@@ -361,8 +361,8 @@ menu:
       reload: Reload frame
       viewSourceCode: View frame's source code
   tabMenu:
-    create-newTab: Create new tab
-    create-newPrivateTab: Create new private tab
+    createNewTab: Create new tab
+    createNewPrivateTab: Create new private tab
     reloadAll: Reload all tabs
     copyURL: Copy URL
     duplicate: Duplicate tab

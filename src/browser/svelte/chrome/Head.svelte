@@ -161,6 +161,7 @@
   }
 
   const colorTheme = getContext('colorTheme')
+  const URLParse = getContext('URLParse')
 
   const isOnMac = process.platform == 'darwin';
   const isOnLinux = process.platform == 'linux';
@@ -301,7 +302,13 @@
           on:auxclick={handleClickF(id)}
           in:tab_anim={{ x: -50, y: 0, duration: 120 }}
           out:tab_anim={{ x: -50, y: 0, duration: 120 }}
-          title={tab.title}
+          title={
+            tab.private ? '' : (
+              tab.title +
+              `\n• ${URLParse(tab.url).hostname}` +
+              (tab.isMuted ? '\n• ' + _.MUTED : (tab.isPlaying ? '\n• ' + _.AUDIBLE : ''))
+            )
+          }
           role="tab"
         >
           {#if tab.private && !(id == currentTab)}
@@ -335,6 +342,7 @@
       <button
         id="addtab"
         on:click={newTab}
+        on:auxclick={() => ipcRenderer.send('chrome:menu-newTab')}
         draggable="true"
         on:dragstart={e => e.dataTransfer.setData('text/newTab', true)}
       >

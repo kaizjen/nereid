@@ -321,7 +321,6 @@ export function addTab(win: TabWindow, tab: BrowserView, opts: TabOptions) {
   } else {
     win.tabs.push(tab);
   }
-  console.trace('addTab called', opts)
   win.chrome.webContents.send('addTab', opts)
 
   updateSavedTabs()

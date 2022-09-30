@@ -8,7 +8,7 @@ import type { TabWindow, TabOptions, Configuration, Tab } from "./types"
 import $ from "./vars";
 import * as tabManager from './tabs'
 import * as _url from "url";
-import { appMenu, displayOptions, menuOfBookmark, menuOfTab } from "./menu";
+import { appMenu, displayOptions, menuNewTab, menuOfBookmark, menuOfTab } from "./menu";
 import { getTabWindowByID, isTabWindow, newDialogWindow, setCurrentTabBounds } from "./windows";
 import type TypeFuse from "fuse.js";
 import { certificateCache, DEFAULT_PARTITION, NO_CACHE_PARTITION } from "./sessions";
@@ -242,6 +242,12 @@ export function init() {
     if (!tab) throw(new Error("ipcManager: no tab found in window"))
 
     menuOfTab(win, tab)
+  })
+  ipcMain.on('chrome:menu-newTab', (e) => {
+    let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
+    if (!win) return;
+
+    menuNewTab(win)
   })
   ipcMain.on('chrome:menu-of-bookmark', (e, bookmark, index: number) => {
     let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
