@@ -6,7 +6,7 @@
     theme: "dark",
     defaultZoomFactor: 1,
     chromeZoomFactor: 0.9,
-    showBookmarks: false,
+    showBookmarks: 'newtab',
     backgroundImage: "${userdata}/background_images/${theme}/${size}/"
   },
   search: {

@@ -83,8 +83,14 @@
       ipcRenderer.send('chrome:menu-of-bookmark', bookmark, i)
     }
   }
+
+  let shouldShowBookmarks;
+  $: shouldShowBookmarks = (
+    $config?.ui.showBookmarks == 'all' ||
+    ($config?.ui.showBookmarks == 'newtab' && pageURL?.startsWith('nereid://newtab'))
+  )
 </script>
-{#if $config?.ui.showBookmarks && !['nereid://bookmarks', 'nereid://bookmarks/'].includes(pageURL)}
+{#if shouldShowBookmarks}
   <div class="dropdown-box">
     <div class="bar">
       {#each bookmarks as bm, i}

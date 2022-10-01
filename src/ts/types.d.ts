@@ -92,7 +92,7 @@ export interface Configuration {
     theme: 'light' | 'dark' | 'system'
     defaultZoomFactor: number
     chromeZoomFactor: number
-    showBookmarks: boolean
+    showBookmarks: 'newtab' | 'all' | 'none'
     backgroundImage: string
   }
   search: {

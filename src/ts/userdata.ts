@@ -169,7 +169,7 @@ try {
       theme: ['"light"', '"dark"', '"system"'],
       defaultZoomFactor: 'realnumber',
       chromeZoomFactor: 'realnumber',
-      showBookmarks: 'boolean',
+      showBookmarks: ['"newtab"', '"all"', '"none"'],
       backgroundImage: 'string'
     },
     search: {
