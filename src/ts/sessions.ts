@@ -312,7 +312,20 @@ export function registerSession(ses: Session) {
 
     let dSavePath = config.get().behaviour.downloadPath;
     if (dSavePath) {
-      item.setSavePath(pathModule.join(dSavePath, item.getFilename()))
+      const realPath = pathModule.join(dSavePath, item.getFilename());
+      const ext = pathModule.extname(realPath)
+      let number = 0;
+      let path = realPath;
+
+      function checkPath() {
+        if (fs.existsSync(path)) {
+          number++;
+          path = realPath.slice(0, -ext.length) + ` (${number})` + ext;
+          checkPath()
+        }
+      }
+      checkPath()
+      item.setSavePath(path)
 
     } else {
       item.setSaveDialogOptions({
