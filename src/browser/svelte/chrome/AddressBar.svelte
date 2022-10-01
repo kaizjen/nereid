@@ -46,6 +46,7 @@
   }
   .tab-state:hover {
     background: var(--button-hover);
+    transition: 0s;
   }
   .tab-state:active {
     background: var(--button-active);
