@@ -2,7 +2,6 @@
   .dialog {
     top: 110%;
     right: 0;
-    overflow: hidden;
     cursor: default;
   }
   h3 {
@@ -27,42 +26,8 @@
     padding: 4px;
     overflow: hidden;
   }
-
-  .dl-buttons {
-    margin-left: 16px;
-    display: flex;
-  }
-  .mini-btn {
-    padding: 14px;
-    width: 15px;
-    height: 15px;
-    overflow: hidden;
-    display: inline-flex;
-    border-radius: 50%;
-    align-items: center;
-    justify-content: center;
-    transition: 0.15s;
-  }
-  .mini-btn:hover {
-    background: #ffffff59;
-    transition: 0s;
-  }
-  .mini-btn:active {
-    background: #ffffff94;
-    transition: .15s;
-  }
-  .mini-btn > img {
-    width: inherit;
-    height: inherit;
-  }
-  .url {
+  .download span {
     white-space: nowrap;
-    text-overflow: ellipsis;
-    color: var(--trivial-text);
-  }
-  .more-info {
-    font-size: small;
-    color: var(--trivial-text);
   }
   .btn-container {
     display: flex;

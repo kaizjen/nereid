@@ -11,6 +11,9 @@
     padding: 4px;
     overflow: hidden;
   }
+  .download b {
+    white-space: nowrap;
+  }
 
   .file-image {
     padding-inline: 4px;
@@ -24,42 +27,6 @@
   }
   .open-file:active {
     opacity: 0.6;
-  }
-  .dl-buttons {
-    margin-left: 16px;
-    display: flex;
-  }
-  .mini-btn {
-    padding: 14px;
-    width: 15px;
-    height: 15px;
-    overflow: hidden;
-    display: inline-flex;
-    border-radius: 50%;
-    align-items: center;
-    justify-content: center;
-    transition: 0.15s;
-  }
-  .mini-btn:hover {
-    background: #ffffff59;
-    transition: 0s;
-  }
-  .mini-btn:active {
-    background: #ffffff94;
-    transition: .15s;
-  }
-  .mini-btn > img {
-    width: inherit;
-    height: inherit;
-  }
-  .url {
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    color: var(--trivial-text);
-  }
-  .more-info {
-    font-size: small;
-    color: var(--trivial-text);
   }
 </style>
 
@@ -103,9 +70,16 @@
     <img src={image} alt="">
   </div>
   <div class="download">
-    <b class="open-file" on:click={openFile}>
-      {basename(download.savePath)}
-    </b><br>
+    {#if download.status == 'completed'}
+      <b class="open-file" on:click={openFile}>
+        {basename(download.savePath)}
+      </b>
+    {:else}
+      <b>
+        {basename(download.savePath)}
+      </b>
+    {/if}
+    <br>
     <span class="url">{download.url}</span><br>
     <span class="more-info"> {download.status == 'completed' ? _.status.COMPLETED : _.status.INTERRUPTED} </span>
   </div>

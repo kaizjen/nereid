@@ -83,6 +83,42 @@
       padding: 12px;
     }
 
+    .dl-buttons {
+      margin-left: 16px;
+      display: flex;
+    }
+    .mini-btn {
+      padding: 14px;
+      width: 15px;
+      height: 15px;
+      overflow: hidden;
+      display: inline-flex;
+      border-radius: 4px;
+      align-items: center;
+      justify-content: center;
+      transition: 0.1s;
+    }
+    .mini-btn:hover {
+      background: var(--button-hover);
+      transition: 0s;
+    }
+    .mini-btn:active {
+      background: var(--button-active);
+    }
+    .mini-btn > img {
+      width: inherit;
+      height: inherit;
+    }
+    .url {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      color: var(--trivial-text);
+    }
+    .more-info {
+      font-size: small;
+      color: var(--trivial-text);
+    }
+
     input.input {
       display: block;
       background: transparent;
