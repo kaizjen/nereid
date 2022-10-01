@@ -1,5 +1,5 @@
 <style>
-  div {
+  .tools {
     background: var(--active-background);
     padding: 8px;
     display: flex;
@@ -13,12 +13,22 @@
   .disabled {
     opacity: 0.5;
   }
-  .tool:hover {
-    background: var(--tool-hover) !important;
-    transition: 0s;
+  .progressbar-container {
+    position: relative;
   }
-  .tool:active {
-    background: var(--tool-active) !important;
+  .progress-bar {
+    position: absolute;
+    bottom: 0;
+    margin-bottom: 2px;
+    background: #3b3b3b70;
+    width: 80%;
+    height: 3px;
+    overflow: hidden;
+    border-radius: 2px;
+  }
+  .progress {
+    background: var(--accent-color);
+    height: 100%;
   }
   .nav.disabled:hover {
     background: transparent;
@@ -73,17 +83,21 @@
   }
 </script>
 
-<div class:private={tab.private}>
+<div class="tools" class:private={tab.private}>
   <button class="tool nav" class:disabled={!tab.nav?.canGoBack} on:click={navBack}><img alt={_.BACK} src="n-res://{$colorTheme}/arrow.svg" class="rotated"></button>
   <button class="tool nav" class:disabled={!tab.nav?.canGoFwd} on:click={navFwd}><img alt={_.FWD} src="n-res://{$colorTheme}/arrow.svg"></button>
   <button class="tool nav" on:click={refresh}><img alt={tab.isLoading ? _.STOPLOAD : _.REFRESHLOAD} src={tab.isLoading ? `n-res://${$colorTheme}/cross.svg` : `n-res://${$colorTheme}/redo.svg`}></button>
   <AddressBar {tab} />
   <button
-    class="tool"
-    style="background: linear-gradient(to right, #23db646b {downloadPercent}%, transparent 0%);"
+    class="tool progressbar-container"
     on:click={() => downloadsDialog = !downloadsDialog}
   >
     <img src="n-res://{$colorTheme}/downloads.svg" alt={_.DOWNLOADS}>
+    {#if downloadInfo}
+      <div class="progress-bar">
+        <div class="progress" style="width: {downloadPercent}%;" />
+      </div>
+    {/if}
   </button>
   <button class="tool" on:click={(e) => {
     let { bottom, left } = e.currentTarget.getBoundingClientRect()
