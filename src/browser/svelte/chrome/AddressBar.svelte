@@ -9,11 +9,12 @@
     -webkit-app-region: no-drag;
     margin-left: 6px;
     margin-right: 6px;
-    box-shadow: 0px 0px 0px 1px #ffffff5c;
+    box-shadow: 0px 0px 0px 1px #ffffff3d;
     padding-right: 2px;
   }
   #addressbar:hover {
     box-shadow: none;
+    transition: 0s;
   }
   #addressbar.focus {
     outline: none;
