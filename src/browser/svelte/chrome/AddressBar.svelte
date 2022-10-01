@@ -9,8 +9,10 @@
     -webkit-app-region: no-drag;
     margin-left: 6px;
     margin-right: 6px;
-    box-shadow: 0px 0px 0px 1px #ffffff3d;
     padding-right: 2px;
+  }
+  #addressbar:not(.noborder) {
+    box-shadow: 0px 0px 0px 1px #ffffff3d;
   }
   #addressbar:hover {
     box-shadow: none;
@@ -20,7 +22,7 @@
     outline: none;
     box-shadow: 0px 0px 0px 2px var(--accent-color);
   }
-  #addressbar:not(.abignore):hover {
+  #addressbar:not(.noborder):hover {
     background: #00000026;
   }
   #addressbar.focus:hover {
@@ -44,7 +46,7 @@
     height: 15px;
     padding: 8px;
   }
-  .tab-state:hover {
+  .tab-state:hover, .tab-state.open {
     background: var(--button-hover);
     transition: 0s;
   }
@@ -133,7 +135,7 @@
   let inputValue = '';
   let hints = [];
   let inputRef; // before it is referenced, initialize as a dummy object
-  let abignore = false;
+  let noBorder = false;
 
   let config = getContext('config');
   let bookmarks = getContext('bookmarks');
@@ -159,10 +161,10 @@
 
   function hover(node) {
     node.addEventListener('mouseover', () => {
-      abignore = true;
+      noBorder = true;
     })
     node.addEventListener('mouseout', () => {
-      abignore = false;
+      noBorder = false;
     })
   }
 
@@ -289,7 +291,7 @@
     }()
   }
 </script>
-<div class:abignore id="addressbar" class:focus={isActive}>
+<div class:noborder={anyDialog || noBorder} id="addressbar" class:focus={isActive}>
   <button use:hover on:click={() => securityDialog = !securityDialog} class="ab-btn">
     <img alt={_.SECURITY} class="tab-state sec"
       src={
@@ -298,6 +300,7 @@
         tab.security == 'local' ? `n-res://${$colorTheme}/file.svg` :
         `n-res://${$colorTheme}/insecure.svg`
       }
+      class:open={securityDialog}
     >
   </button>
   <button id="ab-txt"
@@ -341,6 +344,7 @@
         src="n-res://{$colorTheme}/zoom{$globalZoom - $config?.ui.defaultZoomFactor > 0 ? 'in' : 'out'}.svg"
         alt={_.ALT_ZOOM({ zoom: Math.round($globalZoom * 100) })}
         title={_.ALT_ZOOM({ zoom: Math.round($globalZoom * 100) })}
+        class:open={zoomDialog}
       >
     </button>
   {/if}
@@ -355,6 +359,7 @@
         src="n-res://{$colorTheme}/shield{(abEnabled && !abError) ? '-good' : '-bad'}.svg"
         alt={(abEnabled && !abError) ? _.ADBLOCK_GOOD : _.ADBLOCK_BAD}
         title={(abEnabled && !abError) ? _.ADBLOCK_GOOD : _.ADBLOCK_BAD}
+        class:open={adblockerDialog}
       >
     </button>
   {/if}
@@ -368,6 +373,7 @@
       src="n-res://{$colorTheme}/bookmark{isInBookmarks ? '-selected' : ''}.svg"
       alt={isInBookmarks ? _.BOOKMARK_ADD_OR_RM : _.BOOKMARK_ADD}
       title={isInBookmarks ? _.BOOKMARK_ADD_OR_RM : _.BOOKMARK_ADD}
+      class:open={bookmarkDialog}
     >
   </button>
 </div>
