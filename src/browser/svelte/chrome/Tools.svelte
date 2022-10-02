@@ -90,6 +90,7 @@
   <AddressBar {tab} />
   <button
     class="tool progressbar-container"
+    class:open={downloadsDialog}
     on:click={() => downloadsDialog = !downloadsDialog}
   >
     <img src="n-res://{$colorTheme}/downloads.svg" alt={_.DOWNLOADS}>
