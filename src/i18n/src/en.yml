@@ -416,7 +416,10 @@ pages:
       theme-dark: Dark
       theme-light: Light
       theme-system: Same as system
-      bookmarkBar: Show bookmarks panel
+      bookmarkBar: Show bookmark bar
+      bookmarkBar-always: Always
+      bookmarkBar-newtab: Only on new tabs
+      bookmarkBar-never: Never
       pageZoom: "Default page zoom:"
       uiZoom: "Nereid's UI zoom:"
     privacy:

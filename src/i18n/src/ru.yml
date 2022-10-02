@@ -415,6 +415,9 @@ pages:
       theme-light: Светлая
       theme-system: Системная
       bookmarkBar: Показывать панель закладок
+      bookmarkBar-always: Всегда
+      bookmarkBar-newtab: Только на новой вкладке
+      bookmarkBar-never: Никогда
       pageZoom: "Масштаб страниц по умолчанию:"
       uiZoom: "Масштаб интерфейса Nereid:"
     privacy:

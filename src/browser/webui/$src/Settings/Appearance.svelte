@@ -76,9 +76,15 @@
   />
 </div>
 <div class="s-option">
-  <Checkbox
-    bind:checked={bookmarkBar}
-  > {t('pages.settings.appearance.bookmarkBar')} </Checkbox>
+  <TextBlock> {t('pages.settings.appearance.bookmarkBar')} </TextBlock>
+  <ComboBox
+    items={[
+      { name: t('pages.settings.appearance.bookmarkBar-always'), value: 'all' },
+      { name: t('pages.settings.appearance.bookmarkBar-newtab'), value: 'newtab' },
+      { name: t('pages.settings.appearance.bookmarkBar-never'), value: 'none' },
+    ]}
+    bind:value={bookmarkBar}
+  />
 </div>
 <div class="s-option">
   <TextBlock style="width: 30%"> {t('pages.settings.appearance.pageZoom')} </TextBlock>
