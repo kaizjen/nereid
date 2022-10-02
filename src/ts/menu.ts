@@ -44,6 +44,10 @@ function toggleDevTools(wc: Electron.WebContents) {
   }
 }
 
+function focusChrome(win: TabWindow) {
+  win.chrome.webContents.focus()
+}
+
 const SEPARATOR: Electron.MenuItemConstructorOptions = {
   type: 'separator'
 }
@@ -57,6 +61,7 @@ const tabs_windows: Electron.MenuItemConstructorOptions[] = [
       createTab(win, {
         url: $.newTabUrl
       })
+      focusChrome(win)
     },
     accelerator: 'CmdOrCtrl+T',
     id: 'new-tab'
@@ -70,6 +75,7 @@ const tabs_windows: Electron.MenuItemConstructorOptions[] = [
         url: 'nereid://private',
         private: true
       })
+      focusChrome(win)
     },
     accelerator: 'CmdOrCtrl+P',
     id: 'new-tab-p'
@@ -745,9 +751,11 @@ export function menuOfTab(win: TabWindow, tab: Tab) {
       private: false,
       url: $.newTabUrl
     })
+    focusChrome(win)
   } })
   addItem({ label: $t('createNewPrivateTab'), accelerator: 'CmdOrCtrl+P', click() {
     createContextTab({ url: 'nereid://private', private: true })
+    focusChrome(win)
   } })
   addItem(SEPARATOR)
   addItem({ label: t('navigation.reload'), click() { tab.webContents.reload() } })
@@ -828,6 +836,7 @@ export function menuNewTab(win: TabWindow) {
       accelerator: 'CmdOrCtrl+T',
       click() {
         createTab(win, { url: $.newTabUrl })
+        focusChrome(win)
       }
     },
     {
@@ -835,6 +844,7 @@ export function menuNewTab(win: TabWindow) {
       accelerator: 'CmdOrCtrl+P',
       click() {
         createTab(win, { url: 'nereid://private', private: true })
+        focusChrome(win)
       }
     },
   ]).popup()
