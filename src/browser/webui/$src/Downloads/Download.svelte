@@ -15,6 +15,7 @@
     flex-direction: column;
     align-items: flex-start;
     flex-grow: 1;
+    overflow: hidden;
   }
   .file-link {
     background: none;
@@ -42,6 +43,7 @@
     color: gray;
     font-size: x-small;
     padding-inline: 3px;
+    white-space: nowrap;
   }
   .btn-container {
     margin-top: 10px;
