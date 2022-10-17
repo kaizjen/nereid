@@ -177,18 +177,24 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
 
   if (!WCO_BOUNDS) {
     await w.webContents.loadURL('data:text/html,')
+    let currentChange = -1;
     w.webContents.on('ipc-message', (_e, _ch, arg) => {
+      currentChange++;
+      const thisChange = currentChange;
+
       let vars: { left: number, right: number } = JSON.parse(arg);
   
-      // immediately crash the original renderer of the window, so it doesnt take any memory.
-      w.webContents.forcefullyCrashRenderer();
-  
       function proceed() {
+        if (thisChange != currentChange) return; // geometrychange has been fired
         WCO_BOUNDS = {
           left: vars.left,
           right: w.getContentBounds().width - vars.right
         };
         chromeBV.webContents.send('wco', WCO_BOUNDS)
+        console.log('setting WCO bounds:', WCO_BOUNDS, vars, currentChange);
+        
+        // immediately crash the original renderer of the window, so it doesnt take any memory.
+        w.webContents.forcefullyCrashRenderer();
       }
   
       if (chromeBV.webContents.isLoading()) {
@@ -197,9 +203,11 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
     })
   
     await w.webContents.mainFrame.executeJavaScript(`
-      requestAnimationFrame(() => {
+      function send() {
         nereid.ipcRenderer.send('geometrybegin', JSON.stringify(navigator.windowControlsOverlay.getTitlebarAreaRect()))
-      })
+      }
+      requestAnimationFrame(send)
+      navigator.windowControlsOverlay.ongeometrychange = send;
     `);
   }
 

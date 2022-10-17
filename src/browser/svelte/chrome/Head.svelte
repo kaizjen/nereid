@@ -5,7 +5,6 @@
     background: var(--base-background);
 
     padding-left: var(--titlebar-left);
-    padding-right: var(--titlebar-right);
   }
   #nereid-icn {
     width: 24px;
@@ -47,6 +46,7 @@
     height: 37px;
     margin-right: 40px; /* For some reason, the titlebar is calculated incorrectly (on windows), so we add 20 px to fix that */
     z-index: 10;
+    max-width: calc(100% - 76px - var(--titlebar-right)); /* 76px is margin-right + the logo */
   }
   .tabhead > * {
     -webkit-app-region: no-drag;
@@ -170,7 +170,6 @@
   const colorTheme = getContext('colorTheme')
   const URLParse = getContext('URLParse')
 
-  const isOnMac = process.platform == 'darwin';
   const isOnLinux = process.platform == 'linux';
 
   function tab_anim(node, { delay = 0, duration = 400, easing = cubicOut, opacity = 0 }) {
