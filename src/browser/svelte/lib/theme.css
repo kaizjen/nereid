@@ -53,6 +53,7 @@ a {
 
     --dialog-background: var(--active-background);
 
+    --border-color: #0000003d;
     --trivial-color: #96a0b1;
     --trivial-text: #000000ab;
     --accent-text: black;
@@ -77,6 +78,7 @@ a {
 
     --dialog-background: var(--base-background);
 
+    --border-color: #ffffff3d;
     --trivial-color: #838383;
     --trivial-text: #ffffffab;
     --accent-text: white;

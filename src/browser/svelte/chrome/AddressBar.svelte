@@ -12,7 +12,7 @@
     padding-right: 2px;
   }
   #addressbar:not(.noborder) {
-    box-shadow: 0px 0px 0px 1px #ffffff3d;
+    box-shadow: 0px 0px 0px 1px var(--border-color);
   }
   #addressbar:hover {
     box-shadow: none;

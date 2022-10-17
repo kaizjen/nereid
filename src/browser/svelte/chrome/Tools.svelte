@@ -6,6 +6,7 @@
     align-items: center;
     -webkit-app-region: no-drag;
     position: relative;
+    border-top: 1px solid var(--border-color);
   }
   .nav, .tool {
     padding-inline: 6px;

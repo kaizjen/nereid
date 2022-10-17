@@ -38,12 +38,15 @@
   }
 
   .tabhead {
+    position: absolute;
+    margin-left: 36px; /* The logo */
     display: flex;
     align-items: center;
     overflow: hidden;
     flex-grow: 1;
-    height: 36px;
+    height: 37px;
     margin-right: 40px; /* For some reason, the titlebar is calculated incorrectly (on windows), so we add 20 px to fix that */
+    z-index: 10;
   }
   .tabhead > * {
     -webkit-app-region: no-drag;
@@ -67,6 +70,8 @@
     display: flex;
     align-items: center;
     flex-shrink: 0;
+    border: 1px solid transparent;
+    border-bottom: 1px solid transparent !important;
   }
   .tab:hover {
     background: #ffffff17;
@@ -74,6 +79,8 @@
   .tab.selected {
     background: var(--active-background);
     border-radius: 4px 4px 0px 0px;
+    border-color: var(--border-color);
+    box-shadow: 0px 1px 0px 0px var(--active-background);
   }
   .tabhead :global(.tab.dragover) {
     opacity: 0.5;
