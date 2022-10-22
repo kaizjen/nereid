@@ -571,6 +571,38 @@ export async function showContextMenu(win: TabWindow | false, tab: Tab, opts: El
     return t(`menu.contextMenu.${str}`, obj)
   }
 
+  /** Executes code on the selected element, with variable `element` pointing to it.
+   * Bypasses iframes and open shadow roots, but fails on closed ones. */
+  async function executeCodeOnElement(frame: Electron.WebFrameMain, code: string) {
+    let x = opts.x;
+    let y = opts.y;
+    if (frame != frame.top && frame.top != null) {
+      // x & y in the string code are the absolute coordinates of the ctx menu;
+      // we subtract the starting coords of the iframe to get the coordinates relative to the iframe's document.
+      let { newX, newY } = await executeCodeOnElement(frame.top, `(function(){
+        const { x: iframeX, y: iframeY } = element.getBoundingClientRect();
+        return { newX: x - iframeX, newY: y - iframeY }
+      })()`) as any
+      x = newX;
+      y = newY;
+    }
+    return await frame.executeJavaScript(`(function(){
+      const x = ${x};
+      const y = ${y};
+      function findElement(root) {
+        const element = root.elementFromPoint(x, y);
+  
+        if (element.shadowRoot) {
+          findElement(element.shadowRoot)
+  
+        } else {
+          return ${code}
+        }
+      }
+      return findElement(document)
+    })()`)
+  }
+
   if (opts.altText) {
     addItem({ label: opts.altText, enabled: false })
     addItem(SEPARATOR)
@@ -622,7 +654,11 @@ export async function showContextMenu(win: TabWindow | false, tab: Tab, opts: El
   }
 
   if (opts.mediaType == 'image') {
-    addItem({ label: $t('image.viewInNewTab'), click() { createContextTab({ url: opts.srcURL }) } })
+    if (opts.srcURL) {
+      addItem({ label: $t('image.viewInNewTab'), click() { createContextTab({ url: opts.srcURL }) } })
+      addItem({ label: $t('image.copyURL'), click() { clipboard.writeText(opts.srcURL) } })
+      addItem(SEPARATOR)
+  }
     addItem({ label: $t('image.saveAs'), async click() {
       let response: Response;
       try {
@@ -687,8 +723,46 @@ export async function showContextMenu(win: TabWindow | false, tab: Tab, opts: El
     } })
     addItem({ label: $t('image.copy'), click() { tab.webContents.copyImageAt(opts.x, opts.y) } })
     addItem(SEPARATOR)
-    addItem({ label: $t('image.copyURL'), click() { clipboard.writeText(opts.srcURL) } })
+  }
 
+  if (opts.mediaType == 'audio' || opts.mediaType == 'video') {
+    addItem({ label: $t('media.' + (opts.mediaFlags.isPaused ? 'play' : 'pause')), click() {
+      executeCodeOnElement(
+        opts.frame,
+        opts.mediaFlags.isPaused ? `element.play()` : `element.pause()`
+      )
+    } })
+    addItem({ label: $t('media.mute'), type: 'checkbox', checked: opts.mediaFlags.isMuted, click() {
+      executeCodeOnElement(opts.frame, `element.muted = ${opts.mediaFlags.isMuted ? 'false' : 'true'}`)
+    }, enabled: opts.mediaFlags.hasAudio })
+    addItem({ label: $t('media.loop'), type: 'checkbox', checked: opts.mediaFlags.isLooping, click() {
+      executeCodeOnElement(opts.frame, `element.loop = ${opts.mediaFlags.isLooping ? 'false' : 'true'}`)
+    }, enabled: opts.mediaFlags.canLoop })
+    if (opts.srcURL) {
+      addItem(SEPARATOR)
+      addItem({ label: $t('media.viewInNewTab'), click() {
+        createContextTab({ url: opts.srcURL })
+      } })
+      addItem({ label: $t('media.copyURL'), click() {
+        clipboard.writeText(opts.srcURL)
+      } })
+    }
+    addItem(SEPARATOR)
+  }
+
+  if (opts.mediaType == 'video') {
+    addItem({ label: $t('media.controls'), type: 'checkbox', checked: opts.mediaFlags.isControlsVisible, click() {
+      executeCodeOnElement(opts.frame, `element.controls = ${opts.mediaFlags.isControlsVisible ? 'false' : 'true'}`)
+    }, enabled: opts.mediaFlags.canToggleControls })
+
+    if (opts.mediaFlags.canShowPictureInPicture) {
+      addItem({ label: $t('media.pictureInPicture'), type: 'checkbox', checked: opts.mediaFlags.isShowingPictureInPicture, click() {
+        executeCodeOnElement(
+          opts.frame,
+          opts.mediaFlags.isShowingPictureInPicture ? 'document.exitPictureInPicture()' : 'element.requestPictureInPicture()'
+        )
+      } })
+    }
     addItem(SEPARATOR)
   }
 

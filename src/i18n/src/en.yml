@@ -357,6 +357,15 @@ menu:
         error-title: Failed to download image
         error-notAnImage: This is not an image.
         error-alreadyExists: File with that name already exists.
+    media:
+      play: Play
+      pause: Pause
+      mute: Mute
+      loop: Loop
+      viewInNewTab: View media in new tab
+      copyURL: Copy media URL
+      controls: Show controls
+      pictureInPicture: Picture-in-picture mode
     frame:
       reload: Reload frame
       viewSourceCode: View frame's source code

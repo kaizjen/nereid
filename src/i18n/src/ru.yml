@@ -357,6 +357,15 @@ menu:
         error-title: Ошибка
         error-notAnImage: Это не картинка.
         error-alreadyExists: Файл с таким именем уже существует.
+    media:
+      play: Воспроизвести
+      pause: Пауза
+      mute: Без звука
+      loop: Повтор
+      viewInNewTab: Открыть в новой вкладке
+      copyURL: Скопировать URL
+      controls: Элементы управления
+      pictureInPicture: Режим картинка-в-картинке
     frame:
       reload: Перезагрузить фрейм
       viewSourceCode: Посмотреть исходный код фрейма
