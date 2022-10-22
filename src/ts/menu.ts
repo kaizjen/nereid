@@ -159,7 +159,7 @@ const tools: Electron.MenuItemConstructorOptions[] = [
     },
     id: 'dls'
   },
-  {
+  /* {
     label: t('common.extensions'),
     click(_, win) {
       if (!isTabWindow(win)) return;
@@ -170,7 +170,7 @@ const tools: Electron.MenuItemConstructorOptions[] = [
       })
     },
     id: 'exts'
-  },
+  }, */
   {
     label: t('common.bookmarks'),
     click(_, win) {
