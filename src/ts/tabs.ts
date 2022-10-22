@@ -65,6 +65,7 @@ export function updateSavedTabsImmediately() {
 }
 
 function displayPreventUnloadDialog(win: BrowserWindow, url: string, sync?: boolean) {
+  // this function has to be synchronous D:
   const options = {
     type: 'question',
     title: `Are you sure you want to leave "${URLParse(url).hostname}"?`,
@@ -121,7 +122,6 @@ function handleBeforeUnload<T>(wc: WebContents, proceed: () => T): Promise<false
       }
       
       if (isPrevented) {
-        // TODO: make prettier dialog windows
         let response = await displayPreventUnloadDialog(BrowserWindow.fromWebContents(wc), wc.getURL())
 
         if (response) {
@@ -139,9 +139,10 @@ function handleBeforeUnload<T>(wc: WebContents, proceed: () => T): Promise<false
 
     wc.mainFrame.executeJavaScript(code, true).then(onCodeExecuted)
     // If we call wc.executeJavaScript(), it doesn't actually execute it in some cases:
-    // - if the url is "view-source:"
+    // - if the protocol is "view-source:"
     // - if the tab was moved to another window
-    // idk why, but this works
+    // in these cases, electron for some reason thinks that webFrame hasn't finished loading yet,
+    // so it waits indefinitely for it to load ¯\_(ツ)_/¯
   })
 }
 
