@@ -70,10 +70,11 @@ export function init() {
           return {
             url: t.url,
             background: i != 0, // only select the first tab
-            initialFavicon: t.faviconURL
+            initialFavicon: t.faviconURL,
+            isOpenedAtStart: true
           }
         });
-      if (lastTabs.length < 1) lastTabs = [{ url: $.newTabUrl }];
+      if (lastTabs.length < 1) lastTabs = [{ url: $.newTabUrl, isOpenedAtStart: true }];
     })
 
   }
@@ -92,24 +93,24 @@ export function init() {
       }
       if (!isAlreadyLaunched) {
         // First time launching, an argument with a url.
-        newWindow([...lastTabs, { url, private: argv.private }])
+        newWindow([...lastTabs, { url, private: argv.private, isOpenedAtStart: true }])
 
       } else if (argv['new-window']) {
         // Second instance, --new-window
-        newWindow([{ url, private: argv.private }])
+        newWindow([{ url, private: argv.private, isOpenedAtStart: true }])
 
       } else {
         let win = getTabWindowByID(0);
-        createTab(win, { url, private: argv.private })
+        createTab(win, { url, private: argv.private, isOpenedAtStart: true })
       }
 
     } else if (!isAlreadyLaunched) {
       // This is the first launch, no arguments.
       if (onStart.type == 'page') {
-        newWindow([ { url: onStart.url } ])
+        newWindow([ { url: onStart.url, isOpenedAtStart: true } ])
 
       } else if (onStart.type == 'new-tab') {
-        newWindow([ { url: $.newTabUrl } ])
+        newWindow([ { url: $.newTabUrl, isOpenedAtStart: true } ])
 
       } else {
         newWindow(lastTabs);

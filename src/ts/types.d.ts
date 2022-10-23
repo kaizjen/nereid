@@ -43,6 +43,7 @@ export interface TabOptions {
   position?: number
   uid?: number
   initialFavicon?: string
+  isOpenedAtStart?: boolean
 }
 
 export interface CertficateCache {
@@ -59,6 +60,7 @@ export interface Tab extends BrowserView {
   lastNavigationReason?: NavigationReason
   isFullScreen?: boolean
   owner?: TabWindow
+  isOpenedAtStart?: boolean
 }
 
 export interface ParsedURL extends URL {

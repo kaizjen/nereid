@@ -208,6 +208,10 @@ async function pushToHistory(tab: Tab, responseCode: number = 0) {
   const url = tab.webContents.getURL();
 
   if (tab.private) return; // obviously
+  if (tab.isOpenedAtStart) {
+    tab.isOpenedAtStart = false;
+    return;
+  }
 
   let history = await userData.history.get();
   if (
@@ -274,6 +278,7 @@ export function createBrowserView(opts: TabOptions): Tab {
   tab.setBackgroundColor('#ffffffff'); // doesn't work for some reason
 
   tab.private = opts.private
+  tab.isOpenedAtStart = opts.isOpenedAtStart
 
   return tab;
 }
