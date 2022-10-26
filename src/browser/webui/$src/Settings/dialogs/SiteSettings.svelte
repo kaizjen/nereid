@@ -27,7 +27,7 @@
   }
 </style>
 <script>
-  import { ListItem, TextBlock, ContentDialog, IconButton, ToggleSwitch, TextBox, AutoSuggestBox, Button, ComboBox } from "fluent-svelte";
+  import { ListItem, TextBlock, ContentDialog, IconButton, ToggleSwitch, TextBox, AutoSuggestBox, Button, ComboBox, ContextMenu, MenuFlyoutItem } from "fluent-svelte";
   import { afterUpdate, getContext } from "svelte/internal";
   import { ArrowBack } from "nereid://js/icons";
   import { fly } from "svelte/transition";
@@ -142,6 +142,29 @@
       update()
     }
   }
+
+  function resetPermissionsF(site) {
+    return async function () {
+      if (recentlyChanged[site]) return;
+
+      console.log('Resetting', site);
+
+      delete $config.privacy.sitePermissions[site];
+      sites = Object.keys($config.privacy.sitePermissions);
+
+      _animation_comingFromSite = true;
+      currentSite = '';
+      pages.site = false;
+      pages.sitesOverview = true;
+
+      recentlyChanged[site] = true
+      await update();
+      requestIdleCallback(() => {
+        // prevent an infinite loop
+        recentlyChanged[site] = false
+      })
+    }
+  }
 </script>
 
 <div class="wrapper">
@@ -183,7 +206,7 @@
       <div class="space"></div>
 
       <TextBlock variant="subtitle">
-        {t('dialog.sites.with-permissions')}
+        {t('dialog.sites.withPermissions')}
       </TextBlock>
       {#each sites as s}
         <div class="item">
@@ -223,6 +246,10 @@
             <TextBlock style="color: gray;" variant="caption">{_t(`common.permissions.${permissionKey}.desc`)}</TextBlock>
           </div>
         {/each}
+
+        <Button style="width: 100%" on:click={resetPermissionsF(currentSite)}>
+          {t('dialog.sites.reset')}
+        </Button>
 
       {:else}
         <div class="text-center">

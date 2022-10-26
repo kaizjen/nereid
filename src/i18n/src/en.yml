@@ -459,7 +459,8 @@ pages:
           sites:
             title: Sites
             more: More sites...
-            with-permissions: Sites with permissions
+            withPermissions: Sites with permissions
+            reset: Reset all permissions of this site
           sitePage:
             invalidURL: Invalid URL
             hostPlaceholder: Enter a host

@@ -456,7 +456,8 @@ pages:
           sites:
             title: Сайты
             more: Ещё...
-            with-permissions: Сайты с разрешениями
+            withPermissions: Сайты с разрешениями
+            reset: Сбросить все разрешения этого сайта
           sitePage:
             invalidURL: Неверный URL
             hostPlaceholder: Введите имя хоста
