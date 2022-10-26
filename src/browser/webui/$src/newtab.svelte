@@ -51,6 +51,21 @@
 
   let date;
   $: date = dateFmt.format(unixMs)
+
+  let keyLocks = 0;
+
+  window.lockKeyEvents = () => {
+    keyLocks++;
+  }
+  window.unlockKeyEvents = () => {
+    if (keyLocks == 0) return;
+    keyLocks--;
+  }
+
+  window.addEventListener('keydown', ({ code, key, ctrlKey }) => {
+    if (keyLocks > 0) return;
+    nereid.tab.sendKeyToChrome({ code, key, ctrlKey });
+  })
 </script>
 
 <div class="app">

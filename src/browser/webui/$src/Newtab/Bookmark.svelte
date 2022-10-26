@@ -73,10 +73,10 @@
   title={t('pages.newtab.startPanel.delete.title', { name: bookmark.name })}
 >
   <svelte:fragment slot="footer">
-    <Button on:click={() => deleteDialog = false}>
+    <Button on:click={() => {deleteDialog = false; window.unlockKeyEvents()}}>
       {t('common.cancel')}
     </Button>
-    <Button variant="accent" on:click={() => {deleteDialog = false; dispatch('delete')}}>
+    <Button variant="accent" on:click={() => {deleteDialog = false; window.unlockKeyEvents(); dispatch('delete')}}>
       {t('pages.newtab.startPanel.delete.button-delete')}
     </Button>
   </svelte:fragment>
@@ -103,7 +103,7 @@
       <MenuFlyoutItem on:click={() => dispatch('edit')}>
         {t('pages.newtab.startPanel.button-edit')}
       </MenuFlyoutItem>
-      <MenuFlyoutItem on:click={() => deleteDialog = true}>
+      <MenuFlyoutItem on:click={() => {deleteDialog = true; window.lockKeyEvents()}}>
         {t('pages.newtab.startPanel.button-delete')}
       </MenuFlyoutItem>
     {:else}

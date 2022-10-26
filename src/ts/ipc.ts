@@ -962,6 +962,13 @@ export function init() {
 
     e.sender.loadURL(url)
   })
+  onInternal('sendKeyToChrome', (e, { code, key, ctrlKey }) => {
+    const win = BrowserWindow.fromWebContents(e.sender) as TabWindow
+    if (!win || !isTabWindow(win)) return;
+
+    win.chrome.webContents.focus();
+    win.chrome.webContents.send('keySent', { code, key, ctrlKey })
+  })
 }
 
 export function webContentsOnce(wc: WebContents, id: string, fn: Function) {

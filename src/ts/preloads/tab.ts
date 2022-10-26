@@ -120,6 +120,7 @@ if (location.protocol == 'nereid:') {
       close: () => sendInternal('closeMe'),
       create: (url) => sendInternal('createTab', url),
       go: (url) => sendInternal('navigateMe', url),
+      sendKeyToChrome: (keyData: object) => sendInternal('sendKeyToChrome', keyData)
     }
   })
 }

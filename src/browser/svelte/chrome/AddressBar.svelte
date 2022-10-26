@@ -150,18 +150,21 @@
   let adblockerDialog = false;
   $: anyDialog = securityDialog || zoomDialog || bookmarkDialog || adblockerDialog;
 
-  document.body.addEventListener('keydown', ({ key, code, ctrlKey }) => {
+  function recieveKey({ key, code, ctrlKey }) {
     if (key.length > 1) return;
     if (isActive) return;
     if (!['nereid://private/', 'nereid://newtab/'].includes(tab?.url)) return;
     if (ctrlKey && code == 'KeyV') {
       key = nereid.sendInternalSync('clipboard', 'readText');
-
+  
     } else if (ctrlKey) return;
-
+  
     inputValue += key;
     activate();
-  })
+  }
+
+  document.body.addEventListener('keydown', recieveKey)
+  ipcRenderer.on('keySent', (_, i) => recieveKey(i))
 
   function hover(node) {
     node.addEventListener('mouseover', () => {
