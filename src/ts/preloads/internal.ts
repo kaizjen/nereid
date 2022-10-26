@@ -1,6 +1,5 @@
-import { contextBridge as ctx, ipcRenderer } from "electron";
+import { ipcRenderer } from "electron";
 
-//const expose = ctx.exposeInMainWorld
 function expose(apiKey: string, obj: any) {
   window[apiKey] = obj;
 }

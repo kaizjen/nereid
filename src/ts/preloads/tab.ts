@@ -9,8 +9,6 @@ webFrame.setIsolatedWorldInfo(1, {
   name: "Nereid's shared extension context"
 })
 
-console.log('preload running', webFrame, webFrame == webFrame.top);
-
 class NereidError extends Error {
   constructor(msg: string) {
     super(msg);
@@ -132,10 +130,6 @@ if (location.protocol == 'chrome-error:') {
   })
 }
 
-function isForeground() {
-  return ipcRenderer.sendSync('tab:isForeground')
-}
-
 function requestMain(id: string, ...args: any[]) {
   return ipcRenderer.invoke(`tab:${id}`, ...args)
 }
@@ -145,13 +139,6 @@ function requestMainSync(id: string, ...args: any[]) {
 
 expose('[NEREID]', {
   extendNavigator: {
-    requestPresence() {
-      // this is just a test API, // TODO: remove it
-      return ipcRenderer.sendSync('tab:requestPresence')
-    },
-    fuckYou() {
-      ipcRenderer.sendSync('nope')
-    }
   },
   extendWindow: {
     prompt(t, defaultValue) {
