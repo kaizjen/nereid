@@ -150,10 +150,14 @@
   let adblockerDialog = false;
   $: anyDialog = securityDialog || zoomDialog || bookmarkDialog || adblockerDialog;
 
-  document.body.addEventListener('keydown', ({ key }) => {
+  document.body.addEventListener('keydown', ({ key, code, ctrlKey }) => {
     if (key.length > 1) return;
     if (isActive) return;
     if (!['nereid://private/', 'nereid://newtab/'].includes(tab?.url)) return;
+    if (ctrlKey && code == 'KeyV') {
+      key = nereid.sendInternalSync('clipboard', 'readText');
+
+    } else if (ctrlKey) return;
 
     inputValue += key;
     activate();
