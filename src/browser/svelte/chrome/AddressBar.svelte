@@ -209,7 +209,7 @@
   /**
    * @param {KeyboardEvent} e
    */
-  function handleKeyUp(e) {
+  function handleKeyDown(e) {
     switch (e.key) {
       case 'Enter': {
         if (!hints[selectedHint]) {
@@ -324,7 +324,7 @@
     type="text"
     style:display={isActive ? '' : 'none'}
     id="ab-input"
-    on:keyup={handleKeyUp}
+    on:keydown={handleKeyDown}
     bind:value={inputValue}
     placeholder={_.PLACEHOLDER}
     on:mouseup={() => {
