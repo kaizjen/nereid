@@ -159,11 +159,11 @@ try {
     let { extendNavigator, extendWindow } = window['[NEREID]'];
     
     for (let prop in extendNavigator) {
-      window.navigator[prop] = extendNavigator[prop]
+      Object.defineProperty(navigator, prop, Object.getOwnPropertyDescriptor(extendNavigator, prop))
     }
     
     for (let prop in extendWindow) {
-      window[prop] = extendWindow[prop]
+      Object.defineProperty(window, prop, Object.getOwnPropertyDescriptor(extendWindow, prop))
     }
   }());`)
 } catch (error) {
