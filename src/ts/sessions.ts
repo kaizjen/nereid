@@ -492,13 +492,16 @@ export function registerSession(ses: Session) {
           return obj.geolocation
         }
         case 'media': {
-          if (details.mediaTypes.includes('audio')) {
+          if (details.mediaTypes?.includes('audio')) {
             return obj['media.audio']
           }
-          if (details.mediaTypes.includes('video')) {
+          if (details.mediaTypes?.includes('video')) {
             return obj['media.video']
           }
-          return false
+          // TODO: find a way to not do this, because this is very risky behaviour, even though I couldn't find a way to hack this.
+          // This is done because every time a media permission is requested, for some reason another media permission
+          // is requested right after without "mediaTypes".
+          return true
         }
         case 'mediaKeySystem': {
           return obj.DRM
@@ -529,8 +532,8 @@ export function registerSession(ses: Session) {
         case 'mediaKeySystem': return 'DRM'
         case 'display-capture': return 'displayCapture'
         case 'idle-detection': return 'idleDetection'
-        case 'media': return details.mediaTypes.includes('audio') ? 'media.audio' :
-          (details.mediaTypes.includes('video') ? 'media.video' : '-unknown-')
+        case 'media': return details.mediaTypes?.includes('audio') ? 'media.audio' :
+          (details.mediaTypes?.includes('video') ? 'media.video' : '-unknown-')
         default: return perm
       }
     }
