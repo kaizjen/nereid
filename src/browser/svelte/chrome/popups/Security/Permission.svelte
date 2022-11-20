@@ -27,11 +27,14 @@
     background: #80808082;
   }
   button {
-    border-radius: 0.25rem;
+    border-radius: 50%;
     display: flex;
     justify-content: center;
     align-content: center;
-    padding: 1px;
+    padding: 0.15rem;
+  }
+  button img {
+    height: 1.3rem;
   }
   .denied {
     background: red;
@@ -72,7 +75,7 @@
     }
   }
 
-  const BORDER_RADIUS_VALUE = '0.25rem'
+  const BORDER_RADIUS_VALUE = '50%'
 
   let isDefault;
   $: isDefault = value == null;
