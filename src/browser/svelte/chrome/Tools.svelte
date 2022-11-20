@@ -1,7 +1,7 @@
 <style>
   .tools {
     background: var(--active-background);
-    padding: 8px;
+    padding: 0.5rem;
     display: flex;
     align-items: center;
     -webkit-app-region: no-drag;
@@ -9,7 +9,13 @@
     border-top: 1px solid var(--border-color);
   }
   .nav, .tool {
-    padding-inline: 6px;
+    padding-inline: 0.375rem;
+  }
+  .tool img {
+    height: 1.35rem;
+  }
+  :global([dir=rtl]) .arrow-img {
+    transform: rotate(180deg);
   }
   .disabled {
     opacity: 0.5;
@@ -85,8 +91,8 @@
 </script>
 
 <div class="tools" class:private={tab.private}>
-  <button class="tool nav" class:disabled={!tab.nav?.canGoBack} on:click={navBack}><img alt={_.BACK} src="n-res://{$colorTheme}/arrow.svg" class="rotated"></button>
-  <button class="tool nav" class:disabled={!tab.nav?.canGoFwd} on:click={navFwd}><img alt={_.FWD} src="n-res://{$colorTheme}/arrow.svg"></button>
+  <button class="tool nav arrow-img" class:disabled={!tab.nav?.canGoBack} on:click={navBack}><img alt={_.BACK} src="n-res://{$colorTheme}/arrow.svg" class="rotated"></button>
+  <button class="tool nav arrow-img" class:disabled={!tab.nav?.canGoFwd} on:click={navFwd}><img alt={_.FWD} src="n-res://{$colorTheme}/arrow.svg"></button>
   <button class="tool nav" on:click={refresh}><img alt={tab.isLoading ? _.STOPLOAD : _.REFRESHLOAD} src={tab.isLoading ? `n-res://${$colorTheme}/cross.svg` : `n-res://${$colorTheme}/redo.svg`}></button>
   <AddressBar {tab} />
   <button

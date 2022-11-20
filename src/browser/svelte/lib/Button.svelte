@@ -1,8 +1,8 @@
 <style>
   button {
-    padding: 6px;
+    padding: 0.375rem;
     min-width: 80px;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     transition: .2s;
   }
   button.with-bg {

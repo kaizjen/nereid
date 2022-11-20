@@ -1,9 +1,9 @@
 <style>
   .dialog {
-    right: 10px;
+    right: 0.625rem;
   }
   main {
-    padding: 12px;
+    padding: 0.68rem;
   }
   .biginfo {
     display: flex;
@@ -13,10 +13,10 @@
   .amount {
     display: block;
     color: var(--trivial-text);
-    margin-bottom: 20px;
+    margin-bottom: 1.25rem;
   }
   .warn, .error {
-    margin-top: 10px;
+    margin-top: 0.625rem;
     display: block;
     color: var(--trivial-text);
     text-align: center;
@@ -26,8 +26,8 @@
     color: #ceb4209a;
   }
   footer {
-    margin-top: 8px;
-    padding: 12px;
+    margin-top: 0.5rem;
+    padding: 0.68rem;
     text-align: center;
     background: #8080804a;
   }

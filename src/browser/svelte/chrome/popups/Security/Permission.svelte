@@ -2,7 +2,7 @@
   .permission {
     display: flex;
     flex-direction: column;
-    padding: 6px;
+    padding: 0.375rem;
   }
   .description {
     color: var(--trivial-text);
@@ -21,13 +21,13 @@
     display: flex;
   }
   .button-container {
-    padding: 4px;
+    padding: 0.25rem;
   }
   .button-container.active {
     background: #80808082;
   }
   button {
-    border-radius: 4px;
+    border-radius: 0.25rem;
     display: flex;
     justify-content: center;
     align-content: center;
@@ -72,7 +72,7 @@
     }
   }
 
-  const BORDER_RADIUS_VALUE = '4px'
+  const BORDER_RADIUS_VALUE = '0.25rem'
 
   let isDefault;
   $: isDefault = value == null;

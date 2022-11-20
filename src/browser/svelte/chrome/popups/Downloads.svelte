@@ -23,7 +23,7 @@
     border-bottom: var(--trivial-color) 1px solid;
   }
   .download {
-    padding: 4px;
+    padding: 0.25rem;
     overflow: hidden;
   }
   .download span {
@@ -32,7 +32,7 @@
   .btn-container {
     display: flex;
     justify-content: space-between;
-    margin-top: 15px;
+    margin-top: 1rem;
   }
 </style>
 

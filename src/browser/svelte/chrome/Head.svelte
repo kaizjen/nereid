@@ -3,19 +3,22 @@
     -webkit-app-region: drag;
     display: flex;
     background: var(--base-background);
+    height: 2rem;
 
     padding-left: var(--titlebar-left);
   }
   #nereid-icn {
-    width: 24px;
-    height: 24px;
-    margin: 6px;
+    width: 1.35rem;
+    height: 1.35rem;
+    margin: 0.325rem;
+    position: absolute;
+    left: 0;
   }
   .traffic-lights {
     white-space: nowrap;
     background: var(--base-background);/* #21252b; */
     right: 0;
-    max-height: 36px;
+    max-height: 2rem;
     display: flex;
     z-index: 7;
   }
@@ -38,15 +41,16 @@
 
   .tabhead {
     position: absolute;
-    margin-left: 36px; /* The logo */
+    margin-left: 2rem; /* The logo */
     display: flex;
     align-items: center;
     overflow: hidden;
     flex-grow: 1;
-    height: 37px;
-    margin-right: 40px; /* For some reason, the titlebar is calculated incorrectly (on windows), so we add 20 px to fix that */
+    height: calc(2rem + 1px); /* 1px to hide the border */
+    margin-right: calc(1.25rem + 20px); /* For some reason, the titlebar is calculated incorrectly (on windows), so we add 20 px to fix that */
     z-index: 10;
-    max-width: calc(100% - 76px - var(--titlebar-right)); /* 76px is margin-right + the logo */
+    max-width: calc(100% - 2rem - 1.25rem - 20px - var(--titlebar-right)); /* - margin-right - the logo */
+    left: 0;
   }
   .tabhead > * {
     -webkit-app-region: no-drag;
@@ -59,14 +63,13 @@
     height: 100%;
   }
   .tab {
-    padding: 8px;
+    padding: 0.5rem;
     transition: 0.06s;
-    display: inline-block;
     position: relative;
     white-space: nowrap;
     overflow: hidden;
-    width: 150px;
-    font-size: 15px;
+    width: 9.5rem;
+    font-size: 0.9rem;
     display: flex;
     align-items: center;
     flex-shrink: 0;
@@ -78,7 +81,7 @@
   }
   .tab.selected {
     background: var(--active-background);
-    border-radius: 4px 4px 0px 0px;
+    border-radius: 0.25rem 0.25rem 0px 0px;
     border-color: var(--border-color);
     box-shadow: 0px 1px 0px 0px var(--active-background);
   }
@@ -89,10 +92,10 @@
     background: #684a86;
   } */
   .tab img {
-    height: 14px;
+    height: 0.85rem;
   }
   .tab img.favicon {
-    padding: 3px;
+    padding: 0.15rem;
   }
   .tab img.favicon.decoy {
     flex-grow: 1;
@@ -100,7 +103,7 @@
   .tab img.audio-control {
     transform: translate(9px, 5px);
     position: absolute;
-    padding: 3px;
+    padding: 0.15rem;
     border-radius: 50%;
     transition: 0.2s;
   }
@@ -115,13 +118,13 @@
     filter: invert(0.3) sepia(1) saturate(5) hue-rotate(177deg); /* creates a cyan color */
   }
   .tab span {
-    padding-left: 8px;
+    padding-left: 0.5rem;
     flex-grow: 1;
   }
   .close-tab {
-    padding: 2px;
+    padding: 0.135rem;
     transition: 0.05s;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     display: flex;
   }
   .close-tab:hover {
@@ -134,15 +137,18 @@
   .tab > span {
     text-overflow: ellipsis;
     overflow: hidden;
-    max-width: calc(100% - 20px);
+    max-width: calc(100% - 1.12rem);
   }
 
   #addtab {
-    padding: 4px;
-    margin-left: 2px;
-    border-radius: 4px;
+    padding: 0.2rem;
+    margin-left: 0.125rem;
+    border-radius: 0.25rem;
     transition: 0.1s;
     display: flex;
+  }
+  #addtab img {
+    height: 1.25rem;
   }
   #addtab:hover {
     background: var(--button-hover);
@@ -187,6 +193,8 @@
       `
     };
   }
+
+  let headElement;
 
   function handleClickF(id) {
     // captial F stands for factory
@@ -281,10 +289,13 @@
       ipcRenderer.send('@window', msg)
     }
   }
+  requestAnimationFrame(() => {
+    ipcRenderer.send('chrome:headHeight', headElement.getBoundingClientRect().height)
+  })
 </script>
 
 
-<div class="head">
+<div class="head" bind:this={headElement}>
   <img
     alt="" src="n-res://{$colorTheme}/nereid.svg" id="nereid-icn"
   >

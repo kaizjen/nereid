@@ -2,14 +2,12 @@
   #addressbar {
     width: -webkit-fill-available;
     transition: box-shadow 0.05s;
-    border-radius: 3px;
+    border-radius: 0.25rem;
     display: flex;
     cursor: text;
     overflow: hidden;
     -webkit-app-region: no-drag;
-    margin-left: 6px;
-    margin-right: 6px;
-    padding-right: 2px;
+    margin-inline: 0.375rem;
   }
   #addressbar:not(.noborder) {
     box-shadow: 0px 0px 0px 1px var(--border-color);
@@ -32,19 +30,19 @@
     display: contents;
   }
   .tab-state {
-    height: 20px;
-    width: 20px;
-    padding: 5px;
-    padding-inline: 8px;
-    border-radius: 4px;
+    height: 1.15rem;
+    width: 1.15rem;
+    padding: 0.312rem;
+    padding-inline: 0.5rem;
+    border-radius: 0.25rem;
     transition: 0.10s;
     cursor: default;
     flex-shrink: 0;
   }
   .sec {
-    width: 20px;
-    height: 15px;
-    padding: 8px;
+    width: 1.125rem;
+    height: 0.88rem;
+    padding: 0.45rem;
   }
   .tab-state:hover, .tab-state.open {
     background: var(--button-hover);
@@ -54,14 +52,15 @@
     background: var(--button-active);
   }
   #ab-txt {
-    margin-left: 2px;
+    margin-left: 0.125rem;
     display: inline-flex;
-    font-size: 15px;
+    font-size: 0.9rem;
     white-space: nowrap;
     flex-grow: 1;
-    padding: 5px;
+    padding: 0.281rem;
     overflow: hidden;
     cursor: text;
+    direction: ltr;
   }
   #ab-input {
     background: transparent;
@@ -69,9 +68,10 @@
     outline: 0;
     color: var(--accent-text);
     width: 100%;
-    font-size: 15px;
+    font-size: 0.9rem;
     font-family: inherit;
     padding-left: 9px;
+    direction: ltr;
   }
   #ab-input:focus-visible {
     box-shadow: none; /* box-shadow defined for all elements in index.html */

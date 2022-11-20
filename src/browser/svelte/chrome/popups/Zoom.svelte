@@ -9,7 +9,7 @@
   }
   .title {
     display: flex;
-    margin-bottom: 10px;
+    margin-bottom: 0.625rem;
   }
 </style>
 

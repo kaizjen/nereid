@@ -8,7 +8,7 @@
     border-bottom: var(--trivial-color) 1px solid;
   }
   .download {
-    padding: 4px;
+    padding: 0.25rem;
     overflow: hidden;
   }
   .download b {
@@ -16,7 +16,7 @@
   }
 
   .file-image {
-    padding-inline: 4px;
+    padding-inline: 0.25rem;
   }
 
   .open-file {

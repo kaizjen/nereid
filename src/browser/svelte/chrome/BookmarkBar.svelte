@@ -5,26 +5,26 @@
   }
   .bar {
     display: flex;
-    padding-bottom: 4px;
+    padding-bottom: 0.25rem;
     width: 100%;
   }
   .suggestion {
-    padding: 4px;
-    padding-left: 16px;
+    padding: 0.25rem;
+    padding-left: 1rem;
   }
   .bookmark {
     flex-shrink: 1;
-    padding: 4px;
-    border-radius: 4px;
-    max-width: 200px;
-    min-width: 50px;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    max-width: 12.5rem;
+    min-width: 3.125rem;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
     transition: .1s;
     display: flex;
     align-items: center;
-    margin-inline: 4px;
+    margin-inline: 0.25rem;
   }
   .bookmark:hover {
     background: var(--button-hover);
@@ -39,9 +39,9 @@
     text-overflow: ellipsis;
   }
   .icon {
-    width: 16px;
-    height: 16px;
-    margin-right: 6px;
+    width: 1rem;
+    height: 1rem;
+    margin-right: 0.375rem;
   }
 </style>
 <script>

@@ -10,7 +10,16 @@ import { showAppMenu } from "./menu";
 import { INTERNAL_PARTITION } from "./sessions";
 
 const WM_INITMENU = 0x0116; // windows' initmenu, explained later in the code
-const headHeight = 36; // px, height of the "head" of chrome
+let headHeight = 36; // px, height of the "head" of chrome
+
+export function setHeadHeight(hh: number) {
+  headHeight = hh;
+  getAllTabWindows().forEach(w => {
+    w.setTitleBarOverlay({
+      height: Math.round(headHeight * w.chrome.webContents.zoomFactor)
+    })
+  })
+}
 
 const colors = {
   bg: {

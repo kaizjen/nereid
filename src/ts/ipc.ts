@@ -9,7 +9,7 @@ import $ from "./vars";
 import * as tabManager from './tabs'
 import * as _url from "url";
 import { appMenu, displayOptions, menuNewTab, menuOfBookmark, menuOfTab } from "./menu";
-import { getTabWindowByID, isTabWindow, newDialogWindow, setCurrentTabBounds } from "./windows";
+import { getTabWindowByID, setHeadHeight, isTabWindow, newDialogWindow, setCurrentTabBounds } from "./windows";
 import type TypeFuse from "fuse.js";
 import { certificateCache, DEFAULT_PARTITION, NO_CACHE_PARTITION } from "./sessions";
 import { getSupportedLanguage, t, availableTranslations } from "./i18n";
@@ -215,6 +215,13 @@ export function init() {
     win.setSheetOffset(win.chromeHeight);
 
     setCurrentTabBounds(win)
+  })
+  ipcMain.on('chrome:headHeight', (e, value: number) => {
+    let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
+    if (!win) return;
+
+    setHeadHeight(Math.round(value * win.chrome.webContents.zoomFactor));
+    console.log('head height being set to', win.chromeHeight);
   })
   ipcMain.on('chrome:setTop', (e, isTop: boolean) => {
     let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;

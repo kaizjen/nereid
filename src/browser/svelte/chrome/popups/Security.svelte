@@ -2,32 +2,32 @@
   .info {
     display: flex;
     font-weight: bold;
-    padding: 5px;
+    padding: 0.375rem;
     justify-content: center;
     align-items: center;
   }
   .info > * {
-    margin-left: 4px;
+    margin-left: 0.25rem;
   }
   .info.secure {
     filter: invert(0.5) sepia(1) saturate(3) hue-rotate(45deg);
   }
   .more_info {
-    padding: 7px;
+    padding: 0.375rem;
     opacity: 0.7;
     font-size: small;
   }
   .separator {
     background: var(--trivial-color);
     padding: 1px;
-    margin-bottom: 20px;
-    margin-top: 15px;
+    margin-bottom: 1.25rem;
+    margin-top: 0.937rem;
   }
   button {
     display: flex;
-    padding: 8px;
+    padding: 0.5rem;
     align-items: center;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     transition: .1s;
     opacity: 0.85;
     width: -webkit-fill-available;
@@ -40,10 +40,10 @@
     background: var(--button-active);
   }
   button > img {
-    margin-right: 8px;
+    margin-right: 0.5rem;
   }
   .perm-title {
-    margin-bottom: 8px;
+    margin-bottom: 0.5rem;
   }
 </style>
 

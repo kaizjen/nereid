@@ -4,17 +4,17 @@
   }
   .preview-container {
     background: #00000031;
-    width: 5cm;
-    height: 3cm;
+    width: 100%;
+    height: 7rem;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 20px;
-    border-radius: 6px;
+    margin-bottom: 1.25rem;
+    border-radius: 0.375rem;
     overflow: hidden;
   }
   input {
-    margin-bottom: 20px;
+    margin-bottom: 1.25rem;
   }
   .preview {
     width: inherit;
@@ -25,9 +25,9 @@
     display: flex;
     width: 100%;
     align-items: center;
-    padding: 4px;
-    padding-inline: 10px;
-    border-radius: 4px;
+    padding: 0.25rem;
+    padding-inline: 0.625rem;
+    border-radius: 0.25rem;
     transition: .1s;
   }
   .folder:hover {
@@ -38,7 +38,7 @@
     background: var(--button-active);
   }
   .footer {
-    margin-top: 20px;
+    margin-top: 1.25rem;
     display: flex;
     justify-content: end;
   }

@@ -309,6 +309,7 @@
     display: contents;{ tabs[currentTab]?.private ? "--active-background: var(--private-theme);" : '' }
     --titlebar-left: {wco.left};
     --titlebar-right: {wco.right};
+    font-size: 0.9rem;
   "
 >
 
