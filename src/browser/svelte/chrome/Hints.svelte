@@ -1,11 +1,10 @@
 <style>
   .hints {
-    position: fixed;
+    position: absolute;
     display: flex;
     flex-direction: column;
     background: var(--active-background);
-    margin-top: 84px;
-    top: 0;
+    top: 100%;
     left: 0;
     width: 100%;
     /* border-radius: 0px 0px 10px 10px; */
