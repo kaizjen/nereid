@@ -162,7 +162,7 @@
 <script>
   const { ipcRenderer } = window.nereid;
   import { getContext } from "svelte/internal";
-  import { cubicOut } from 'svelte/easing'
+  import { quintOut } from 'svelte/easing'
   export let tabs;
   export let currentTab;
 
@@ -178,7 +178,7 @@
 
   const isOnLinux = process.platform == 'linux';
 
-  function tab_anim(node, { delay = 0, duration = 400, easing = cubicOut, opacity = 0 }) {
+  function tab_anim(node, { delay = 0, duration = 400, easing = quintOut, opacity = 0 }) {
     const style = getComputedStyle(node);
     const target_opacity = +style.opacity;
     const od = target_opacity * (1 - opacity);
