@@ -73,11 +73,12 @@ export function init() {
             initialFavicon: t.faviconURL,
             isOpenedAtStart: true
           }
-        });
-      if (lastTabs.length < 1) lastTabs = [{ url: $.newTabUrl, isOpenedAtStart: true }];
+        })
+      ;
     })
-
   }
+
+  if (lastTabs.length < 1) lastTabs = [{ url: $.newTabUrl, isOpenedAtStart: true }];
 
   function actArgv(argv: ReturnType<ArgvParse>, workingDir: string, isAlreadyLaunched?: boolean) {
     if (argv._?.[0]) {
