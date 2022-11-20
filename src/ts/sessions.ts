@@ -518,9 +518,12 @@ export function registerSession(ses: Session) {
         case 'display-capture': {
           return obj.displayCapture
         }
+        // undocumented
         case 'idle-detection' as string: {
-          // undocumented
           return obj.idleDetection
+        }
+        case 'sensors' as string: {
+          return obj.sensors
         }
 
         default: return false // unknown permission

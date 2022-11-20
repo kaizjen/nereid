@@ -52,6 +52,10 @@ common:
       name: Capturing the display
       desc: Allows to record your screen
       prompt: ${hostname} wants to record your screen
+    sensors:
+      name: Sensors
+      desc: Allows to use to motion or light sensors on your device
+      prompt: ${hostname} wants to use to motion or light sensors on your device
     DRM:
       name: DRM
       desc: Allows to play content protected by Digital Rights Management

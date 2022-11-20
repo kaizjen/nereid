@@ -201,6 +201,7 @@ try {
         pointerLock: bool_null,
         openExternal: bool_null,
         idleDetection: bool_null,
+        sensors: bool_null,
         fullscreen: bool_null
       },
       sitePermissions: {
@@ -216,6 +217,7 @@ try {
           'pointerLock?': bool_null,
           'openExternal?': bool_null,
           'idleDetection?': bool_null,
+          'sensors?': bool_null,
           'fullscreen?': bool_null,
         }
       },
