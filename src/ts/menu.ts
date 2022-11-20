@@ -516,6 +516,7 @@ export async function displayOptions(win: TabWindow, { x, y }) {
           label: tab.lastTitle,
           sublabel: tab.lastURL,
           click() {
+            console.log('oct', win.recentlyClosed, i, tab);
             openClosedTab(win, i)
           }
         }))

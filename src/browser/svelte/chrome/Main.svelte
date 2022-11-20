@@ -210,6 +210,10 @@
       isMuted: false
     })
     tabs = tabs;
+
+    if (opts.position <= currentTab) {
+      currentTab += 1;
+    }
   })
   ipcRenderer.on('removeTab', (_e, id) => {
     console.log('removed', id);

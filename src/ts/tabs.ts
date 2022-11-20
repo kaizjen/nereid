@@ -268,8 +268,8 @@ export function createBrowserView(opts: TabOptions): Tab {
     let uid = UIDsAmount;
     UIDsAmount++;
     opts.uid = uid;
-    tabUniqueIDs[uid] = tab;
   }
+  tabUniqueIDs[opts.uid] = tab;
   tab.uniqueID = opts.uid;
   tab.lastNavigationReason = 'created';
 
@@ -647,7 +647,7 @@ export function selectTab(win: TabWindow, { tab, id }: { tab?: Tab, id?: number 
   }
   tab = tab || win.tabs[id];
 
-  win.currentTab ? win.removeBrowserView(win.currentTab) : null;
+  if (win.currentTab) win.removeBrowserView(win.currentTab);
   win.addBrowserView(tab)
   win.currentTab = tab;
   
@@ -721,7 +721,7 @@ export function closeTab(win: TabWindow, desc: { tab?: Tab, id?: number }, keepA
 export function openClosedTab(win: TabWindow, index?: number, background: boolean = true) {
   let tabInfo: typeof win.recentlyClosed[0];
   if (win.recentlyClosed.length < 1) return false;
-  if (index) {
+  if (index != undefined) {
     tabInfo = win.recentlyClosed[index];
     win.recentlyClosed.splice(index, 1)
 
