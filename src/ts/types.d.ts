@@ -82,6 +82,7 @@ export type Permissions = {
   openExternal: boolean | null
   idleDetection: boolean | null
   sensors: boolean | null
+  screenWakeLock: boolean | null
   fullscreen: boolean | null
 }
 export interface Configuration {

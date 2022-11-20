@@ -525,6 +525,9 @@ export function registerSession(ses: Session) {
         case 'sensors' as string: {
           return obj.sensors
         }
+        case 'screen-wake-lock' as string: {
+          return obj.screenWakeLock
+        }
 
         default: return false // unknown permission
       }
@@ -535,6 +538,7 @@ export function registerSession(ses: Session) {
         case 'mediaKeySystem': return 'DRM'
         case 'display-capture': return 'displayCapture'
         case 'idle-detection': return 'idleDetection'
+        case 'screen-wake-lock': return 'screenWakeLock'
         case 'media': return details.mediaTypes?.includes('audio') ? 'media.audio' :
           (details.mediaTypes?.includes('video') ? 'media.video' : '-unknown-')
         default: return perm

@@ -50,6 +50,8 @@
       pointerLock: false,
       openExternal: null,
       idleDetection: null,
+      sensors: null,
+      screenWakeLock: null,
       fullscreen: true
     },
     sitePermissions: {},

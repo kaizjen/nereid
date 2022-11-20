@@ -202,6 +202,7 @@ try {
         openExternal: bool_null,
         idleDetection: bool_null,
         sensors: bool_null,
+        screenWakeLock: bool_null,
         fullscreen: bool_null
       },
       sitePermissions: {
@@ -218,6 +219,7 @@ try {
           'openExternal?': bool_null,
           'idleDetection?': bool_null,
           'sensors?': bool_null,
+          'screenWakeLock?': bool_null,
           'fullscreen?': bool_null,
         }
       },

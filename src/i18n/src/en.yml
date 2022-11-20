@@ -81,6 +81,10 @@ common:
       name: Idle detection
       desc: Allows to detect when the user is idle
       prompt: ${hostname} wants to be able to detect when you are idle
+    screenWakeLock:
+      name: Screen lock prevention
+      desc: Allows to prevent your device from automatically locking the screen
+      prompt: ${hostname} wants to be able to prevent automatic screen locking
 navigation:
   back: Back
   forward: Forward
