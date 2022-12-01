@@ -614,14 +614,16 @@ export async function showContextMenu(win: TabWindow | false, tab: Tab, opts: El
     let selectedSE = searchConfig.available[searchConfig.selectedIndex]
 
     if ($.isValidURL(opts.selectionText)) {
-      if (!opts.selectionText.startsWith('http:') && !opts.selectionText.startsWith('https:')) {
-        opts.selectionText = `http://${opts.selectionText}`
+      let linkText = opts.selectionText;
+
+      if (!linkText.startsWith('http:') && !linkText.startsWith('https:')) {
+        linkText = `http://${linkText}`
       }
 
       addItem({
-        label: $t('openLink', { link: opts.selectionText }), sublabel: opts.selectionText,
+        label: $t('openLink'), sublabel: linkText,
         click() {
-          createContextTab({ url: opts.selectionText })
+          createContextTab({ url: linkText })
         }
       })
     }
