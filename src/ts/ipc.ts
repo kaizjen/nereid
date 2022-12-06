@@ -806,8 +806,8 @@ export function init() {
         throw new Error(`[dialog] unknown action: ${action}`)
     }
   })
-  onInternal('cookies', async(_e, action: string, options) => {
-    const { cookies } = session.fromPartition(DEFAULT_PARTITION);
+  onInternal('cookies', async(e, action: string, options) => {
+    const { cookies } = e.sender.session;
     switch (action) {
       case 'get': {
         return await cookies.get({
