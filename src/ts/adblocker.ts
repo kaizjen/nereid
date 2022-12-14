@@ -1,5 +1,5 @@
 import { FiltersEngine, Request } from "@cliqz/adblocker";
-import fetch, { RequestInfo, RequestInit } from "electron-fetch";
+import fetch from "electron-fetch";
 import * as fs from "fs-extra";
 import * as pt from "path";
 import { config, control, userdataDirectory } from "./userdata";
@@ -30,6 +30,7 @@ export async function setup() {
       },
       async write(path, buffer) {
         let str = Buffer.from(buffer).toString('utf-8');
+        // we store the expiration date in the file, before a NUL byte
         str = (Date.now() + expirationValue) + '\0' + str;
         await fs.writeFile(path, str);
       }
@@ -54,12 +55,16 @@ function standardOptions() {
 export function matchRequest(info: Electron.OnBeforeRequestListenerDetails) {
   const pageURL = info.webContents?.getURL();
   if (pageURL && !webContentsABMap[info.webContentsId]) {
+    // write standard options to the adblocker map
     webContentsABMap[info.webContentsId] = standardOptions();
     info.webContents.on('did-navigate', () => {
+      // when webContents navigates, overwrite the options
       webContentsABMap[info.webContentsId] = standardOptions();
     })
   }
 
+  if (!isAdBlockerReady) return {};
+  
   if (pageURL) {
     const { protocol, hostname } = $.URLParse(pageURL)
 

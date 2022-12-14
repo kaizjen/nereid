@@ -6,7 +6,7 @@ import { isTabWindow, newWindow, setCurrentTabBounds } from './windows'
 import { bookmarks, config, control, downloads } from './userdata'
 import * as pathModule from "path";
 import * as fs from "fs"
-import { closeTab, createTab, moveTab, openClosedTab, setMutedTab } from './tabs'
+import { closeTab, createTab, openClosedTab, setMutedTab } from './tabs'
 import $ from './vars'
 import fetch from "electron-fetch";
 import type { Response } from "electron-fetch"

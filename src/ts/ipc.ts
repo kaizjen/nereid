@@ -4,7 +4,7 @@ import { ipcMain, BrowserWindow, clipboard, nativeTheme, safeStorage, dialog, sh
 import type { WebContents, IpcMainEvent } from "electron";
 import fetch from "electron-fetch";
 import * as userData from "./userdata";
-import type { TabWindow, TabOptions, Configuration, Tab } from "./types"
+import type { TabWindow, TabOptions, Configuration } from "./types"
 import $ from "./vars";
 import * as tabManager from './tabs'
 import * as _url from "url";

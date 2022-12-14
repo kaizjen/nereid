@@ -82,21 +82,11 @@ function cloneObject<T extends object>(obj: T): T {
 try {
   if (!fs.existsSync(userdataDirectory)) {
     fs.mkdirSync(userdataDirectory, { recursive: true })
-    /* if (app.isPackaged) {
-      fs.moveSync(
-        'src/browser/templates/background_images',
-        path.join(userdataDirectory, 'background_images')
-      )
-      
-    } else { */
-      // ~~For testing purposes, will save the 'templates' folder~~
-      // App should not edit the details of asar archive
-      fs.copySync(
-        'src/browser/templates/background_images',
-        path.join(userdataDirectory, 'background_images'),
-        { recursive: true }
-      )
-    //}
+    fs.copySync(
+      'src/browser/templates/background_images',
+      path.join(userdataDirectory, 'background_images'),
+      { recursive: true }
+    )
     writeDefaults()
   }
   
@@ -111,7 +101,7 @@ try {
   lastlaunchContent = JSON.parse(fs.readFileSync(lastlaunchPath, 'utf-8'))
   controlContent = JSON.parse(fs.readFileSync(controlPath, 'utf-8'))
 
-  // check the history and downloads
+  // check the history and downloads for being readable
   JSON.parse(fs.readFileSync(historyPath, 'utf-8'));
   JSON.parse(fs.readFileSync(downloadsPath, 'utf-8'));
   JSON.parse(fs.readFileSync(bookmarksPath, 'utf-8'));
@@ -129,6 +119,7 @@ try {
 }
 
 (function() {
+  // check the config file
   if (configContent.v != '0.0.1') {
     app.prependListener('ready', () => {
       const { t } = require('./i18n.js')

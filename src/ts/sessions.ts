@@ -9,7 +9,7 @@ import * as fs from "fs-extra"
 import { getAllTabWindows, isTabWindow } from './windows'
 import { config, downloads, userdataDirectory, control } from "./userdata";
 import fetch from "electron-fetch";
-import { isAdBlockerReady, matchRequest } from "./adblocker";
+import { matchRequest } from "./adblocker";
 
 const URLParse = $.URLParse;
 
@@ -217,8 +217,6 @@ export function registerSession(ses: Session) {
   })
 
   ses.webRequest.onBeforeRequest({ urls: ['*://*/*'] }, (details, callback) => {
-    if (!isAdBlockerReady) return callback({ cancel: false });
-
     const { redirect, match } = matchRequest(details);
     if (redirect) return callback({ redirectURL: redirect });
     if (match) return callback({ cancel: true });

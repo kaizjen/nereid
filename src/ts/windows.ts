@@ -1,7 +1,7 @@
 // This file is for all types of windows
 
 import type { TabWindow, TabOptions, Tab, Configuration, Bookmarks } from "./types";
-import { app, BrowserView, BrowserWindow, BrowserWindowConstructorOptions, ipcMain, nativeTheme, screen } from "electron";
+import { app, BrowserView, BrowserWindow, BrowserWindowConstructorOptions, nativeTheme, screen } from "electron";
 import * as tabManager from "./tabs";
 import * as _url from "url";
 import * as pathModule from "path";

@@ -9,7 +9,6 @@ import { DEFAULT_PARTITION } from "./sessions";
 import * as thisProcess from "./process";
 import * as pathModule from "path"
 import $ from "./vars";
-import type { TabOptions } from "./types";
 import { t, data } from "./i18n";
 import { setup } from "./adblocker";
 
