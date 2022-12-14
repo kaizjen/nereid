@@ -100,7 +100,7 @@ app.on('window-all-closed', (e: Event) => {
   } else {
     let img = nativeImage.createFromPath(
       pathModule.join(__dirname, 
-        process.platform == 'win32' ? '../../nereid.ico' : '../../nereid.png'
+        process.platform == 'win32' ? '../../icon.ico' : '../../icon.png'
       )
     );
 

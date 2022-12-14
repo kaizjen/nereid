@@ -17,7 +17,6 @@
   "dependencies": {
     "@cliqz/adblocker": "^1.25.0",
     "argv-parse": "^1.0.1",
-    "electron": "^21.0.0",
     "electron-fetch": "^1.7.4",
     "fs-extra": "^10.0.1",
     "fuse.js": "^6.6.1",
@@ -28,10 +27,27 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "electron": "^21.0.0",
     "@types/fs-extra": "^9.0.13",
     "ilo-mute": "^1.0.0",
     "svbuild": "^2.0.1",
     "typescript": "^4.7.3",
     "yaml": "^1.10.2"
+  },
+  "files": [
+    "!branding",
+    "!docs",
+    "!svlc",
+    "!src/i18n/src",
+    "!src/i18n/*.js",
+    "!src/ts",
+    "!src/browser/svelte",
+    "!src/browser/webui/$src"
+  ],
+  "build": {
+    "nsis": {
+      "deleteAppDataOnUninstall": true,
+      "uninstallDisplayName": "Nereid [alpha]"
+    }
   }
 }

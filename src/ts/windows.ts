@@ -81,7 +81,7 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
     titleBarStyle: platform.windows ? 'hidden' : 'hiddenInset',
     show: false,
     backgroundColor: '#ffffffff',
-    icon: pathModule.join(__dirname, `../../nereid.${platform.windows ? 'ico' : 'png'}`),
+    icon: pathModule.join(__dirname, `../../icon.${platform.windows ? 'ico' : 'png'}`),
 
     width, height, x, y,
 

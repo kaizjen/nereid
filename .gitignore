@@ -4,3 +4,4 @@ src/js
 src/i18n/final/**
 src/browser/webui/js
 package-lock.json
+dist
