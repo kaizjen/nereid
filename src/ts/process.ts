@@ -116,7 +116,11 @@ export function init() {
       } else {
         newWindow(lastTabs);
       }
+    } else {
+      let win = getTabWindowByID(0);
+      createTab(win, { url: $.newTabUrl, private: argv.private, isOpenedAtStart: true })
     }
+    getTabWindowByID(0).focus();
   }
 
   if (argv['second-instance'] || app.requestSingleInstanceLock({ argv: JSON.stringify(argv) })) {

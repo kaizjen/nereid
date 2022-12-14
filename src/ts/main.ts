@@ -36,10 +36,6 @@ if (userData.lastlaunch.get().launchFailed) {
 } else {
   global.isSafeMode = false;
 
-  if (app.isPackaged && !userData.lastlaunch.get().exitedSafely) {
-    dialog.showErrorBox("Oh no!", "Nereid's work ended abruptly last time. There might be some unsaved data.")
-  }
-
   let oldConfig = userData.config.get()
 
   userData.config.listenCall((c) => {
@@ -80,7 +76,11 @@ app.on('ready', () => {
   } else {
     thisProcess.init()
   }
-  
+
+  if (app.isPackaged && !userData.lastlaunch.get().exitedSafely) {
+    dialog.showErrorBox("Oh no!", "Nereid's work ended abruptly last time. There might be some unsaved data.")
+  }
+
   userData.lastlaunch.set({ launchFailed: false, exitedSafely: false })
 
   console.log('Starting adblock...')
