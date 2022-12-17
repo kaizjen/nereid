@@ -52,7 +52,7 @@
     background: var(--button-active);
   }
   #ab-txt {
-    margin-left: 0.125rem;
+    margin-left: 0.284rem;
     display: inline-flex;
     font-size: 0.9rem;
     white-space: nowrap;
@@ -70,7 +70,7 @@
     width: 100%;
     font-size: 0.9rem;
     font-family: inherit;
-    padding-left: 9px;
+    padding-left: 0.565rem;
     direction: ltr;
   }
   #ab-input:focus-visible {
