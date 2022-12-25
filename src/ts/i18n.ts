@@ -22,23 +22,8 @@ let lang = ''
 
 let configData = config.get();
 
-if (configData.i18n != null) {
-  app.commandLine.appendSwitch('lang', configData.i18n.locale)
-  lang = getSupportedLanguage(configData.i18n.lang)
 
-} else {
-  app.once('ready', () => {
-    // You have to call .getLocale() after the 'ready' event on Windows
-    let language = getSupportedLanguage(app.getLocale());
-    config.set({
-      i18n: { locale: app.getLocale(), lang: language }
-    })
-    lang = language;
-  })
-}
-
-
-(function init(){
+function init() {
   function parseTranslation(lang: string) {
     try {
       return JSON.parse(
@@ -46,7 +31,7 @@ if (configData.i18n != null) {
           pathModule.join(translationsDirectory, lang + '.json'), 'utf-8'
         )
       );
-      
+
     } catch (e) {
       console.log(`Warning! The translation for the language ${lang} is not available!`);
       return JSON.parse(
@@ -76,7 +61,24 @@ if (configData.i18n != null) {
   console.log('Initialized i18next for language %o (prefers %o)', (i18n as any).language, lang);
   defaultData.this.name = t('name', { defaultValue: 'Nereid' })
   console.log('%o', t('name'));
-})()
+}
+
+if (configData.i18n != null) {
+  app.commandLine.appendSwitch('lang', configData.i18n.locale)
+  lang = getSupportedLanguage(configData.i18n.lang);
+  init();
+
+} else {
+  app.once('ready', () => {
+    // You have to call .getLocale() after the 'ready' event on Windows
+    let language = getSupportedLanguage(app.getLocale());
+    config.set({
+      i18n: { locale: app.getLocale(), lang: language }
+    })
+    lang = language;
+    init();
+  })
+}
 
 export function data(obj: Record<string, any> = {}) {
   return {...defaultData, obj}
