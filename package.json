@@ -2,6 +2,7 @@
   "name": "nereid",
   "version": "0.0.1",
   "description": "An Electron-based web browser",
+  "productName": "Nereid",
   "main": "src/js/main.js",
   "scripts": {
     "start": "electron .",
