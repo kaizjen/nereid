@@ -38,7 +38,7 @@ const { existsSync } = fs;
 
 function writeDefaults() {
   if (!lastlaunchContent) {
-    const fileContents = fs.readFileSync('src/browser/templates/lastlaunch.json', 'utf-8');
+    const fileContents = fs.readFileSync(`${__dirname}/../browser/templates/lastlaunch.json`, 'utf-8');
     fs.writeFile(lastlaunchPath, fileContents)
     lastlaunchContent = JSON.parse(fileContents)
   }
@@ -48,7 +48,7 @@ function writeDefaults() {
   }
 
   if (!configContent) {
-    const fileContents = fs.readFileSync('src/browser/templates/config.json5', 'utf-8');
+    const fileContents = fs.readFileSync(`${__dirname}/../browser/templates/config.json5`, 'utf-8');
     fs.writeFileSync(configPath, fileContents)
     configContent = JSON5.parse(fileContents)
   }
@@ -58,12 +58,12 @@ function writeDefaults() {
   }
 
   if (!existsSync(bookmarksPath)) {
-    const fileContents = fs.readFileSync('src/browser/templates/bookmarks.json', 'utf-8');
+    const fileContents = fs.readFileSync(`${__dirname}/../browser/templates/bookmarks.json`, 'utf-8');
     fs.writeFileSync(bookmarksPath, fileContents)
   }
 
   if (!controlContent) {
-    const fileContents = fs.readFileSync('src/browser/templates/control.json', 'utf-8');
+    const fileContents = fs.readFileSync(`${__dirname}/../browser/templates/control.json`, 'utf-8');
     fs.writeFileSync(controlPath, fileContents)
     controlContent = JSON.parse(fileContents)
   }
@@ -82,12 +82,16 @@ function cloneObject<T extends object>(obj: T): T {
 try {
   if (!fs.existsSync(userdataDirectory)) {
     fs.mkdirSync(userdataDirectory, { recursive: true })
+    writeDefaults()
+  }
+
+  const bgImages = path.join(userdataDirectory, 'background_images')
+  if (!fs.existsSync(bgImages)) {
     fs.copySync(
-      'src/browser/templates/background_images',
-      path.join(userdataDirectory, 'background_images'),
+      `${__dirname}/../browser/templates/background_images`,
+      bgImages,
       { recursive: true }
     )
-    writeDefaults()
   }
   
 } catch (e) {
