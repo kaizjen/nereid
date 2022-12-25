@@ -282,7 +282,7 @@
   $: for (const folder in $bookmarks) {
     isInBookmarks = false;
     const elements = $bookmarks[folder];
-    if (elements.find(v => new URL(v.url).href == url.href)) {
+    if (elements.find(v => URLParse(v.url).href == url.href)) {
       isInBookmarks = true;
       break;
     }
