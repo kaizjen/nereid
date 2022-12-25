@@ -18,7 +18,9 @@
     config = await window.nereid.userdata.config.get();
     if (config.welcomePhase > 4) {
       await nereid.view.leaveFullWindowView()
-      window.location = 'nereid://newtab'
+      config.welcomePhase = 5;
+      window.nereid.userdata.config.set(config);
+      window.nereid.tab.go('nereid://newtab');
     }
     slide = config.welcomePhase;
   }()

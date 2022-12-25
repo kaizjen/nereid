@@ -25,6 +25,9 @@
     padding-block: 8px;
     justify-content: flex-end;
   }
+  footer > :global(*) {
+    margin-inline: 20px;
+  }
   @media (prefers-color-scheme: dark) {
     footer {
       background: black;

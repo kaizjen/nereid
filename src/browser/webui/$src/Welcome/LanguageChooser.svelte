@@ -21,6 +21,9 @@
     width: 100%;
     padding-block: 8px;
   }
+  footer > :global(*) {
+    margin-inline: 20px;
+  }
   @media (prefers-color-scheme: dark) {
     footer {
       background: black;

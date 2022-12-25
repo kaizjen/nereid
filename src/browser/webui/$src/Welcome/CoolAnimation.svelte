@@ -79,8 +79,9 @@
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 500 500" width="500" height="500"
     >
-      <ellipse in:fade={{ duration: svgAnimDuration }} style="fill: none; stroke: rgb(36, 126, 205); stroke-width: 120px;" cx="250" cy="250" rx="160" ry="160"></ellipse>
-      <path in:draw={{ duration: svgAnimDuration }} style="fill: none; stroke: rgb(68, 168, 255); stroke-width: 50px; stroke-linecap: round; stroke-linejoin: round;" d="M 63.881 419.558 C 180.652 406.94 419.122 198.969 431.389 76.498"></path>
+      <ellipse in:fade={{ duration: svgAnimDuration / 2 }} style="fill: none; stroke: rgb(36, 126, 205); paint-order: fill; stroke-width: 120px;" cx="250" cy="250" rx="160" ry="160"/>
+      <path in:draw={{ duration: svgAnimDuration }} style="fill: none; stroke-width: 50px; stroke-linecap: round; stroke-linejoin: round; stroke: rgb(36, 126, 205);" d="M 47.329 431.972 C 172.208 418.136 427.235 190.097 440.355 55.808"/>
+      <ellipse in:fade={{ duration: svgAnimDuration / 2 }} style="fill-rule: nonzero; fill: rgb(255, 255, 255); stroke: none;" cx="250" cy="250" rx="100" ry="100"/>
     </svg>
   </div>
 {:else}
