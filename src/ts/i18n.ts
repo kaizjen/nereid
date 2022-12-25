@@ -80,10 +80,6 @@ if (configData.i18n != null) {
   })
 }
 
-export function data(obj: Record<string, any> = {}) {
-  return {...defaultData, obj}
-}
-
 export function getSupportedLanguage(locale: string) {
   // Try to find the closest language to the system locale.
 

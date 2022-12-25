@@ -9,7 +9,7 @@ import { DEFAULT_PARTITION } from "./sessions";
 import * as thisProcess from "./process";
 import * as pathModule from "path"
 import $ from "./vars";
-import { t, data } from "./i18n";
+import { t } from "./i18n";
 import { setup } from "./adblocker";
 
 require('tls').DEFAULT_ECDH_CURVE = 'auto' // fix handshake error
@@ -105,7 +105,7 @@ app.on('window-all-closed', (e: Event) => {
 
     tray = new Tray(img);
     
-    tray.setToolTip(t('menu.tray.state-ready', data()))
+    tray.setToolTip(t('menu.tray.state-ready'))
     tray.setContextMenu(Menu.buildFromTemplate([
       {
         label: t('name'),
@@ -125,7 +125,7 @@ app.on('window-all-closed', (e: Event) => {
         }
       },
       {
-        label: t('menu.common.quit', data()),
+        label: t('menu.common.quit'),
         click() {
           app.quit()
         }
