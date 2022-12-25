@@ -26,12 +26,6 @@
       "type": "bool",
       "description": "Don't allow sites to read your clipboard."
     },
-    "crash_tabs_on_close": {
-      "default": false,
-      "value": false,
-      "type": "bool",
-      "description": "When closing a tab, crash its process so the history remains even when you open a closed tab. May introduce bugs as some processes are shared by multiple tabs."
-    },
     "experimental_beforeunload": {
       "default": false,
       "value": false,

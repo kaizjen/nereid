@@ -19,7 +19,6 @@ let UIDsAmount = 0;
 
 const options = userData.control.options;
 
-const shouldCrashClosedTabs = options.crash_tabs_on_close?.value
 const shouldUseExperimentalBeforeUnload = options.experimental_beforeunload?.value
 const autoplayWithDocumentActivation = options.autoplay_by_document_activation?.value
 
@@ -285,12 +284,7 @@ export function createBrowserView(opts: TabOptions): Tab {
 
 export function destroyWebContents(bv: Tab) {
   delayExecution(() => {
-    if (shouldCrashClosedTabs) {
-      bv.webContents.forcefullyCrashRenderer();
-
-    } else {
-      (bv.webContents as any).destroy()
-    }
+    (bv.webContents as any).close()
 
     if (bv.childWindow) {
       bv.childWindow.close();
@@ -736,11 +730,7 @@ export function openClosedTab(win: TabWindow, index?: number, background: boolea
     background
   }
 
-  if (shouldCrashClosedTabs) {
-    tabInfo.tab.webContents.reload()
-  } else {
-    tabInfo.tab = createBrowserView(options)
-  }
+  tabInfo.tab = createBrowserView(options)
 
   addTab(win, tabInfo.tab, options)
   attach(win, tabInfo.tab)
