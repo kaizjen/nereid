@@ -239,8 +239,12 @@
 
   function dropzone(el) {
     let counter = 0;
-    function dragenter() {
-      el.classList.add('dragover')
+    function dragenter(e) {
+      console.log('dd', e.dataTransfer.types);
+      // all data types are lowercase for some reason
+      if (e.dataTransfer.types[0] == 'text/tabuid') {
+        el.classList.add('dragover')
+      }
       counter++;
     }
     function dragleave() {
@@ -324,7 +328,7 @@
           class="tab"
           draggable="true"
           on:dragstart={e => e.dataTransfer.setData('text/tabUID', tab.uid)}
-          on:dragover|preventDefault={e => {}}
+          on:dragover={e => e.dataTransfer.types[0] == 'text/tabuid' ? e.preventDefault() : null}
           on:drop|capture={handleDropF(id, tab.uid)}
           use:dropzone
           class:selected={id == currentTab}
