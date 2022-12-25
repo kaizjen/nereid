@@ -89,8 +89,11 @@
     ipcRenderer.send('chrome:setHeight', document.body.getBoundingClientRect().height)
   })
   
+  let changeToSetHeadHeight = {};
+
   ipcRenderer.on('adjustHeight', () => {
     ipcRenderer.send('chrome:setHeight', document.body.getBoundingClientRect().height)
+    changeToSetHeadHeight = {};
   })
 
   ipcRenderer.on('userData/config', (_e, conf) => {
@@ -313,7 +316,7 @@
   "
 >
 
-<Head {tabs} {currentTab} />
+<Head {tabs} {currentTab} bind:changeToSetHeadHeight />
 <div class="wrapper">
   {#if tabs[currentTab]?.uid in dialogsMap}
   <PagePopup tab={tabs[currentTab]} dialog={dialogsMap[tabs[currentTab]?.uid]} />

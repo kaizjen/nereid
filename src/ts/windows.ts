@@ -150,11 +150,6 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
     if (prevChrZoomFactor == c.ui.chromeZoomFactor) return;
 
     chromeBV.webContents.zoomFactor = c.ui.chromeZoomFactor;
-    if (platform.windows) {
-      w.setTitleBarOverlay({
-        height: Math.round(headHeight * c.ui.chromeZoomFactor)
-      })
-    }
 
     chromeBV.webContents.send('adjustHeight') // webContents will send a 'chrome:setHeight' message in return.
     prevChrZoomFactor = c.ui.chromeZoomFactor;

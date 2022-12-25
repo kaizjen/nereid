@@ -166,6 +166,8 @@
   export let tabs;
   export let currentTab;
 
+  export let changeToSetHeadHeight = {};
+
   const { t } = window;
   const _ = {
     PRIVATE_TAB: t('ui.tabs.private'),
@@ -289,9 +291,21 @@
       ipcRenderer.send('@window', msg)
     }
   }
-  requestAnimationFrame(() => {
+
+  function setHeadHeight() {
+    if (!headElement) return;
+
     ipcRenderer.send('chrome:headHeight', headElement.getBoundingClientRect().height)
+  }
+
+  requestAnimationFrame(() => {
+    setHeadHeight();
   })
+
+  $: {
+    changeToSetHeadHeight;
+    setHeadHeight();
+  }
 </script>
 
 

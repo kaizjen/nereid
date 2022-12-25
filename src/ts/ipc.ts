@@ -220,8 +220,8 @@ export function init() {
     let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
     if (!win) return;
 
-    setHeadHeight(Math.round(value * win.chrome.webContents.zoomFactor));
-    console.log('head height being set to', win.chromeHeight);
+    setHeadHeight(Math.round(value));
+    console.log('head height being set to', Math.round(value));
   })
   ipcMain.on('chrome:setTop', (e, isTop: boolean) => {
     let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
@@ -312,8 +312,6 @@ export function init() {
   ipcMain.on('newTab', (e, options: TabOptions = { url: $.newTabUrl }) => {
     let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
     if (!win) return;
-
-    if (!('url' in options)) options.url = $.newTabUrl
 
     tabManager.createTab(win, options);
   })
