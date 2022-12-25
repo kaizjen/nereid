@@ -233,7 +233,7 @@
       if (isNaN(movedUID)) return;
       if (movedUID == zoneUID) return;
 
-      ipcRenderer.send('chrome:crossMoveTab', movedUID, id)
+      ipcRenderer.send('chrome:moveTab', movedUID, id)
     }
   }
 

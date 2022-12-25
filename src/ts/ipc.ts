@@ -262,17 +262,11 @@ export function init() {
 
     menuOfBookmark(win, bookmark, index)
   })
-  ipcMain.on('chrome:moveTab', (e, tabID: number, newID: number) => {
-    let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
-    if (!win) return;
-
-    tabManager.moveTab(win, win.tabs[tabID], newID);
-  })
-  ipcMain.on('chrome:crossMoveTab', (e, tabUID: number, newIndex: number) => {
+  ipcMain.on('chrome:moveTab', (e, tabUID: number, newIndex: number) => {
     let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
     if (!win) return;
     
-    tabManager.crossMoveTab(tabManager.getTabByUID(tabUID), {
+    tabManager.moveTab(tabManager.getTabByUID(tabUID), {
       window: win, index: newIndex
     })
   })

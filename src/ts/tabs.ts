@@ -748,30 +748,7 @@ export function openClosedTab(win: TabWindow, index?: number, background: boolea
   return true;
 }
 
-export function moveTab(win: TabWindow, tab: Tab, newID: number) {
-  if (win.tabs.length == 1) return;
-
-  removeTab(win, { tab })
-  addTab(win, tab, {
-    url: tab.webContents.getURL(),
-    initialFavicon: tab.faviconDataURL,
-    private: tab.private,
-    position: newID
-  })
-  
-  win.chrome.webContents.send('tabUpdate', {
-    type: 'title', id: newID,
-    value: tab.webContents.getTitle() || tab.webContents.getURL()
-  })
-  win.chrome.webContents.send('tabUpdate', {
-    type: 'sec', id: newID,
-    value: checkSecurity(tab.webContents.getURL())
-  })
-
-  selectTab(win, { id: newID })
-}
-
-export function crossMoveTab(tab: Tab, destination: { window: TabWindow, index: number }) {
+export function moveTab(tab: Tab, destination: { window: TabWindow, index: number }) {
   const { window, index } = destination;
   if (!tab.owner) return;
 
