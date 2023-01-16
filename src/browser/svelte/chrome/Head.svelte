@@ -328,7 +328,9 @@
           class="tab"
           draggable="true"
           on:dragstart={e => e.dataTransfer.setData('text/tabUID', tab.uid)}
-          on:dragover={e => e.dataTransfer.types[0] == 'text/tabuid' ? e.preventDefault() : null}
+          on:dragover={
+            e => e.dataTransfer.types[0] == 'text/tabuid' || e.dataTransfer.types[0] == 'text/newtab' ? e.preventDefault() : null
+          }
           on:drop|capture={handleDropF(id, tab.uid)}
           use:dropzone
           class:selected={id == currentTab}
