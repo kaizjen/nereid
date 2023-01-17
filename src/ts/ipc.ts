@@ -11,7 +11,7 @@ import * as _url from "url";
 import { appMenu, displayOptions, menuNewTab, menuOfBookmark, menuOfTab } from "./menu";
 import { getTabWindowByID, setHeadHeight, isTabWindow, newDialogWindow, setCurrentTabBounds } from "./windows";
 import type TypeFuse from "fuse.js";
-import { certificateCache, DEFAULT_PARTITION, NO_CACHE_PARTITION } from "./sessions";
+import { certificateCache, DEFAULT_PARTITION, NO_CACHE_PARTITION, PRIVATE_PARTITION } from "./sessions";
 import { getSupportedLanguage, t, availableTranslations } from "./i18n";
 import { adBlockerError, isAdBlockerReady, webContentsABMap } from "./adblocker";
 const Fuse = require('fuse.js') as typeof TypeFuse;
@@ -800,7 +800,11 @@ export function init() {
     }
   })
   onInternal('cookies', async(e, action: string, options) => {
-    const { cookies } = e.sender.session;
+    const modalWindow = BrowserWindow.fromWebContents(e.sender);
+    const window = modalWindow.getParentWindow();
+    if (!window || !isTabWindow(window)) return;
+
+    const { cookies } = window.currentTab.private ? session.fromPartition(PRIVATE_PARTITION) : session.fromPartition(DEFAULT_PARTITION);
     switch (action) {
       case 'get': {
         return await cookies.get({
