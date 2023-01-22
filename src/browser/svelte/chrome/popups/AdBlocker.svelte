@@ -12,13 +12,13 @@
   }
   .amount {
     display: block;
-    color: var(--trivial-text);
+    color: var(--gray-8);
     margin-bottom: 1.25rem;
   }
   .warn, .error {
     margin-top: 0.625rem;
     display: block;
-    color: var(--trivial-text);
+    color: var(--gray-8);
     text-align: center;
     font-size: smaller;
   }
@@ -29,7 +29,22 @@
     margin-top: 0.5rem;
     padding: 0.68rem;
     text-align: center;
-    background: #8080804a;
+    background: var(--t-white-2);
+  }
+
+  @media (prefers-color-scheme: light) {
+    .amount {
+      color: var(--gray-1);
+    }
+    .warn, .error {
+      color: var(--gray-1);
+    }
+    .error {
+      color: #ceb4209a;
+    }
+    footer {
+      background: var(--t-black-2);
+    }
   }
 </style>
 <script>

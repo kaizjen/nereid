@@ -23,8 +23,8 @@ export function setHeadHeight(hh: number) {
 
 const colors = {
   bg: {
-    dark: '#21252b',
-    light: '#aab0b6'
+    dark: '#181b20',
+    light: '#a9aeb8'
   },
   fg: {
     dark: '#ffffff',

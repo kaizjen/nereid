@@ -20,19 +20,37 @@
     white-space: nowrap;
   }
   .h-link:hover {
-    background: var(--button-hover);
+    background: var(--t-white-4);
   }
   .h-link:active {
-    background: var(--button-active);
+    background: var(--t-white-6);
   }
   .h-link.sel {
-    background: var(--button-hover);
+    background: var(--t-white-4);
   }
   span.h-body {
     display: inline-flex;
   }
   span.h-more {
-    color: var(--trivial-text);
+    color: var(--t-white-7);
+  }
+
+  @media (prefers-color-scheme: light) {
+    .hints {
+      background: var(--active-background);
+    }
+    .h-link:hover {
+      background: var(--t-black-3);
+    }
+    .h-link:active {
+      background: var(--t-black-5);
+    }
+    .h-link.sel {
+      background: var(--t-black-3);
+    }
+    span.h-more {
+      color: var(--t-black-7);
+    }
   }
 </style>
 

@@ -7,33 +7,44 @@
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding-top: 25px
+    padding-top: 3.5rem
   }
   .popup {
-    background: var(--dialog-background);
+    background: var(--dark-1);
     z-index: 9;
     display: inline-block;
-    padding: 14px;
-    border: 1px solid var(--trivial-color);
-    border-radius: 6px;
-    min-width: 450px;
-    min-width: 600px;
+    padding: 0.875rem;
+    border: 1px solid var(--gray-2);
+    border-radius: 0.375rem;
+    min-width: 37.5rem;
     cursor: default; /* document's cursor is changed by a function in Main.svelte */
   }
   .title {
     font-size: larger;
     font-weight: 700;
-    margin-bottom: 20px;
+    margin-bottom: 1.25rem;
     display: block;
   }
   .message {
-    color: var(--trivial-text);
+    color: var(--gray-7);
     font-size: small;
     display: block;
-    margin-bottom: 20px;
+    margin-bottom: 1.25rem;
+    user-select: text;
+    cursor: text;
   }
   input {
-    margin-bottom: 20px;
+    margin-bottom: 1.25rem;
+  }
+
+  @media (prefers-color-scheme: light) {
+    .popup {
+      background: var(--light-9);
+      border: 1px solid var(--gray-9);
+    }
+    .message {
+      color: var(--gray-2);
+    }
   }
 </style>
 <script>

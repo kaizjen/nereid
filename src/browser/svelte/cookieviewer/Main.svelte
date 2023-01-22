@@ -6,9 +6,14 @@
   }
   .cookielist {
     padding: 0px;
-    border: 1px solid var(--trivial-color);
+    border: 1px solid var(--gray-2);
     height: 30vh;
     overflow: auto;
+  }
+  @media (prefers-color-scheme: light) {
+    .cookielist {
+      border: 1px solid var(--gray-8);
+    }
   }
 </style>
 <script>

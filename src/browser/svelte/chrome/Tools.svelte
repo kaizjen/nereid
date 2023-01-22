@@ -1,15 +1,13 @@
 <style>
   .tools {
     background: var(--active-background);
-    padding: 0.5rem;
+    padding: 0.3rem;
+    height: 2.3rem;
     display: flex;
     align-items: center;
     -webkit-app-region: no-drag;
     position: relative;
-    border-top: 1px solid var(--border-color);
-  }
-  .nav, .tool {
-    padding-inline: 0.375rem;
+    border-top: 1px solid var(--t-white-5);
   }
   .tool img {
     height: 1.35rem;
@@ -34,7 +32,7 @@
     border-radius: 2px;
   }
   .progress {
-    background: var(--accent-color);
+    background: var(--accent-5);
     height: 100%;
   }
   .nav.disabled:hover {
@@ -42,6 +40,19 @@
   }
   .rotated {
     transform: rotate(180deg);
+  }
+
+  @media (prefers-color-scheme: light) {
+    .tools {
+      background: var(--active-background);
+      border-top-color: var(--t-black-6);
+    }
+    .progress-bar {
+      background: #3b3b3b70;
+    }
+    .progress {
+      background: var(--accent-5);
+    }
   }
 </style>
 

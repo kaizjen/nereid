@@ -3,7 +3,7 @@
     right: 10px;
   }
   .preview-container {
-    background: #00000031;
+    background: var(--t-black-6);
     width: 100%;
     height: 7rem;
     display: flex;
@@ -21,6 +21,10 @@
     height: inherit;
     object-fit: cover;
   }
+  b {
+    display: block;
+    margin-bottom: 0.75rem;
+  }
   .folder {
     display: flex;
     width: 100%;
@@ -31,16 +35,28 @@
     transition: .1s;
   }
   .folder:hover {
-    background: var(--button-hover);
-    transition: 0s;
+    background: var(--t-white-3);
   }
-  .folder:active {
-    background: var(--button-active);
+  .folder:hover:active {
+    background: var(--t-white-5);
+    transition: 0s;
   }
   .footer {
     margin-top: 1.25rem;
     display: flex;
     justify-content: end;
+  }
+
+  @media (prefers-color-scheme: light) {
+    .preview-container {
+      background: var(--t-black-2);
+    }
+    .folder:hover {
+      background: var(--t-black-2);
+    }
+    .folder:hover:active {
+      background: var(--t-black-3);
+    }
   }
 </style>
 <script>

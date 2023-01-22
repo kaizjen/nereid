@@ -6,38 +6,41 @@
     transform: rotate(90deg);
   }
   .case-toggle {
-    padding: 8px;
-    width: 30px;
-    height: 30px;
-    margin-right: 10px;
-    font-size: 15px;
+    padding: 0.25rem;
+    padding-inline: 0.5rem;
+    width: fit-content;
+    height: fit-content;
+    margin-right: 0.625rem;
+    font-size: 0.93rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 3px;
-    border: 1px solid var(--trivial-color);
+    border-radius: 0.2rem;
+    border: 1px solid var(--t-white-3);
+    transition: .15s;
   }
   .case-toggle:hover {
-    background: var(--button-hover);
-    border: 0;
+    background: var(--t-white-5);
+    border-color: transparent;
   }
-  .case-toggle:active {
-    background: var(--button-active);
+  .case-toggle:hover:active {
+    background: var(--t-white-7);
+    transition: 0s;
   }
   .active {
-    color: var(--accent-color);
-    background: var(--accent-active);
-    border: 0;
+    color: var(--accent-2);
+    background: var(--accent-8);
+    border-color: transparent;
   }
   .active:hover {
-    background: var(--accent-hover);
+    background: var(--accent-9);
   }
-  .active:hover {
-    background: var(--accent-active);
+  .active:hover:active {
+    background: var(--accent-6);
   }
   .results {
-    color: var(--trivial-text);
-    margin-inline: 10px;
+    color: var(--gray-7);
+    margin-inline: 0.625rem;
   }
   .results.null {
     color: red;
@@ -45,11 +48,44 @@
   .bar {
     background: transparent;
     border: none;
-    color: var(--accent-text);
+    color: var(--text);
     flex-grow: 1;
   }
   .bar:focus-visible {
     box-shadow: none;
+  }
+
+  @media (prefers-color-scheme: light) {
+    .case-toggle {
+      border-color: var(--t-black-3);
+    }
+    .case-toggle:hover {
+      background: var(--t-black-2);
+      border-color: transparent;
+    }
+    .case-toggle:hover:active {
+      background: var(--t-black-5);
+    }
+    .active {
+      color: var(--accent-2);
+      background: var(--accent-8);
+      border-color: transparent;
+    }
+    .active:hover {
+      background: var(--accent-9);
+    }
+    .active:hover:active {
+      background: var(--accent-6);
+    }
+    .results {
+      color: var(--gray-3);
+    }
+    .results.null {
+      color: red;
+    }
+    .bar {
+      color: var(--text);
+    }
   }
 </style>
 <script>

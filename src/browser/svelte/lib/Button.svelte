@@ -1,45 +1,64 @@
 <style>
   button {
     padding: 0.375rem;
+    padding-inline: 0.55rem;
     min-width: 80px;
-    border-radius: 0.25rem;
-    transition: .2s;
+    border-radius: 0.2rem;
+    transition: .15s;
   }
   button.with-bg {
-    background: var(--button-background);
+    background: var(--t-white-base);
   }
   button:hover {
-    background: var(--button-hover);
-    transition: .05s;
-    outline-color: var(--button-hover) !important;
+    background: var(--t-white-5);
   }
-  button:active {
-    background: var(--button-active);
-    outline-color: white !important;
+  button:hover:active {
+    background: var(--t-white-6);
+    transition: 0s;
   }
   button.call-to-action {
-    background: var(--accent-color);
-    color: white;
+    background: var(--accent-5);
+    color: var(--text);
   }
   button.call-to-action:hover {
-    background: var(--accent-hover);
+    background: var(--accent-6);
   }
-  button.call-to-action:active {
-    background: var(--accent-active);
+  button.call-to-action:hover:active {
+    background: var(--accent-8);
+  }
+
+  @media (prefers-color-scheme: light) {
+    button.with-bg {
+      background: var(--t-black-base);
+    }
+    button:hover {
+      background: var(--t-black-4);
+    }
+    button:hover:active {
+      background: var(--t-black-5);
+    }
+    button.call-to-action {
+      background: var(--accent-6);
+      color: var(--text);
+    }
+    button.call-to-action:hover {
+      background: var(--accent-8);
+    }
+    button.call-to-action:hover:active {
+      background: var(--accent-9);
+    }
   }
 </style>
 <script>
   import { createEventDispatcher } from "svelte/internal";
   export let background = true;
   export let callToAction = false;
-  export let outline = false;
   export let style = '';
 
   const emit = createEventDispatcher();
 </script>
 <button
   {style}
-  style:outline={outline ? '1px solid var(--trivial-color)' : ''}
   class:call-to-action={callToAction}
   class:with-bg={background}
   on:click={e => emit('click', e)}

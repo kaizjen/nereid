@@ -15,6 +15,7 @@
   .bookmark {
     flex-shrink: 1;
     padding: 0.25rem;
+    padding-inline: 0.35rem;
     border-radius: 0.25rem;
     max-width: 12.5rem;
     min-width: 3.125rem;
@@ -27,11 +28,11 @@
     margin-inline: 0.25rem;
   }
   .bookmark:hover {
-    background: var(--button-hover);
+    background: var(--t-white-2);
     transition: 0s;
   }
   .bookmark:active {
-    background: var(--button-active);
+    background: var(--t-white-4);
   }
   .bookmark span {
     flex-grow: 1;
@@ -42,6 +43,15 @@
     width: 1rem;
     height: 1rem;
     margin-right: 0.375rem;
+  }
+
+  @media (prefers-color-scheme: light) {
+    .bookmark:hover {
+      background: var(--t-black-2);
+    }
+    .bookmark:active {
+      background: var(--t-black-3);
+    }
   }
 </style>
 <script>

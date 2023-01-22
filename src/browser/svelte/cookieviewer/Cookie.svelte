@@ -5,11 +5,28 @@
     padding-inline: 8px;
   }
   .gray {
-    color: var(--trivial-color);
+    color: var(--gray-8);
     margin-left: 20px;
   }
   .selected {
-    background: var(--accent-active);
+    background: var(--accent-9);
+  }
+
+  .selected > .gray {
+    color: var(--accent-1);
+  }
+
+  @media (prefers-color-scheme: light) {
+    .gray {
+      color: var(--gray-3);
+    }
+    .selected {
+      background: var(--accent-9);
+    }
+
+    .selected > .gray {
+      color: var(--accent-1);
+    }
   }
 </style>
 <script>

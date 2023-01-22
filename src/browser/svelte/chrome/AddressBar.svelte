@@ -10,21 +10,19 @@
     margin-inline: 0.375rem;
   }
   #addressbar:not(.noborder) {
-    box-shadow: 0px 0px 0px 1px var(--border-color);
+    box-shadow: 0px 0px 0px 1px var(--t-white-3);
   }
   #addressbar:hover {
     box-shadow: none;
     transition: 0s;
   }
+  #addressbar:not(.noborder):not(.focus):hover {
+    background: var(--t-black-4);
+  }
   #addressbar.focus {
     outline: none;
-    box-shadow: 0px 0px 0px 2px var(--accent-color);
-  }
-  #addressbar:not(.noborder):hover {
-    background: #00000026;
-  }
-  #addressbar.focus:hover {
-    background: inherit;
+    box-shadow: 0px 0px 0px 2px var(--accent-5);
+    background: var(--t-black-9)
   }
   .ab-btn {
     display: contents;
@@ -35,21 +33,21 @@
     padding: 0.312rem;
     padding-inline: 0.5rem;
     border-radius: 0.25rem;
-    transition: 0.10s;
+    transition: 0.15s;
     cursor: default;
     flex-shrink: 0;
   }
   .sec {
-    width: 1.125rem;
+    width: 1.2rem;
     height: 0.88rem;
     padding: 0.45rem;
   }
-  .tab-state:hover, .tab-state.open {
-    background: var(--button-hover);
-    transition: 0s;
+  .tab-state:hover {
+    background: var(--t-white-5);
   }
-  .tab-state:active {
-    background: var(--button-active);
+  .tab-state:hover:active, .tab-state.open {
+    background: var(--t-white-7);
+    transition: 0s;
   }
   #ab-txt {
     margin-left: 0.284rem;
@@ -66,7 +64,7 @@
     background: transparent;
     border: 0;
     outline: 0;
-    color: var(--accent-text);
+    color: var(--text);
     width: 100%;
     font-size: 0.9rem;
     font-family: inherit;
@@ -77,7 +75,7 @@
     box-shadow: none; /* box-shadow defined for all elements in index.html */
   }
   #ab-input::placeholder {
-    color: var(--trivial-text);
+    color: var(--t-white-9);
   }
 
   .wrapper {
@@ -86,6 +84,32 @@
     height: -webkit-fill-available;
     margin-right: 30px;
     margin-left: 30px;
+  }
+
+  @media (prefers-color-scheme: light) {
+    #addressbar:not(.noborder) {
+      box-shadow: 0px 0px 0px 1px var(--t-black-3);
+    }
+    #addressbar:hover {
+      box-shadow: none;
+    }
+    #addressbar:not(.noborder):not(.focus):hover {
+      background: var(--t-white-2);
+    }
+    #addressbar.focus {
+      outline: none;
+      box-shadow: 0px 0px 0px 2px var(--accent-5);
+      background: var(--t-white-9);
+    }
+    .tab-state:hover {
+      background: var(--t-black-3);
+    }
+    .tab-state:hover:active, .tab-state.open {
+      background: var(--t-black-5);
+    }
+    #ab-input::placeholder {
+      color: var(--t-black-9);
+    }
   }
 </style>
 

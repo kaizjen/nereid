@@ -30,6 +30,8 @@
   }
   .time-containter > h1 {
     margin: 0;
+    font-size: 70px;
+    font-weight: 100;
   }
   .date {
     text-transform: capitalize;

@@ -2,7 +2,7 @@
   .head {
     -webkit-app-region: drag;
     display: flex;
-    background: var(--base-background);
+    background: var(--dark-1);
     height: 2rem;
 
     padding-left: var(--titlebar-left);
@@ -16,7 +16,7 @@
   }
   .traffic-lights {
     white-space: nowrap;
-    background: var(--base-background);/* #21252b; */
+    background: var(--dark-1);
     right: 0;
     max-height: 2rem;
     display: flex;
@@ -35,7 +35,7 @@
     background: #ff5656a6;
   }
   .traffic-lights > img:hover {
-    background: #ffffff4a;
+    background: var(--dark-7);
     transition: 0s;
   }
 
@@ -64,7 +64,7 @@
   }
   .tab {
     padding: 0.5rem;
-    transition: 0.06s;
+    transition: 0.15s;
     position: relative;
     white-space: nowrap;
     overflow: hidden;
@@ -76,21 +76,22 @@
     border: 1px solid transparent;
     border-bottom: 1px solid transparent !important;
   }
+  *:active > .tab {
+    transition: 0s;
+  }
   .tab:hover {
-    background: #ffffff17;
+    background: var(--t-white-2);
   }
   .tab.selected {
     background: var(--active-background);
     border-radius: 0.25rem 0.25rem 0px 0px;
-    border-color: var(--border-color);
-    box-shadow: 0px 1px 0px 0px var(--active-background);
+    border-color: var(--t-white-5);
+    box-shadow: 0px 1px 0px 0px var(--active-background); /* removes the part of the border of <Tools> */
+    transition: 0s;
   }
   .tabhead :global(.tab.dragover) {
     opacity: 0.5;
   }
-  /* .tab.private.selected {
-    background: #684a86;
-  } */
   .tab img {
     height: 0.85rem;
   }
@@ -108,11 +109,11 @@
     transition: 0.2s;
   }
   .tab img.audio-control:hover {
-    background: var(--tool-hover);
+    background: var(--t-white-3);
     transition: 0s;
   }
   .tab img.audio-control:active {
-    background: var(--tool-active);
+    background: var(--t-white-5);
   }
   .tab img.audio-control.playing {
     filter: invert(0.3) sepia(1) saturate(5) hue-rotate(177deg); /* creates a cyan color */
@@ -123,15 +124,15 @@
   }
   .close-tab {
     padding: 0.135rem;
-    transition: 0.05s;
+    transition: 0.15s;
     border-radius: 0.25rem;
     display: flex;
   }
   .close-tab:hover {
-    background: var(--button-hover);
+    background: var(--t-white-5);
   }
-  .close-tab:active {
-    background: var(--button-active);
+  .close-tab:hover:active {
+    background: var(--t-white-6);
     transition: 0s;
   }
   .tab > span {
@@ -151,11 +152,51 @@
     height: 1.25rem;
   }
   #addtab:hover {
-    background: var(--button-hover);
+    background: var(--t-white-3);
   }
-  #addtab:active {
-    background: var(--button-active);
+  #addtab:hover:active {
+    background: var(--t-white-6);
     transition: 0s;
+  }
+  
+  @media (prefers-color-scheme: light) {
+    .head {
+      background: var(--light-5);
+    }
+    .traffic-lights {
+      background: var(--light-5);
+    }
+    .traffic-lights > img:hover {
+      background: var(--light-3);
+    }
+
+    .tab:hover {
+      background: var(--t-white-2);
+    }
+    .tab.selected {
+      background: var(--active-background);
+      border-color: var(--t-black-6);
+      box-shadow: 0px 1px 0px 0px var(--active-background); /* removes the part of the border of <Tools> */
+    }
+    .tab img.audio-control:hover {
+      background: var(--t-black-3);
+    }
+    .tab img.audio-control:active {
+      background: var(--t-black-5);
+    }
+    .close-tab:hover {
+      background: var(--t-black-2);
+    }
+    .close-tab:hover:active {
+      background: var(--t-black-4);
+    }
+
+    #addtab:hover {
+      background: var(--t-black-2);
+    }
+    #addtab:hover:active {
+      background: var(--t-black-4);
+    }
   }
 </style>
 

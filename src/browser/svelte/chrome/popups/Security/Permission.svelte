@@ -5,7 +5,7 @@
     padding: 0.375rem;
   }
   .description {
-    color: var(--trivial-text);
+    color: var(--gray-7);
   }
   .main {
     display: flex;
@@ -24,7 +24,7 @@
     padding: 0.25rem;
   }
   .button-container.active {
-    background: #80808082;
+    background: var(--t-white-3);
   }
   button {
     border-radius: 50%;
@@ -44,6 +44,15 @@
   }
   .granted {
     background: green;
+  }
+
+  @media (prefers-color-scheme: light) {
+    .description {
+      color: var(--gray-2);
+    }
+    .button-container.active {
+      background: var(--t-black-3);
+    }
   }
 </style>
 <script>

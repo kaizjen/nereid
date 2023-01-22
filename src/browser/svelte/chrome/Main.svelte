@@ -1,6 +1,12 @@
 <style>
   .wrapper {
     position: relative;
+    border-bottom: 1px solid var(--dark-6);
+  }
+  @media (prefers-color-scheme: light) {
+    .wrapper {
+      border-bottom: 1px solid var(--light-6);
+    }
   }
 </style>
 <script>
@@ -309,7 +315,11 @@
 
 <div
   style="
-    display: contents;{ tabs[currentTab]?.private ? "--active-background: var(--private-theme);" : '' }
+    display: contents;{
+      tabs[currentTab]?.private ?
+      ($colorTheme == 'light' ? "--active-background: var(--purple-9);" : "--active-background: var(--purple-2);")
+      : ''
+    }
     --titlebar-left: {wco.left};
     --titlebar-right: {wco.right};
     font-size: 0.9rem;
@@ -317,14 +327,17 @@
 >
 
 <Head {tabs} {currentTab} bind:changeToSetHeadHeight />
-<div class="wrapper">
+<div class="wrapper" style="{
+    tabs[currentTab]?.private ? 
+    ($colorTheme == 'light' ? "border-bottom-color: var(--purple-8);" : "border-bottom-color: var(--purple-1);")
+    : ''
+  }">
   {#if tabs[currentTab]?.uid in dialogsMap}
   <PagePopup tab={tabs[currentTab]} dialog={dialogsMap[tabs[currentTab]?.uid]} />
   {/if}
   <Tools tab={tabs[currentTab]} />
   <BookmarkBar pageURL={tabs[currentTab]?.url} />
+  <PermissionAccessor tab={tabs[currentTab]} />
+  <FindInPage index={currentTab} {tabs} />
 </div>
-
-<PermissionAccessor tab={tabs[currentTab]} />
-<FindInPage index={currentTab} {tabs} />
 </div>

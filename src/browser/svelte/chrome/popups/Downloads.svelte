@@ -9,30 +9,22 @@
   }
 
   .empty {
-    width: 380px;
+    margin-inline: 6rem;
+    display: block;
     text-align: center;
-    color: var(--trivial-text);
+    color: var(--gray-8);
   }
 
-  .dl-wrapper {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .dl-wrapper:not(:last-child) {
-    border-bottom: var(--trivial-color) 1px solid;
-  }
-  .download {
-    padding: 0.25rem;
-    overflow: hidden;
-  }
-  .download span {
-    white-space: nowrap;
-  }
   .btn-container {
     display: flex;
     justify-content: space-between;
     margin-top: 1rem;
+  }
+
+  @media (prefers-color-scheme: light) {
+    .empty {
+      color: var(--gray-2);
+    }
   }
 </style>
 
@@ -133,14 +125,14 @@
     </div>
 
     <div class="btn-container">
-      <Button outline={true} on:click={() => {
+      <Button on:click={() => {
         ipcRenderer.send('newTab', { url: 'nereid://downloads' });
         open = false;
       }}>
         {_.OPEN_PAGE}
       </Button>
       {#if $config?.behaviour.downloadPath}
-        <Button outline={true} on:click={() => {
+        <Button on:click={() => {
           shell.openPath(($config?.behaviour.downloadPath).replaceAll('%s', ''))
         }}>
         {_.OPEN_FOLDER}

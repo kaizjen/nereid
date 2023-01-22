@@ -8,15 +8,24 @@
   }
   .val {
     user-select: text;
-    color: var(--trivial-text);
+    color: var(--gray-9);
   }
   ::selection {
-    background: var(--accent-hover);
+    background: var(--accent-3);
   }
   div {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
+  }
+
+  @media (prefers-color-scheme: light) {
+    .val {
+      color: var(--gray-2);
+    }
+    ::selection {
+      background: var(--accent-8);
+    }
   }
 </style>
 <script>

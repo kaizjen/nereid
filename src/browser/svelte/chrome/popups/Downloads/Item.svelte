@@ -1,20 +1,4 @@
 <style>
-  .dl-wrapper {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .dl-wrapper:not(:last-child) {
-    border-bottom: var(--trivial-color) 1px solid;
-  }
-  .download {
-    padding: 0.25rem;
-    overflow: hidden;
-  }
-  .download b {
-    white-space: nowrap;
-  }
-
   .file-image {
     padding-inline: 0.25rem;
   }
