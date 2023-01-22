@@ -132,7 +132,7 @@ ui:
 
       Always be sure you're on the intended site before entering any information.
     description-insecure: It is recommended you do not send information such as
-      passwords or credit cards to this site, because it can be intercepted.
+      passwords or credit cards to this site because it can be intercepted.
     button-viewCertificate: View certificate
     button-cookieFiles: Cookie files
     button-siteSettings: Site settings
@@ -154,9 +154,9 @@ ui:
     warnings:
       active: Sometimes, the adblocker may cause some pages to malfunction. If a page
         is not being loaded correctly, try turning it off.
-      inactive: Ads and trackers on ${hostname} are not being blocked, because you
+      inactive: Ads and trackers on ${hostname} are not being blocked because you
         have whitelisted the website. Unless the adblock is hurting performance
-        or functionality, it is very recommended to turn it on.
+        or functionality of ${hostname}, it's recommended to turn it on.
       malfunction: The adblocker failed to load correctly or a critical error occured
         while it was loading.
       notReady: The page was loaded before the adblocker, so ads and trackers weren't
