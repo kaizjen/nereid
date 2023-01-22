@@ -154,9 +154,9 @@ ui:
     warnings:
       active: Sometimes, the adblocker may cause some pages to malfunction. If a page
         is not being loaded correctly, try turning it off.
-      inactive: Ads and trackers on ${hostname} are not being blocked because you
-        have whitelisted the website. Unless the adblock is hurting performance
-        or functionality of ${hostname}, it's recommended to turn it on.
+      inactive: Ads and trackers on ${hostname} are not being blocked because you have
+        whitelisted the website. Unless the adblock is hurting performance or
+        functionality of ${hostname}, it's recommended to turn it on.
       malfunction: The adblocker failed to load correctly or a critical error occured
         while it was loading.
       notReady: The page was loaded before the adblocker, so ads and trackers weren't
