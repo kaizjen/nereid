@@ -5,6 +5,9 @@
 
   .open-file {
     cursor: pointer;
+    font-weight: bold;
+    text-align: left;
+    white-space: nowrap;
   }
   .open-file:hover {
     opacity: 0.8;
@@ -55,9 +58,9 @@
   </div>
   <div class="download">
     {#if download.status == 'completed'}
-      <b class="open-file" on:click={openFile}>
+      <button class="open-file" on:click={openFile}>
         {basename(download.savePath)}
-      </b>
+      </button>
     {:else}
       <b>
         {basename(download.savePath)}

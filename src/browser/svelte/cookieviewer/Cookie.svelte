@@ -35,7 +35,8 @@
   export let selected;
 </script>
 
-<li class:selected={i == selected} on:click={() => selected = i}>
+<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+<li tabindex="0" class:selected={i == selected} on:click={() => selected = i} on:keypress={e => e.key == "Enter" ? selected = i : null}>
   <b>{cookie.name}</b>
   <span class="gray">{cookie.domain}</span>
 </li>

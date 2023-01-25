@@ -394,6 +394,7 @@
           {:else}
             <img alt="" src={tab.isLoading ? `n-res://${$colorTheme}/clock.svg` : (tab.favicon ?? `n-res://${$colorTheme}/webpage.svg`)} class="favicon">
             {#if tab.isPlaying || tab.isMuted}
+              <!-- svelte-ignore a11y-click-events-have-key-events -->
               <img
                 role="button"
                 tabindex="0"
@@ -432,8 +433,11 @@
       style:pointer-events={isOnLinux ? '' : 'none'}
       style:display={isOnLinux ? '' : 'none'}
     >
-      <img alt="" src="n-res://{$colorTheme}/minimize.svg" on:click={winActionF('min')}>
-      <img alt="" src="n-res://{$colorTheme}/restore.svg" on:click={winActionF('max')} width="24" height="24">
-      <img alt="" src="n-res://{$colorTheme}/cross.svg" id="close" on:click={winActionF('close')}>
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <img role="button" alt="" src="n-res://{$colorTheme}/minimize.svg" on:click={winActionF('min')}>
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <img role="button" alt="" src="n-res://{$colorTheme}/restore.svg" on:click={winActionF('max')} width="24" height="24">
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <img role="button" alt="" src="n-res://{$colorTheme}/cross.svg" id="close" on:click={winActionF('close')}>
   </div>
 </div>

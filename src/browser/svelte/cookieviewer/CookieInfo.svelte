@@ -58,7 +58,8 @@
   }
 </script>
 
-<table>
+<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+<table tabindex="0">
   {#each Object.keys(cookie) as prop}
     <tr>
       <td class="prop">{tt(`props.${prop}`)}</td><td class="val">{formatProperty(prop)}</td>

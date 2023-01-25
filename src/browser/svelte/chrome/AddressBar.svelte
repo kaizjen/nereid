@@ -172,6 +172,7 @@
   let zoomDialog = false;
   let bookmarkDialog = false;
   let adblockerDialog = false;
+  // ALL DIALOGS
   $: anyDialog = securityDialog || zoomDialog || bookmarkDialog || adblockerDialog;
 
   function recieveKey({ key, code, ctrlKey }) {
@@ -322,6 +323,14 @@
     }()
   }
 </script>
+<svelte:window on:keydown={e => {
+  if (e.key != "Escape" || !anyDialog) return;
+  // ALL DIALOGS
+  securityDialog = false;
+  zoomDialog = false;
+  bookmarkDialog = false;
+  adblockerDialog = false;
+}} />
 <div class:noborder={anyDialog || noBorder} id="addressbar" class:focus={isActive}>
   <button use:hover on:click={() => securityDialog = !securityDialog} class="ab-btn">
     <img alt={_.SECURITY} class="tab-state sec"

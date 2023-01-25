@@ -173,4 +173,5 @@
   </div>
 </div>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="blocker" on:click={() => isOpen = false}></div>

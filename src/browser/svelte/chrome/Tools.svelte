@@ -101,6 +101,10 @@
   }
 </script>
 
+<svelte:window on:keydown={e => {
+  if (e.key != "Escape" || !downloadsDialog) return;
+  downloadsDialog = false;
+}} />
 <div class="tools" class:private={tab.private}>
   <button class="tool nav arrow-img" class:disabled={!tab.nav?.canGoBack} on:click={navBack}><img alt={_.BACK} src="n-res://{$colorTheme}/arrow.svg" class="rotated"></button>
   <button class="tool nav arrow-img" class:disabled={!tab.nav?.canGoFwd} on:click={navFwd}><img alt={_.FWD} src="n-res://{$colorTheme}/arrow.svg"></button>
