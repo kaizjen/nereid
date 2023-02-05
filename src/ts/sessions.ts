@@ -35,6 +35,12 @@ function nereidProtocol(req: Electron.ProtocolRequest, respond: (response: strin
     finalPath = finalPath.slice(0, -1)
   }
 
+  if (!['nereid:', '', null].includes(URLParse(req.referrer).protocol)) {
+    // if any other thing tries to access nereid protocol, deny
+    respond({ error: -10 }) // Access denied
+    return false;
+  }
+
   // Internal URLs:
   switch (parsed.hostname) {
     case '.svelte': {
@@ -131,11 +137,6 @@ function nereidProtocol(req: Electron.ProtocolRequest, respond: (response: strin
   }
   // end of Internal URLs
 
-  if (!['nereid:', '', null].includes(URLParse(req.referrer).protocol)) {
-    // if any other thing tries to access nereid protocol, deny
-    respond({ error: -10 }) // Access denied
-    return false;
-  }
   if (finalPath.endsWith('.svelte')) {
     // Add .js extension for all svelte files
     finalPath += '.js'
