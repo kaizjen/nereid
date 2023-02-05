@@ -198,24 +198,11 @@ try {
         idleDetection: bool_null,
         sensors: bool_null,
         screenWakeLock: bool_null,
-        fullscreen: bool_null
+        fullscreen: bool_null,
       },
       sitePermissions: {
         '*': {
-          'popups?': bool_null,
-          'media.video?': bool_null,
-          'media.audio?': bool_null,
-          'displayCapture?': bool_null,
-          'DRM?': bool_null,
-          'geolocation?': bool_null,
-          'notifications?': bool_null,
-          'midi?': bool_null,
-          'pointerLock?': bool_null,
-          'openExternal?': bool_null,
-          'idleDetection?': bool_null,
-          'sensors?': bool_null,
-          'screenWakeLock?': bool_null,
-          'fullscreen?': bool_null,
+          '*': bool_null,
         }
       },
       adblockerWhitelist: [['string']]

@@ -160,7 +160,7 @@ export function handleNetError(
       break;
   }
 
-  frame.executeJavaScript('document.documentElement.innerHTML = `' + fs.readFileSync('src/browser/webui/net-err-template.html', 'utf-8').replaceAll('`', '\\`') + '`');
+  frame.executeJavaScript('document.documentElement.innerHTML = `' + fs.readFileSync(`${__dirname}/../browser/webui/net-err-template.html`, 'utf-8').replaceAll('`', '\\`') + '`');
   frame.executeJavaScript(`document.getElementById('info').innerHTML = "${errInfo.info.replaceAll('"', '\\"')}"`);
   frame.executeJavaScript(`document.getElementById('detail').innerHTML = "${errInfo.detail.replaceAll('"', '\\"')}"`);
   frame.executeJavaScript(`document.getElementById('code').innerHTML = "${errInfo.code.replaceAll('"', '\\"')}"`);
