@@ -104,24 +104,38 @@ export function init() {
         break;
       case 'go': {
         console.log('go', params);
-        
         let q = params[0];
 
-        if ($.isValidURL(q) && !q.includes(' ')) {
-          win.currentTab.lastNavigationReason = 'input-url'
-          if (URLParse(q).protocol) {
-            wc.loadURL(q)
-            
-          } else {
-            wc.loadURL('http://'+q)
-          }
-
-        } else {
+        function search() {
           let searchConfig = userData.config.get().search;
           let SE = searchConfig.available[searchConfig.selectedIndex]
 
           win.currentTab.lastNavigationReason = `searched:${q}`
           wc.loadURL(SE.searchURL.replaceAll('%s', encodeURIComponent(q)))
+        }
+
+        if ($.isValidURL(q) && !q.includes(' ')) {
+          win.currentTab.lastNavigationReason = 'input-url'
+          const parsed = URLParse(q);
+          if (parsed.protocol) {
+            if (!parsed.slashes) {
+              if (isNaN(Number(parsed.pathname))) {
+                search()
+
+              } else {
+                // the hostname was probably incorrectly assumed to be the protocol,
+                // and whatever comes after the `:` is the port
+                wc.loadURL('http://' + q)
+              }
+            }
+            wc.loadURL(q)
+            
+          } else {
+            wc.loadURL('http://' + q)
+          }
+
+        } else {
+          search()
         }
 
         break;
