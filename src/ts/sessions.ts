@@ -202,7 +202,7 @@ export function registerSession(ses: Session) {
   ses.protocol.registerStreamProtocol('get', getProtocol)
 
   ses.webRequest.onBeforeRequest({ urls: ['http://*/*'] }, ({ url }, callback) => {
-    if (!config.get().privacy.httpsOnly) return callback({ cancel: false })
+    if (!config.get().privacy.httpsOnly || URLParse(url).hostname == 'localhost') return callback({ cancel: false })
 
     if (control.options.disallow_http?.value) {
       callback({

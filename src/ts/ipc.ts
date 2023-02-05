@@ -117,26 +117,21 @@ export function init() {
         if ($.isValidURL(q) && !q.includes(' ')) {
           win.currentTab.lastNavigationReason = 'input-url'
           const parsed = URLParse(q);
+          console.log((parsed));
+
           if (parsed.protocol) {
             if (!parsed.slashes) {
-              if (isNaN(Number(parsed.pathname))) {
-                search()
-
-              } else {
+              if (isNaN(Number(parsed.pathname))) search();
+              else {
                 // the hostname was probably incorrectly assumed to be the protocol,
                 // and whatever comes after the `:` is the port
                 wc.loadURL('http://' + q)
               }
-            }
-            wc.loadURL(q)
+            } else wc.loadURL(q);
             
-          } else {
-            wc.loadURL('http://' + q)
-          }
+          } else wc.loadURL('http://' + q);
 
-        } else {
-          search()
-        }
+        } else search();
 
         break;
       }
