@@ -24,7 +24,7 @@
       "default": false,
       "value": false,
       "type": "bool",
-      "description": "Don't allow sites to read your clipboard."
+      "description": "Don't allow sites to read your clipboard, even if the tab is focused."
     },
     "experimental_beforeunload": {
       "default": false,
