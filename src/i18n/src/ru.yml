@@ -18,6 +18,7 @@ common:
   cancel: Отмена
   loading: Загрузка...
   done: Готово
+  back: Назад
   bookmarkFolders:
     bookmarkBar: Панель закладок
     startPanel: Стартовая панель
@@ -161,6 +162,21 @@ ui:
     list: Папки
     addToFolder: Добавить в папку
     removeFromFolder: Удалить из папки
+    editBookmark: Изменить закладку...
+    createFolder: Новая папка...
+    create:
+      newFolder: Новая папка
+      name: Название
+      next: Далее
+      error-alreadyExists: Имя папки занято
+      error-empty: Имя папки не может быть пусто
+      error-illegalName: Неверное имя папки
+    edit:
+      name: Название
+      url: URL-адрес
+      siteIcon: Иконка страницы
+      delete: Удалить
+      confirmation: Вы точно хотите удалить эту закладку?
   adblocker:
     status-good: Реклама и трекеры заблокированы
     status-bad: Реклама и трекеры не заблокированы

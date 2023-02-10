@@ -120,7 +120,7 @@
   import Security from "./popups/Security.svelte"
   import { getContext } from "svelte/internal"
   import ZoomPopup from "./popups/Zoom.svelte";
-  import Bookmark from "./popups/Bookmark.svelte";
+  import BookmarksModal from "./popups/BookmarksModal.svelte";
   import AdBlocker from "./popups/AdBlocker.svelte";
 
   const { t } = window;
@@ -425,7 +425,7 @@
     <ZoomPopup level={$globalZoom} bind:open={zoomDialog} />
   {/if}
   {#if bookmarkDialog}
-    <Bookmark bind:open={bookmarkDialog} {tab} bookmarks={$bookmarks} />
+    <BookmarksModal bind:open={bookmarkDialog} {tab} bookmarks={$bookmarks} />
   {/if}
   {#if adblockerDialog}
     <AdBlocker bind:open={adblockerDialog} hostname={url.hostname} protocol={url.protocol} />

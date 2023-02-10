@@ -27,6 +27,10 @@
     background: var(--accent-8);
   }
 
+  button:disabled {
+    opacity: 0.8;
+  }
+
   @media (prefers-color-scheme: light) {
     button.with-bg {
       background: var(--t-black-base);
@@ -53,6 +57,7 @@
   import { createEventDispatcher } from "svelte/internal";
   export let background = true;
   export let callToAction = false;
+  export let disabled = false;
   export let style = '';
 
   const emit = createEventDispatcher();
@@ -61,6 +66,7 @@
   {style}
   class:call-to-action={callToAction}
   class:with-bg={background}
+  {disabled}
   on:click={e => emit('click', e)}
   on:mousedown={e => emit('mousedown', e)}
   on:mouseup={e => emit('mouseup', e)}

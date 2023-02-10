@@ -17,6 +17,7 @@ common:
   cancel: Cancel
   loading: Loading...
   done: Done
+  back: Back
   bookmarkFolders:
     bookmarkBar: Bookmarks panel
     startPanel: Start panel
@@ -143,6 +144,21 @@ ui:
     list: Folders
     addToFolder: Add to folder
     removeFromFolder: Remove from folder
+    editBookmark: Edit bookmark...
+    createFolder: Create folder...
+    create:
+      newFolder: New folder
+      name: Name
+      next: Next
+      error-alreadyExists: This folder name is already taken
+      error-empty: Folder name cannot be empty
+      error-illegalName: Illegal folder name
+    edit:
+      name: Name
+      url: URL
+      siteIcon: Site icon
+      delete: Delete
+      confirmation: Are you sure you want to delete this bookmark?
   adblocker:
     status-good: Ads and trackers are blocked
     status-bad: Ads and trackers weren't blocked
