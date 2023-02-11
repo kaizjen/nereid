@@ -403,19 +403,21 @@
       >
     </button>
   {/if}
-  <button
-    class="ab-btn"
-    on:click={() => bookmarkDialog = true}
-    use:hover
-  >
-    <img
-      class="tab-state"
-      src="n-res://{$colorTheme}/bookmark{isInBookmarks ? '-selected' : ''}.svg"
-      alt={isInBookmarks ? _.BOOKMARK_ADD_OR_RM : _.BOOKMARK_ADD}
-      title={isInBookmarks ? _.BOOKMARK_ADD_OR_RM : _.BOOKMARK_ADD}
-      class:open={bookmarkDialog}
+  {#if !url.protocol == 'nereid:'}
+    <button
+      class="ab-btn"
+      on:click={() => bookmarkDialog = true}
+      use:hover
     >
-  </button>
+      <img
+        class="tab-state"
+        src="n-res://{$colorTheme}/bookmark{isInBookmarks ? '-selected' : ''}.svg"
+        alt={isInBookmarks ? _.BOOKMARK_ADD_OR_RM : _.BOOKMARK_ADD}
+        title={isInBookmarks ? _.BOOKMARK_ADD_OR_RM : _.BOOKMARK_ADD}
+        class:open={bookmarkDialog}
+      >
+    </button>
+  {/if}
 </div>
 <div class="wrapper" style="z-index: {anyDialog ? '9' : '-1'};">
   {#if securityDialog}
