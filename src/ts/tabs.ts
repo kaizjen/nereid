@@ -164,16 +164,8 @@ function setTitleOfWindow(win: TabWindow, tab: Tab) {
 }
 
 async function fetchFavicon(url: string) {
-  /** Needed to ignore the exception in electron-fetch (https://github.com/arantes555/electron-fetch/issues/46) */
-  function _unthrow(error?) {
-    if (error) console.log(`Ignored uncaught exception:`, error?.stack || error?.message);
-    process.off('uncaughtException', _unthrow)
-  }
-
   try {
-    process.on('uncaughtException', _unthrow)
     let res = await fetch(url, { session: session.fromPartition(NO_CACHE_PARTITION) });
-    _unthrow(null);
     if (res.ok && res.headers.get('Content-Type').startsWith('image/')) {
       return {
         url,
@@ -186,7 +178,6 @@ async function fetchFavicon(url: string) {
 
   } catch (e) {
     console.log(`Icon could not be loaded:`, e);
-    _unthrow(null);
     return { url: null }
   }
 }
