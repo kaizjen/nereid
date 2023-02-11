@@ -67,7 +67,7 @@
   const { ipcRenderer, sendInternal } = window.nereid;
   import { getContext } from "svelte";
   import { fly } from "svelte/transition";
-  import { appear } from "//lib/transition.js";
+  import { appear, modalPageAnimations } from "//lib/transition.js";
   import Button from "//lib/Button.svelte";
   import Bookmark from "./Bookmark/Bookmark.svelte";
   import { cubicOut } from "svelte/easing";
@@ -157,55 +157,6 @@
     sendInternal('userData', 'bookmarks:setFolder', { folder: folderName, value: folder })
   }
 
-  function modalPageAnimations(node, { animationControls, duration = 200, easing = 'ease-out' }) {
-    let firstHeight;
-    let lastHeight;
-    let firstWidth;
-    let lastWidth;
-
-    animationControls.recordFirstSize = () => {
-      firstHeight = node.getBoundingClientRect().height
-      firstWidth = node.getBoundingClientRect().width
-    }
-    animationControls.recordLastSize = () => {
-      lastHeight = node.getBoundingClientRect().height
-      lastWidth = node.getBoundingClientRect().width
-    }
-    animationControls.setFirstSize = (rect) => {
-      firstHeight = rect.height
-      firstWidth = rect.width
-    }
-    animationControls.setLastSize = (rect) => {
-      lastHeight = rect.height
-      lastWidth = rect.width
-    }
-    animationControls.transition = () => {
-      if (firstHeight == null || lastHeight == null)
-        return console.warn("Error while creating animation - not all parameters were set")
-      ;
-
-      node.style.height = firstHeight + 'px';
-      node.style.width = firstWidth + 'px';
-      node.style.transition = `${easing} ${duration}ms`;
-      node.style.overflow = 'hidden';
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          node.style.height = lastHeight + 'px';
-          node.style.width = lastWidth + 'px';
-        })
-      })
-      setTimeout(() => {
-        node.style.height = '';
-        node.style.width = '';
-        node.style.transition = '';
-        node.style.overflow = '';
-        firstHeight = null;
-        lastHeight = null;
-        firstWidth = null;
-        lastWidth = null;
-      }, duration + 10)
-    }
-  }
 </script>
 <div
   class="dialog"
