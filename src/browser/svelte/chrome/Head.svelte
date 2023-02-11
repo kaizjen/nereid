@@ -61,6 +61,7 @@
     overflow-x: overlay;
     overflow-y: hidden;
     height: 100%;
+    padding-right: 1px; /* The right side of the tablist is sometimes clipped */
   }
   .tab {
     padding: 0.5rem;
@@ -68,7 +69,7 @@
     position: relative;
     white-space: nowrap;
     overflow: hidden;
-    width: 9.5rem;
+    width: var(--tab-width);
     font-size: 0.9rem;
     display: flex;
     align-items: center;
@@ -363,6 +364,7 @@
       class="tablist"
       on:mousedown={e => (e.button == 1) /* middle mb */ ? e.preventDefault() : null}
       on:wheel={e => e.deltaX == 0 ? smoothlyScroll(e.currentTarget, e.deltaY) : null}
+      style="--tab-width: {Math.max(14 - Math.sqrt(tabs.length), 8)}rem;"
     >
       {#each tabs as tab, id (tab)}
         <div
