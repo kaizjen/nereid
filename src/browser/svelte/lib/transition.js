@@ -13,19 +13,20 @@ export function appear(node, { delay = 0, duration = 400, easing: easing$1 = eas
   node.style.padding = '0';
   // Padding breaks the animation! The height will increase exponentially because of it! Use a wrapper for dialog padding.
 
+  const finalHeight = node.getBoundingClientRect().height;
+
   return {
       delay,
       duration,
       easing: easing$1,
       css: (_, u) => `
     transform: ${transform} translate(${u * x}px, ${u * y}px);
-    opacity: ${target_opacity - (od * u)};`,
+    opacity: ${target_opacity - (od * u)};
+    height: ${finalHeight - ((finalHeight * oppositeHeight) * u)}px`,
       tick(_, u) {
-        node.style.height = (node.scrollHeight - ((node.scrollHeight * oppositeHeight) * u)) + 'px';
-        if (u == 0) {
-          node.style.height = '';
-          node.style.overflow = '';
-        }
+        if (u != 0) return;
+        node.style.height = '';
+        node.style.overflow = '';
       }
   };
 }
