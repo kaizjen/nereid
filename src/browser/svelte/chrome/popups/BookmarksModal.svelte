@@ -166,9 +166,14 @@
   use:modalPageAnimations={{ animationControls, duration: 200, easing: 'cubic-bezier(0,.5,.44,.85)' }}
 >
   {#if page == 0}
+    <!--
+      For some reason, svelte only allows dynamic parameters in in: and out: attrubutes
+      and not in the transition: attribute.
+    -->
     <div
       class="dialog-content"
-      transition:fly={noAnimation ? { duration: 0 } : { duration: 200, x: -50, easing: cubicOut }}
+      in:fly={noAnimation ? { duration: 0 } : { duration: 200, x: -50, easing: cubicOut }}
+      out:fly={noAnimation ? { duration: 0 } : { duration: 200, x: -50, easing: cubicOut }}
       bind:this={page0}
       on:introstart={() => {
         if (noAnimation) return noAnimation = false;
@@ -235,9 +240,11 @@
       <Bookmark {selectedBookmarkIndex} {selectedFolder} bind:bookmarks bind:page />
     </div>
   {:else if page == 2}
+    <!-- See above for why both in: and out: are here. -->
     <div
       class="dialog-content"
-      transition:fly={{ duration: 200, x: isPage2Returning ? -50 : 50, easing: cubicOut }}
+      in:fly={{ duration: 200, x: 50, easing: cubicOut }}
+      out:fly={{ duration: 200, x: isPage2Returning ? -50 : 50, easing: cubicOut }}
       bind:this={page2}
       on:introstart={() => {
         animationControls.setLastSize(page2.getBoundingClientRect());
