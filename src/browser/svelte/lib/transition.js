@@ -57,17 +57,17 @@ export function modalPageAnimations(node, { animationControls, duration = 200, e
   animationControls.transition = () => {
     if (firstHeight == null || lastHeight == null)
       return console.warn("Error while creating animation - not all parameters were set")
-        ;
+    ;
+
+    node.scrollTop = 0;
 
     node.style.height = firstHeight + 'px';
     node.style.width = firstWidth + 'px';
     node.style.transition = `${easing} ${duration}ms`;
     node.style.overflow = 'hidden';
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        node.style.height = lastHeight + 'px';
-        node.style.width = lastWidth + 'px';
-      })
+      node.style.height = lastHeight + 'px';
+      node.style.width = lastWidth + 'px';
     })
     setTimeout(() => {
       node.style.height = '';
@@ -78,6 +78,6 @@ export function modalPageAnimations(node, { animationControls, duration = 200, e
       lastHeight = null;
       firstWidth = null;
       lastWidth = null;
-    }, duration + 10)
+    }, duration)
   }
 }
