@@ -8,12 +8,12 @@ export function appear(node, { delay = 0, duration = 400, easing: easing$1 = eas
   const od = target_opacity * (1 - opacity);
 
   const oppositeHeight = 1 - height
+  
+  const finalHeight = node.getBoundingClientRect().height;
 
-  node.style.overflow = 'hidden';
+  node.style.overflow = node.scrollHeight > finalHeight ? '' : 'hidden';
   node.style.padding = '0';
   // Padding breaks the animation! The height will increase exponentially because of it! Use a wrapper for dialog padding.
-
-  const finalHeight = node.getBoundingClientRect().height;
 
   return {
       delay,
