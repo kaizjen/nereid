@@ -522,6 +522,21 @@ export function attach(win: TabWindow, tab: Tab) {
 
       await userData.history.set(history);
     })
+    setImmediate(async () => {
+      let bookmarks = await userData.bookmarks.get();
+      for (const folder in bookmarks) {
+        const bms = bookmarks[folder];
+        const thisPage = bms.find(entry =>
+          entry.url == tab.webContents.getURL()
+        )
+        if (!thisPage) continue;
+        if (thisPage.iconURL == tab.faviconURL) continue;
+
+        thisPage.iconURL = tab.faviconURL;
+
+        await userData.bookmarks.set(bookmarks);
+      }
+    })
   })
   tab.webContents.on('will-prevent-unload', (e) => {
     // TODO: stop using this event in favor of 'will-navigate' (async)
