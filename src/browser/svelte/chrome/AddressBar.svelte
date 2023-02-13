@@ -204,6 +204,10 @@
     console.log('zoom is', $globalZoom, 'default:', $config?.ui.defaultZoomFactor)
   }
 
+  function isANewTabURL() {
+    return ['nereid://private/', 'nereid://newtab/'].includes(tab?.url)
+  }
+
   function updateInput() {
     // don't want to update the url when the user is typing something, because this can be frustrating during redirects
     if (isActive || !tab) return
@@ -211,7 +215,7 @@
     inputValue = tab.url;
     inputRef?.setSelectionRange(0, 0); // the domain should stay in front
 
-    if (['nereid://private/', 'nereid://newtab/'].includes(tab?.url)) {
+    if (isANewTabURL()) {
       url = {
         protocol: '',
         hostname: '',
@@ -403,7 +407,7 @@
       >
     </button>
   {/if}
-  {#if !url.protocol == 'nereid:'}
+  {#if url.protocol != 'nereid:' && !isANewTabURL()}
     <button
       class="ab-btn"
       on:click={() => bookmarkDialog = true}
