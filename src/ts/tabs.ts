@@ -327,7 +327,8 @@ export function removeTab(win: TabWindow, { tab, id }: { tab?: BrowserView, id?:
     // select different tab if we're closing the current one
     if (id == 0) {
       if (win.tabs.length < 2) {
-        if (keepAlive) return; //throw(new Error("tabManager.removeTab: The last tab can't be closed with keepAlive as true"));
+        if (keepAlive) return false;
+        win.removeBrowserView(tab);
         win.close(); // close the window if this is the last tab
 
       } else {
