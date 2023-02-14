@@ -39,7 +39,7 @@
   
 </script>
 
-<div class="dialog" in:appear={window.flyoutProperties} out:fly={window.flyoutProperties} on:outroend={() => setTop(false)}>
+<div class="dialog" in:appear={{...window.flyoutProperties, isStatic: true}} out:fly={window.flyoutProperties} on:outroend={() => setTop(false)}>
   <div class="dialog-content">
     <div class="title">
       <img

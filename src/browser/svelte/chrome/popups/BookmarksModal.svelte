@@ -160,7 +160,7 @@
 </script>
 <div
   class="dialog"
-  in:appear={window.flyoutProperties}
+  in:appear={{...window.flyoutProperties, isStatic: true}}
   out:fly={window.flyoutProperties}
   on:outroend={() => setTop(false)}
   use:modalPageAnimations={{ animationControls, duration: 200, easing: 'cubic-bezier(0,.5,.44,.85)' }}
