@@ -25,7 +25,7 @@
     background: var(--t-black-9)
   }
   .ab-btn {
-    display: contents;
+    display: flex;
   }
   .tab-state {
     height: 1.15rem;
