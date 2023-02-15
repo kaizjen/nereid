@@ -51,9 +51,22 @@ img {
   -webkit-user-drag: none;
 }
 a {
-  color: inherit;
-  cursor: default;
   text-decoration: none;
+  border-bottom: 2px solid var(--accent-6);
+  color: var(--accent-6);
+  cursor: pointer;
+  display: inline-block;
+  transition: .2s;
+}
+a:hover {
+  color: var(--accent-7);
+  border-color: var(--accent-7);
+}
+a:hover:active {
+  color: var(--accent-4);
+  border-color: var(--accent-4);
+  transition: .2s;
+  transform: translateY(1px);
 }
 
 

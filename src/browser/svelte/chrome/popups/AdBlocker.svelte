@@ -113,6 +113,14 @@
 
     reload()
   }
+
+  function openCliqzRepoF(isKey) {
+    return (event) => {
+      if (isKey && event.key != "Enter") return;
+      open = false;
+      ipcRenderer.send('newTab', { url: 'https://github.com/ghostery/adblocker' });
+    }
+  }
 </script>
 <div class="dialog" in:appear={window.flyoutProperties} out:fly={window.flyoutProperties} on:outroend={() => setTop(false)}>
   <main>
@@ -163,7 +171,9 @@
     {/if}
   </main>
   <footer>
-    Powered by Cliqz
+    <!-- svelte-ignore a11y-missing-attribute -->
+    <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+    Powered by <a tabindex="0" on:keypress={openCliqzRepoF(true)} on:click={openCliqzRepoF(false)}>Cliqz</a>
   </footer>
 </div>
 <div class="blocker" on:mousedown={() => open = false}></div>
