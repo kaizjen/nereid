@@ -16,7 +16,7 @@
     align-items: center;
     margin-block: .4rem;
   }
-  img {
+  .folder-icon {
     height: 2rem;
     width: 2rem; /* width is necessary because for a split second before the icon loads,
     the animation will glitch and it's gonna be really clunky */
@@ -104,7 +104,7 @@
   <div></div>
 </div>
 <div class="main">
-  <img src="n-res://{$colorTheme}/folder.svg" alt="">
+  <img class="folder-icon" src="n-res://{$colorTheme}/folder.svg" alt="">
   <input class="input" type="text" placeholder={_.NAME} bind:value={name}>
 </div>
 <div class="err">
