@@ -8,8 +8,13 @@ export function appear(node, { delay = 0, duration = 400, easing: easing$1 = eas
   const od = target_opacity * (1 - opacity);
 
   const oppositeHeight = 1 - height
-  
-  let finalHeight = node.getBoundingClientRect().height;
+
+  function getHeight() {
+    const style = getComputedStyle(node);
+    return node.getBoundingClientRect().height - parseFloat(style.borderTop) - parseFloat(style.borderBottom);
+  }
+
+  let finalHeight = getHeight();
 
   node.style.overflow = node.scrollHeight > finalHeight ? '' : 'hidden';
   node.style.padding = '0';
@@ -38,7 +43,7 @@ export function appear(node, { delay = 0, duration = 400, easing: easing$1 = eas
         if (!isStatic && tickCounter % 3 == 0) {
           let perf1 = performance.now()
           node.style.height = '';
-          finalHeight = node.getBoundingClientRect().height;
+          finalHeight = getHeight();
           node.style.height = `${finalHeight - ((finalHeight * oppositeHeight) * u)}px`;
           finalHeightRecalculationTime += (performance.now() - perf1);
         }
