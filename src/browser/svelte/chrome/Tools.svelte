@@ -91,13 +91,13 @@
   })
 
   function navBack() {
-    ipcRenderer.send('@tab', 'back')
+    ipcRenderer.send('currentTab.back')
   }
   function navFwd() {
-    ipcRenderer.send('@tab', 'fwd')
+    ipcRenderer.send('currentTab.forward')
   }
   function refresh(e) {
-    ipcRenderer.send('@tab', (e.shiftKey || e.ctrlKey) ? 'hardRefresh' : 'refresh')
+    ipcRenderer.send((e.shiftKey || e.ctrlKey) ? 'currentTab.hardRefresh' : 'currentTab.refresh')
   }
 </script>
 
@@ -124,7 +124,7 @@
   </button>
   <button class="tool" on:click={(e) => {
     let { bottom, left } = e.currentTarget.getBoundingClientRect()
-    ipcRenderer.send('chrome:browserMenu', {
+    ipcRenderer.send('chrome.browserMenu', {
       x: left, y: bottom
     })
   }}><img alt={_.MORE} src="n-res://{$colorTheme}/more.svg"></button>

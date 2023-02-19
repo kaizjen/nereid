@@ -154,7 +154,7 @@
       })
     }
 
-    sendInternal('userData', 'bookmarks:setFolder', { folder: folderName, value: folder })
+    sendInternal('userData.bookmarks.setFolder', { folder: folderName, value: folder })
   }
 
 </script>

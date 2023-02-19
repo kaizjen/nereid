@@ -80,8 +80,8 @@
     loading = true;
 
     try {
-      await sendInternal('userData', 'bookmarks:addFolder', { folder: name })
-      await sendInternal('userData', 'bookmarks:setFolder', { folder: name, value: [ thisBookmark ] })
+      await sendInternal('userData.bookmarks.addFolder', { folder: name })
+      await sendInternal('userData.bookmarks.setFolder', { folder: name, value: [ thisBookmark ] })
       
     } catch (error) {
       error = error + '';

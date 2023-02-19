@@ -50,7 +50,7 @@
       <b> {_.INFO({ zoom: Math.round(level * 100) })} </b>
     </div>
     <Button on:click={() => {
-      ipcRenderer.send('@tab', 'setZoom', $config?.ui.defaultZoomFactor);
+      ipcRenderer.send('currentTab.setZoom', $config?.ui.defaultZoomFactor);
       open = false;
     }}>
       {_.RESET}

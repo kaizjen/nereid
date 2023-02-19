@@ -49,7 +49,7 @@
   $: console.log(selectedIndex)
 
   let promise = new Promise(async resolve => {
-    cookies = await sendInternal('cookies', 'get', { url: page })
+    cookies = await sendInternal('cookies.get', { url: page })
     console.log('cookies', cookies);
     window.cookies = cookies
     resolve()
@@ -61,7 +61,7 @@
       url: `${getProtocol(page)}//${cookie.domain}${cookie.path}`,
       name: cookie.name
     });
-    await sendInternal('cookies', 'remove', {
+    await sendInternal('cookies.remove', {
       url: `${getProtocol(page)}//${cookie.domain}${cookie.path}`,
       name: cookie.name
     })

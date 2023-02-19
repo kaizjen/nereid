@@ -56,7 +56,7 @@
   export let tab;
   $: {
     tab; // When the tab changes, the tab's BrowserView is placed on top. So, if we have any alerts, we want to bring them to the top
-    ipcRenderer.send('chrome:setTop', true)
+    ipcRenderer.send('chrome.setTop', true)
   }
 
   const { t } = window;

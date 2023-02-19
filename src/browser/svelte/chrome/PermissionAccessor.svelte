@@ -43,7 +43,7 @@
   function updateMap() {
     permissionPendingMap = permissionPendingMap;
     requestAnimationFrame(() => {
-      ipcRenderer.send('chrome:setHeight', document.body.getBoundingClientRect().height)
+      ipcRenderer.send('chrome.setHeight', document.body.getBoundingClientRect().height)
     })
   }
 

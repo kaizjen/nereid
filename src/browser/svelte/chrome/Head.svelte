@@ -248,7 +248,7 @@
         ipcRenderer.send('closeTab', id)
       } else if (e.button == 2) {
         // rightclick
-        ipcRenderer.send('chrome:menu-of-tab', id)
+        ipcRenderer.send('chrome.menuOfTab', id)
       }
     }
   }
@@ -275,7 +275,7 @@
       if (isNaN(movedUID)) return;
       if (movedUID == zoneUID) return;
 
-      ipcRenderer.send('chrome:moveTab', movedUID, id)
+      ipcRenderer.send('chrome.moveTab', movedUID, id)
     }
   }
 
@@ -334,14 +334,14 @@
 
   function winActionF(msg) {
     return function () {
-      ipcRenderer.send('@window', msg)
+      ipcRenderer.send('window.' + msg)
     }
   }
 
   function setHeadHeight() {
     if (!headElement) return;
 
-    ipcRenderer.send('chrome:headHeight', headElement.getBoundingClientRect().height)
+    ipcRenderer.send('chrome.headHeight', headElement.getBoundingClientRect().height)
   }
 
   requestAnimationFrame(() => {
@@ -423,7 +423,7 @@
       <button
         id="addtab"
         on:click={newTab}
-        on:auxclick={() => ipcRenderer.send('chrome:menu-newTab')}
+        on:auxclick={() => ipcRenderer.send('chrome.menuNewTab')}
         draggable="true"
         on:dragstart={e => e.dataTransfer.setData('text/newTab', true)}
       >

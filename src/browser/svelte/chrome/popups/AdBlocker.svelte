@@ -93,7 +93,7 @@
   }()
 
   function reload() {
-    ipcRenderer.send('@tab', 'refresh');
+    ipcRenderer.send('currentTab.refresh');
     open = false;
   }
 
@@ -101,7 +101,7 @@
     abEnabled = false;
     $config.privacy.adblockerWhitelist.push(protocol + hostname);
     $config = $config;
-    sendInternal('userData', 'config:set', $config);
+    sendInternal('userData.config.set', $config);
 
     reload()
   }
@@ -109,7 +109,7 @@
   function turnOnAB() {
     abEnabled = false;
     $config.privacy.adblockerWhitelist = $config.privacy.adblockerWhitelist.filter(value => value != protocol + hostname);
-    sendInternal('userData', 'config:set', $config);
+    sendInternal('userData.config.set', $config);
 
     reload()
   }

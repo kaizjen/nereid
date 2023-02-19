@@ -151,7 +151,7 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
 
     chromeBV.webContents.zoomFactor = c.ui.chromeZoomFactor;
 
-    chromeBV.webContents.send('adjustHeight') // webContents will send a 'chrome:setHeight' message in return.
+    chromeBV.webContents.send('adjustHeight') // webContents will send a 'chrome.setHeight' message in return.
     prevChrZoomFactor = c.ui.chromeZoomFactor;
   }
   function onBookmarksChange(bms: Bookmarks) {

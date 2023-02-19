@@ -10,7 +10,7 @@
   }
 </style>
 <script>
-  const { ipcRenderer } = window.nereid;
+  const { ipcRenderer, sendInternal } = window.nereid;
   import Head from "./Head.svelte"
   import Tools from "./Tools.svelte";
   import { writable } from "svelte/store"
@@ -92,13 +92,13 @@
   window.flyoutProperties = { y: -4, duration: 200, easing: easeOutExpo(3), opacity: 0 };
 
   requestAnimationFrame(() => {
-    ipcRenderer.send('chrome:setHeight', document.body.getBoundingClientRect().height)
+    ipcRenderer.send('chrome.setHeight', document.body.getBoundingClientRect().height)
   })
   
   let changeToSetHeadHeight = {};
 
   ipcRenderer.on('adjustHeight', () => {
-    ipcRenderer.send('chrome:setHeight', document.body.getBoundingClientRect().height)
+    ipcRenderer.send('chrome.setHeight', document.body.getBoundingClientRect().height)
     changeToSetHeadHeight = {};
   })
 
@@ -110,13 +110,13 @@
   })
   setContext('downloads', {
     get() {
-      return ipcRenderer.invoke('userData/downloads', 'get')
+      return sendInternal('userData.downloads.get')
     },
     delete(index) {
-      return ipcRenderer.invoke('userData/downloads', 'del', index)
+      return sendInternal('userData.downloads.del', index)
     },
     create(index) {
-      return ipcRenderer.invoke('userData/downloads', 'start', index)
+      return sendInternal('userData.downloads.start', index)
     }
   })
 
@@ -125,7 +125,7 @@
     let el = document.elementFromPoint(obj.x, obj.y);
     if (!el || el.className.includes('blocker') || el == document.documentElement || el == document.body) {
       // means the mouse is not over any of the chrome's UI elements
-      ipcRenderer.send('@tab', 'inputEvent', type, obj)
+      ipcRenderer.send('currentTab.inputEvent', type, obj)
     }
   }
   const redirectMouseEvents = {
@@ -189,7 +189,7 @@
       }
     }
     isCurrentlyOnTop = isTop;
-    ipcRenderer.send('chrome:setTop', isTop)
+    ipcRenderer.send('chrome.setTop', isTop)
   })
 
   ipcRenderer.on('tabCursorChange', (_e, cursor) => {
@@ -237,7 +237,7 @@
     currentTab = id;
   })
 
-  ipcRenderer.on('tabUpdate', (_e, { type, id, value }) => {
+  ipcRenderer.on('tabUpdateLegacy', (_e, { type, id, value }) => {
     console.log('updating %o %s %o', id, type, value);
     switch (type) {
       case 'title':
@@ -274,6 +274,11 @@
     }
     tabs = tabs;
   })
+  ipcRenderer.on('tabUpdate', (_e, { index, state }) => {
+    console.log('updating tab %o with state %o', index, state);
+    Object.assign(tabs[index], state)
+    tabs = tabs;
+  })
 
   ipcRenderer.on('zoomUpdate', (_e, factor) => {
     $globalZoom = factor;
@@ -289,14 +294,14 @@
     }
     dialogsMap = dialogsMap;
 
-    ipcRenderer.send('chrome:setTop', true) // needs to not actually capture any mouse events
+    ipcRenderer.send('chrome.setTop', true) // needs to not actually capture any mouse events
   })
   ipcRenderer.on('dialog-close', (_e, uID) => {
     console.log('closeDialog', uID);
     delete dialogsMap[uID];
     dialogsMap = dialogsMap;
 
-    ipcRenderer.send('chrome:setTop', false)
+    ipcRenderer.send('chrome.setTop', false)
   })
 
   let wco = {}

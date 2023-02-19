@@ -250,7 +250,7 @@
       case 'Enter': {
         if (!hints[selectedHint]) {
           setTop(false);
-          ipcRenderer.send('@tab', 'go', inputValue)
+          ipcRenderer.send('currentTab.go', inputValue)
           
         } else {
           let hint = hints[selectedHint];

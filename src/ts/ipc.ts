@@ -48,7 +48,7 @@ export function init() {
     e.returnValue = t(str, other)
   })
 
-  ipcMain.on('@window', (e, action) => {
+  /* ipcMain.on('@window', (e, action) => {
     let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
     if (!win) return
 
@@ -73,7 +73,32 @@ export function init() {
       default:
         throw new Error("ipcManager.on[@window]: unknown action:" + action);
     }
-  });
+  }); */
+  function onWindow(channel: string, handler: (win: TabWindow, e: Electron.IpcMainEvent, ...args: any[]) => any) {
+    ipcMain.on(channel, (e, ...args: any[]) => {
+      let win = BrowserWindow.fromWebContents(e.sender);
+      if (!isTabWindow(win)) return;
+
+      handler(win, e, ...args)
+    })
+  }
+  onWindow('window.min', (win) => {
+    win.minimize()
+    win.once('restore', () => {
+      // explanation at menu.ts, on('menu-will-close')
+      win.chrome.webContents.sendInputEvent({
+        type: 'mouseMove',
+        x: 0, y: 0
+      })
+    })
+  })
+  onWindow('window.max', (win) => {
+    win.isMaximized() ? win.unmaximize() : win.maximize();
+  })
+  onWindow('window.close', (win) => {
+    win.close();
+  })
+
   ipcMain.on('@tab', (e, action, ...params) => {
     let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
     if (!win || !win.currentTab) return;
@@ -212,12 +237,118 @@ export function init() {
         throw new Error("ipcManager.on[@tab]: unknown action: " + action);
     }
   })
+  function onCurrentTab(channel: string, handler: (wc: WebContents, win: TabWindow, e: Electron.IpcMainEvent, ...args: any[]) => any) {
+    onWindow(channel, (win, e, ...args) => {
+      if (!win.currentTab) return;
+      let wc = win.currentTab.webContents;
+      handler(wc, win, e, ...args)
+    })
+  }
+  onCurrentTab('currentTab.back', (wc) => {
+    wc.goBack();
+  })
+  onCurrentTab('currentTab.forward', (wc) => {
+    wc.goForward();
+  })
+  onCurrentTab('currentTab.refresh', (wc) => {
+    wc.reload();
+  })
+  onCurrentTab('currentTab.hardRefresh', (wc) => {
+    wc.reloadIgnoringCache();
+  })
+  onCurrentTab('currentTab.setZoom', (wc, win, _e, zoom) => {
+    wc.zoomFactor = zoom;
+    win.chrome.webContents.send('zoomUpdate', wc.zoomFactor)
+  })
+  onCurrentTab('currentTab.go', (wc, win, _e, q) => {
+    console.log('go', q);
+
+    function search() {
+      let searchConfig = userData.config.get().search;
+      let SE = searchConfig.available[searchConfig.selectedIndex]
+
+      win.currentTab.lastNavigationReason = `searched:${q}`
+      wc.loadURL(SE.searchURL.replaceAll('%s', encodeURIComponent(q)))
+    }
+
+    if ($.isValidURL(q) && !q.includes(' ')) {
+      win.currentTab.lastNavigationReason = 'input-url'
+      const parsed = URLParse(q);
+      console.log((parsed));
+
+      if (parsed.protocol) {
+        if (!parsed.slashes) {
+          if (isNaN(Number(parsed.pathname))) search();
+          else {
+            // the hostname was probably incorrectly assumed to be the protocol,
+            // and whatever comes after the `:` is the port
+            wc.loadURL('http://' + q)
+          }
+        } else wc.loadURL(q);
+
+      } else wc.loadURL('http://' + q);
+
+    } else search();
+  })
+  onCurrentTab('currentTab.search', (wc, win, _e, q) => {
+    let searchConfig = userData.config.get().search;
+    let SE = searchConfig.available[searchConfig.selectedIndex]
+
+    win.currentTab.lastNavigationReason = `searched:${q}` // the 'via' property in history
+    wc.loadURL(SE.searchURL.replaceAll('%s', encodeURIComponent(q)))
+  })
+  onCurrentTab('currentTab.navigate', (wc, win, _e, url, isInputURL) => {
+    if (isInputURL) win.currentTab.lastNavigationReason = 'input-url'
+    wc.loadURL(url);
+  })
+  onCurrentTab('currentTab.stop', (wc) => {
+    wc.stop();
+  })
+  onCurrentTab('currentTab.inputEvent', (wc, win, _e, type: "mouseDown" | "mouseUp" | "mouseMove" | "mouseWheel", options: any) => {
+    // We're redirecting the mouse events so that even when chrome's BV is on top,
+    // it doesn't seem as it's blocking anything
+    const buttonMap = {
+      0: 'left' as const,
+      1: 'middle' as const,
+      2: 'right' as const
+    }
+    const timesZoom = n => n * win.chrome.webContents.zoomFactor
+
+    wc.sendInputEvent(
+      type == 'mouseWheel' ? {
+        type,
+        x: timesZoom(options.x),
+        y: timesZoom(options.y) - win.chromeHeight,
+        accelerationRatioX: options.accelX,
+        accelerationRatioY: options.accelY,
+        deltaX: options.deltaX,
+        deltaY: options.deltaY,
+      } :
+        {
+          type,
+          button: buttonMap[(options as any).button],
+          x: timesZoom(options.x),
+          y: timesZoom(options.y) - win.chromeHeight,
+          clickCount: 1
+        }
+    )
+  })
+  onCurrentTab('currentTab.find', (wc, _w, _e, value, options) => {
+    wc.findInPage(value, {
+      findNext: options.newSearch,
+      forward: options.forward,
+      matchCase: options.caseSensitive
+    })
+  })
+  onCurrentTab('currentTab.stopFind', (wc, _w, _e, clearSelection) => {
+    wc.stopFindInPage(clearSelection ? 'clearSelection' : 'keepSelection')
+  })
 
 
-  ipcMain.on('chrome:setHeight', (e, value: number) => {
-    let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
-    if (!win) return;
-
+  onCurrentTab('createDownload', (wc, _w, _e, url) => {
+    wc.downloadURL(url)
+  })
+  onWindow('chrome.setHeight', (win, _e, value: number) => {
     win.chromeHeight = Math.round(value * win.chrome.webContents.zoomFactor);
     console.log('height being set to', win.chromeHeight);
     
@@ -225,17 +356,11 @@ export function init() {
 
     setCurrentTabBounds(win)
   })
-  ipcMain.on('chrome:headHeight', (e, value: number) => {
-    let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
-    if (!win) return;
-
+  onWindow('chrome.headHeight', (win, _e, value: number) => {
     setHeadHeight(Math.round(value));
     console.log('head height being set to', Math.round(value));
   })
-  ipcMain.on('chrome:setTop', (e, isTop: boolean) => {
-    let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
-    if (!win) return;
-
+  onWindow('chrome.setTop', (win, _e, isTop: boolean) => {
     console.log('settop', isTop);
     if (isTop) {
       win.setTopBrowserView(win.chrome)
@@ -244,37 +369,22 @@ export function init() {
       win.setTopBrowserView(win.currentTab)
     }
   })
-  ipcMain.on('chrome:browserMenu', (e, pos) => {
-    let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
-    if (!win) return;
-
+  onWindow('chrome.browserMenu', (win, _e, pos) => {
     displayOptions(win, pos);
   })
-  ipcMain.on('chrome:menu-of-tab', (e, tabID: number) => {
-    let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
-    if (!win) return;
-
+  onWindow('chrome.menuOfTab', (win, _e, tabID: number) => {
     let tab = win.tabs[tabID];
     if (!tab) throw(new Error("ipcManager: no tab found in window"))
 
     menuOfTab(win, tab)
   })
-  ipcMain.on('chrome:menu-newTab', (e) => {
-    let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
-    if (!win) return;
-
+  onWindow('chrome.menuNewTab', (win) => {
     menuNewTab(win)
   })
-  ipcMain.on('chrome:menu-of-bookmark', (e, bookmark, index: number) => {
-    let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
-    if (!win) return;
-
+  onWindow('chrome.menuOfBookmark', (win, _e, bookmark, index: number) => {
     menuOfBookmark(win, bookmark, index)
   })
-  ipcMain.on('chrome:moveTab', (e, tabUID: number, newIndex: number) => {
-    let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
-    if (!win) return;
-    
+  onWindow('chrome.moveTab', (win, _e, tabUID: number, newIndex: number) => {
     tabManager.moveTab(tabManager.getTabByUID(tabUID), {
       window: win, index: newIndex
     })
@@ -577,303 +687,278 @@ export function init() {
     }
   })
   onInternal('userData', async(e, action, obj, obj2) => {
-    switch (action) {
-      case 'config': {
-        return userData.config.get()
-      }
-      case 'config:set': {
-        return userData.config.set(obj)
-      }
-      case 'config:subscribe': {
-        function sub(c: Configuration) {
-          if (e.sender.isDestroyed()) {
-            // had to resort to this terrible method because "destroyed" event doesn't fire (???)
-            unsub();
-            return;
-          }
-          e.sender.send('subscription:config', c)
-        }
-        function unsub() {
-          userData.config.unlisten(sub)
-        }
-        userData.config.listen(sub);
-        e.sender.once('did-navigate', unsub)
-      }
-
-      case 'lastlaunch': {
-        return userData.lastlaunch.get()
-      }
-      case 'lastlaunch:set': {
-        return userData.lastlaunch.set(obj)
-      }
-
-      case 'history': {
-        // obj is { entries: number, offset: number }
-        let history = await userData.history.get();
-        if (obj.offset) {
-          history = history.slice(obj.offset)
-        }
-        history.length = obj.entries;
-        return history;
-      }
-      case 'history:set': {
-        let history = obj;
-        return await userData.history.set(history)
-      }
-      case 'history:setAt': {
-        // obj is { index: number }
-        let history = await userData.history.get();
-        history[obj.index] = obj2;
-        return await userData.history.set(history)
-      }
-      case 'history:delAt': {
-        // obj is { index: number }
-        let history = await userData.history.get();
-        history.splice(obj.index, 1);
-        return await userData.history.set(history)
-      }
-      case 'history:find': {
-        // TODO: use Fuse for this
-        let history = await userData.history.get();
-        let i: number[];
-        function occurrences(string: string, subString: string, allowOverlapping?: boolean) {
-          // source: https://stackoverflow.com/a/7924240
-          string += "";
-          subString += "";
-          if (subString.length <= 0) return (string.length + 1);
-
-          var n = 0,
-            pos = 0,
-            step = allowOverlapping ? 1 : subString.length;
-
-          while (true) {
-            pos = string.indexOf(subString, pos);
-            if (pos >= 0) {
-              ++n;
-              pos += step;
-            } else break;
-          }
-          return n;
-        }
-
-        if (obj.type == 'text') {
-          obj.text = obj.text.trim().toLowerCase();
-          i = history.map((hi, i) => {
-            let likability = 0;
-            let title = decodeURI(hi.title).trim().toLowerCase()
-            let url = decodeURI(hi.url).trim().toLowerCase()
-            likability += (title.includes(obj.text) ? 1 : 0);
-            likability += (url.includes(obj.text) || url.includes(obj.text.replaceAll(' ', '-')) || url.includes(obj.text.replaceAll(' ', '_')) ? 1 : 0);
-            likability += (title.startsWith(obj.text) || title.endsWith(obj.text) ? 1 : 0);
-            likability += (url.startsWith(obj.text) || url.endsWith(obj.text) ? 1 : 0);
-            likability += occurrences(title, obj.text);
-
-            return {i, likability};
-
-          }).filter(l => l.likability > 3).sort((a, b) => b.likability - a.likability).map(x => x.i)
-          
-        } else {
-          let findDate = obj.date;
-          let c = obj.compare;
-          i = history.filter(({ timestamp }) => {
-            if (c == 'lt') {
-              return timestamp < findDate;
-
-            } else if(c == 'gt') {
-              return timestamp > findDate;
-
-            } else {
-              let date1 = new Date(timestamp);
-              let date2 = new Date(findDate);
-
-              return date1.getDate() == date2.getDate() && 
-                     date1.getMonth() == date2.getMonth() &&
-                     date1.getFullYear() == date2.getFullYear();
-            }
-
-          }).map(el => history.indexOf(el))
-        }
-        return i;
-      }
-
-      case 'downloads': {
-        return await userData.downloads.get()
-      }
-      case 'downloads:del': {
-        let dl = await userData.downloads.get();
-        dl.splice(obj, 1);
-        await userData.downloads.set(dl)
-        return true;
-      }
-      case 'downloads:start': {
-        let dl = await userData.downloads.get();
-        let { urlChain } = dl[obj];
-        getTabWindowByID(0).currentTab.webContents.downloadURL(urlChain.at(-1))
-        return true;
-      }
-
-      case 'bookmarks:getAllFolders': {
-        let bookmarks = await userData.bookmarks.get();
-        return Object.keys(bookmarks)
-      }
-      case 'bookmarks:getFolder': {
-        let bookmarks = await userData.bookmarks.get();
-        if (!(obj.folder in bookmarks)) throw `No such folder as "${obj.folder}"`;
-
-        return bookmarks[obj.folder];
-      }
-      case 'bookmarks:addFolder': {
-        let bookmarks = await userData.bookmarks.get();
-        if (obj.folder in bookmarks) throw `Folder "${obj.folder}" already exists.`;
-
-        bookmarks[obj.folder] = [];
-        return await userData.bookmarks.set(bookmarks)
-      }
-      case 'bookmarks:delFolder': {
-        let bookmarks = await userData.bookmarks.get();
-        if (!(obj.folder in bookmarks)) throw `Folder "${obj.folder}" doesn't exist.`;
-
-        delete bookmarks[obj.folder];
-        return await userData.bookmarks.set(bookmarks)
-      }
-      case 'bookmarks:setFolder': {
-        let bookmarks = await userData.bookmarks.get();
-        if (!(obj.folder in bookmarks)) throw `Folder "${obj.folder}" doesn't exist.`;
-
-        bookmarks[obj.folder] = obj.value;
-        return await userData.bookmarks.set(bookmarks)
-      }
-      case 'bookmarks:renFolder': {
-        let bookmarks = await userData.bookmarks.get();
-        if (!(obj.folder in bookmarks)) throw `Folder "${obj.folder}" doesn't exist.`;
-        if (obj.name in bookmarks) throw `Folder "${obj.folder}" already exists.`;
-
-        bookmarks[obj.name] = bookmarks[obj.folder];
-        delete bookmarks[obj.folder];
-        return await userData.bookmarks.set(bookmarks)
-      }
-
-      case 'control:get': {
-        return userData.control.dynamicControl;
-      }
-      case 'control:setOptions': {
-        return userData.control.set({...userData.control.dynamicControl, options: obj });
-      }
-      case 'control:setSwitches': {
-        return userData.control.set({...userData.control.dynamicControl, switches: obj });
-      }
-      case 'control:setArguments': {
-        return userData.control.set({...userData.control.dynamicControl, arguments: obj });
-      }
-
-      default:
-        throw new Error(`[userData] unknown command "${action}"`)
-    }
+    throw new Error(`[userData] is deprecated.`)
   })
+  onInternal('userData.config.get', () => {
+    return userData.config.get()
+  })
+  onInternal('userData.config.set', (_, obj) => {
+    return userData.config.set(obj)
+  })
+  onInternal('userData.config.subscribe', (e) => {
+    function sub(c: Configuration) {
+      if (e.sender.isDestroyed()) {
+        // had to resort to this terrible method because "destroyed" event doesn't fire (???)
+        unsub();
+        return;
+      }
+      e.sender.send('subscription:config', c)
+    }
+    function unsub() {
+      userData.config.unlisten(sub)
+    }
+    userData.config.listen(sub);
+    e.sender.once('did-navigate', unsub)
+  })
+
+  onInternal('userData.lastlaunch.get', () => {
+    return userData.lastlaunch.get()
+  })
+  onInternal('userData.lastlaunch.set', (_, obj) => {
+    return userData.lastlaunch.set(obj)
+  })
+
+  onInternal('userData.history.get', async (_, obj: { offset: number, entries: number }) => {
+    let history = await userData.history.get();
+    if (obj.offset) {
+      history = history.slice(obj.offset)
+    }
+    history.length = obj.entries;
+    return history;
+  })
+  onInternal('userData.history.set', async (_, obj) => {
+    let history = obj;
+    return await userData.history.set(history)
+  })
+  onInternal('userData.history.setAt', async (_, index: number, obj) => {
+    let history = await userData.history.get();
+    history[index] = obj;
+    return await userData.history.set(history)
+  })
+  onInternal('userData.history.delAt', async (_, index: number) => {
+    let history = await userData.history.get();
+    history.splice(index, 1);
+    return await userData.history.set(history)
+  })
+  onInternal('userData.history.find', async (_, query: { type: 'text', text: string } | { type: 'date', date: number, compare: 'lt' | 'gt' | 'eq' }) => {
+    // TODO: use Fuse for this
+    let history = await userData.history.get();
+    let i: number[];
+    function occurrences(string: string, subString: string, allowOverlapping?: boolean) {
+      // source: https://stackoverflow.com/a/7924240
+      string += "";
+      subString += "";
+      if (subString.length <= 0) return (string.length + 1);
+
+      var n = 0,
+        pos = 0,
+        step = allowOverlapping ? 1 : subString.length;
+
+      while (true) {
+        pos = string.indexOf(subString, pos);
+        if (pos >= 0) {
+          ++n;
+          pos += step;
+        } else break;
+      }
+      return n;
+    }
+
+    if (query.type == 'text') {
+      query.text = query.text.trim().toLowerCase();
+      i = history.map((hi, i) => {
+        let likability = 0;
+        let title = decodeURI(hi.title).trim().toLowerCase()
+        let url = decodeURI(hi.url).trim().toLowerCase()
+        likability += (title.includes(query.text) ? 1 : 0);
+        likability += (url.includes(query.text) || url.includes(query.text.replaceAll(' ', '-')) || url.includes(query.text.replaceAll(' ', '_')) ? 1 : 0);
+        likability += (title.startsWith(query.text) || title.endsWith(query.text) ? 1 : 0);
+        likability += (url.startsWith(query.text) || url.endsWith(query.text) ? 1 : 0);
+        likability += occurrences(title, query.text);
+
+        return { i, likability };
+
+      }).filter(l => l.likability > 3).sort((a, b) => b.likability - a.likability).map(x => x.i)
+
+    } else {
+      let findDate = query.date;
+      let c = query.compare;
+      i = history.filter(({ timestamp }) => {
+        if (c == 'lt') {
+          return timestamp < findDate;
+
+        } else if (c == 'gt') {
+          return timestamp > findDate;
+
+        } else {
+          let date1 = new Date(timestamp);
+          let date2 = new Date(findDate);
+
+          return date1.getDate() == date2.getDate() &&
+            date1.getMonth() == date2.getMonth() &&
+            date1.getFullYear() == date2.getFullYear();
+        }
+
+      }).map(el => history.indexOf(el))
+    }
+    return i;
+  })
+
+  onInternal('userData.downloads.get', async () => {
+    return await userData.downloads.get()
+  })
+  onInternal('userData.downloads.del', async (_, index) => {
+    let dl = await userData.downloads.get();
+    dl.splice(index, 1);
+    await userData.downloads.set(dl)
+    return true;
+  })
+  onInternal('userData.downloads.start', async (_, index) => {
+    let dl = await userData.downloads.get();
+    let { urlChain } = dl[index];
+    getTabWindowByID(0).currentTab.webContents.downloadURL(urlChain.at(-1))
+    return true;
+  })
+
+  onInternal('userData.bookmarks.getAllFolders', async () => {
+    let bookmarks = await userData.bookmarks.get();
+    return Object.keys(bookmarks)
+  })
+  onInternal('userData.bookmarks.getFolder', async (_, { folder }) => {
+    let bookmarks = await userData.bookmarks.get();
+    if (!(folder in bookmarks)) throw `No such folder as "${folder}"`;
+
+    return bookmarks[folder];
+  })
+  onInternal('userData.bookmarks.addFolder', async (_, { folder }) => {
+    let bookmarks = await userData.bookmarks.get();
+    if (folder in bookmarks) throw `Folder "${folder}" already exists.`;
+
+    bookmarks[folder] = [];
+    return await userData.bookmarks.set(bookmarks)
+  })
+  onInternal('userData.bookmarks.delFolder', async (_, { folder }) => {
+    let bookmarks = await userData.bookmarks.get();
+    if (!(folder in bookmarks)) throw `Folder "${folder}" doesn't exist.`;
+
+    delete bookmarks[folder];
+    return await userData.bookmarks.set(bookmarks)
+  })
+  onInternal('userData.bookmarks.setFolder', async (_, { folder, value }) => {
+    let bookmarks = await userData.bookmarks.get();
+    if (!(folder in bookmarks)) throw `Folder "${folder}" doesn't exist.`;
+
+    bookmarks[folder] = value;
+    return await userData.bookmarks.set(bookmarks)
+  })
+  onInternal('userData.bookmarks.renFolder', async (_, { folder, name }) => {
+    let bookmarks = await userData.bookmarks.get();
+    if (!(folder in bookmarks)) throw `Folder "${folder}" doesn't exist.`;
+    if (name in bookmarks) throw `Folder "${folder}" already exists.`;
+
+    bookmarks[name] = bookmarks[folder];
+    delete bookmarks[folder];
+    return await userData.bookmarks.set(bookmarks)
+  })
+
+  onInternal('userData.control.get', () => {
+    return userData.control.dynamicControl;
+  })
+  onInternal('userData.control.setOptions', (_, obj) => {
+    return userData.control.set({ ...userData.control.dynamicControl, options: obj });
+  })
+  onInternal('userData.control.setSwitches', (_, obj) => {
+    return userData.control.set({ ...userData.control.dynamicControl, switches: obj });
+  })
+  onInternal('userData.control.setArguments', (_, obj) => {
+    return userData.control.set({ ...userData.control.dynamicControl, arguments: obj });
+  })
+
   onInternalSync('getTheme', (e) => {
     e.returnValue = nativeTheme.shouldUseDarkColors ? 'dark' : 'light'
   })
-  onInternal('safeStorage', (_e, action, str, enc) => {
-    switch (action) {
-      case 'check': {
-        return safeStorage.isEncryptionAvailable()
-      }
-      case 'en': {
-        return safeStorage.encryptString(str).toString(enc || 'base64')
-      }
-      case 'de': {
-        return safeStorage.decryptString(Buffer.from(str as string, enc || 'base64'))
-      }
-    
-      default:
-        throw new Error(`[safeStorage] Unknown action: ${action}`)
-    }
+
+  onInternal('safeStorage.check', (_e) => {
+    return safeStorage.isEncryptionAvailable()
   })
-  onInternal('dialog', async(e, action: string, options) => {
+  onInternal('safeStorage.encrypt', (_e, str, enc) => {
+    return safeStorage.encryptString(str).toString(enc || 'base64')
+  })
+  onInternal('safeStorage.decrypt', (_e, str: string, enc) => {
+    return safeStorage.decryptString(Buffer.from(str, enc || 'base64'))
+  })
+
+  onInternal('dialog.dir', async(e, options) => {
     const win = BrowserWindow.fromWebContents(e.sender)
     if (!win) return;
-
-    switch (action) {
-      case 'dir': {
-        return await dialog.showOpenDialog(win, {
-          properties: [ 'openDirectory', 'createDirectory', ...(options.properties || []) ],
-          title: options.title,
-          message: options.message,
-          buttonLabel: options.buttonLabel,
-          filters: options.filters
-        })
-      }
-    
-      default:
-        throw new Error(`[dialog] unknown action: ${action}`)
-    }
+    return await dialog.showOpenDialog(win, {
+      properties: [ 'openDirectory', 'createDirectory', ...(options.properties || []) ],
+      title: options.title,
+      message: options.message,
+      buttonLabel: options.buttonLabel,
+      filters: options.filters
+    })
   })
-  onInternal('cookies', async(e, action: string, options) => {
-    const modalWindow = BrowserWindow.fromWebContents(e.sender);
-    const window = modalWindow.getParentWindow();
-    if (!window || !isTabWindow(window)) return;
+  onInternal('cookies', async (e, action: string, options) => {
+    throw new Error(`[cookies] is deprecated`);
+  })
+  function onCookies(channel: string, handler: (e: Electron.IpcMainInvokeEvent, cookies: Electron.Cookies, options: any) => any) {
+    onInternal('cookies.' + channel, (e, options) => {
+      const modalWindow = BrowserWindow.fromWebContents(e.sender);
+      const window = modalWindow.getParentWindow();
+      if (!window || !isTabWindow(window)) return;
 
-    const { cookies } = window.currentTab.private ? session.fromPartition(PRIVATE_PARTITION) : session.fromPartition(DEFAULT_PARTITION);
-    switch (action) {
-      case 'get': {
-        return await cookies.get({
-          url: options.url, domain: options.domain, name: options.name,
-          path: options.path, secure: options.secure, session: options.session
-        })
-      }
-      case 'remove': {
-        return await cookies.remove(options.url, options.name)
-      }
-      case 'set': {
-        return await cookies.set({
-          url: options.url, domain: options.domain, name: options.name,
-          path: options.path, secure: options.secure, value: options.value,
-          sameSite: options.sameSite, httpOnly: options.httpOnly, expirationDate: options.expirationDate
-        })
-      }
-    
-      default: throw new Error(`[cookies] unknown action: ${action}`);
-    }
+      const { cookies } = window.currentTab.private ? session.fromPartition(PRIVATE_PARTITION) : session.fromPartition(DEFAULT_PARTITION);
+      return handler(e, cookies, options)
+    })
+  }
+  onCookies('get', async (_, cookies, options) => {
+    return await cookies.get({
+      url: options.url, domain: options.domain, name: options.name,
+      path: options.path, secure: options.secure, session: options.session
+    })
+  })
+  onCookies('set', async (_, cookies, options) => {
+    return await cookies.set({
+      url: options.url, domain: options.domain, name: options.name,
+      path: options.path, secure: options.secure, value: options.value,
+      sameSite: options.sameSite, httpOnly: options.httpOnly, expirationDate: options.expirationDate
+    })
+  })
+  onCookies('remove', async (_, cookies, options) => {
+    return await cookies.remove(options.url, options.name)
   })
 
   onInternal('shell', (_e, action: string, arg: string) => {
     return shell[action](arg)
   })
 
-  onInternal('session', async(_e, action: string, arg) => {
+  onInternal('session.clear', async (_e, types) => {
     const ses = session.fromPartition(DEFAULT_PARTITION);
+    const available = [
+      'appcache', 'cookies', 'filesystem', 'indexdb',
+      'localstorage', 'shadercache', 'websql', 'serviceworkers', 'cachestorage'
+    ]
+    let storages = [];
 
-    switch (action) {
-      case 'clear': {
-        const available = [
-          'appcache', 'cookies', 'filesystem', 'indexdb',
-          'localstorage', 'shadercache', 'websql', 'serviceworkers', 'cachestorage'
-        ]
-        let storages = [];
-
-        for (const type in arg) {
-          const value = arg[type];
-          if (value && available.includes(type)) {
-            storages.push(type)
-          }
-        }
-
-        console.log('Clearing items:', storages);
-        
-        return await ses.clearStorageData({
-          storages
-        })
+    for (const type in types) {
+      const value = types[type];
+      if (value && available.includes(type)) {
+        storages.push(type)
       }
-      case 'getCertificate': {
-        if (arg in certificateCache) {
-          return certificateCache[arg]
-
-        } else throw(`No certificate of "${arg}" found.`)
-      }
-    
-      default:
-        throw new Error(`[session]: Unknown action: ${action}`);
     }
+
+    console.log('Clearing items:', storages);
+
+    return await ses.clearStorageData({
+      storages
+    })
+  })
+  onInternal('session.getCertificate', async (_e, hostname) => {
+    if (hostname in certificateCache) {
+      return certificateCache[hostname]
+
+    } else throw (`No certificate of "${hostname}" found.`)
   })
 
   function preventEvent(e: Electron.Event) {

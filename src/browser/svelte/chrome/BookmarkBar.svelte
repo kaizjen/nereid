@@ -73,12 +73,12 @@
       bookmarks = tree['@bookmarkBar']
 
     } else {
-      await nereid.sendInternal('userData', 'bookmarks:addFolder', { folder: '@bookmarkBar' })
+      await nereid.sendInternal('userData.bookmarks.addFolder', { folder: '@bookmarkBar' })
     }
   }
   ipcRenderer.on('userData/bookmarks', (_, arg) => update(arg))
 
-  const setHeight = () => ipcRenderer.send('chrome:setHeight', document.body.getBoundingClientRect().height)
+  const setHeight = () => ipcRenderer.send('chrome.setHeight', document.body.getBoundingClientRect().height)
   $: {
     $config?.ui.showBookmarks;
     pageURL;
@@ -90,7 +90,7 @@
 
   function ctxMenuF(bookmark, i) {
     return function () {
-      ipcRenderer.send('chrome:menu-of-bookmark', bookmark, i)
+      ipcRenderer.send('chrome.menuOfBookmark', bookmark, i)
     }
   }
 
@@ -107,7 +107,7 @@
         <button
           class="bookmark"
           title={bm.url}
-          on:click={() => ipcRenderer.send('@tab', 'navigate-hint', bm.url)}
+          on:click={() => ipcRenderer.send('currentTab.navigate', bm.url, true)}
           on:contextmenu|preventDefault={ctxMenuF(bm, i)}
         >
           {#if bm.iconURL}

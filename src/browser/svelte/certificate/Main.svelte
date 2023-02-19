@@ -9,7 +9,7 @@
 
   let certificateResult = {};
   let promise = new Promise(async y => {
-    certificateResult = await sendInternal('session', 'getCertificate', hostname);
+    certificateResult = await sendInternal('session.getCertificate', hostname);
     y();
   })
 </script>

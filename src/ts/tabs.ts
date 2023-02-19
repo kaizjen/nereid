@@ -36,6 +36,24 @@ const delayExecution = (function() {
   }
 })()
 
+type ChromeTabState = {
+  background: boolean
+  url: string
+  title: string
+  favicon: string | null
+  private: boolean
+  security: 'internal' | 'local' | true | false
+  isLoading: boolean
+  nav: {
+    canGoBack: boolean
+    canGoFwd: boolean
+  },
+  uid: number
+  crashDetails: Electron.RenderProcessGoneDetails | null
+  isPlaying: boolean
+  isMuted: boolean
+}
+
 
 export function getTabByUID(uid: number) {
   return tabUniqueIDs[uid];
@@ -148,8 +166,8 @@ function handleBeforeUnload<T>(wc: WebContents, proceed: () => T): Promise<false
 export function setMutedTab(win: TabWindow, tab: Tab, isMuted: boolean) {
   tab.webContents.setAudioMuted(isMuted);
   win.chrome.webContents.send('tabUpdate', {
-    type: 'muted', id: win.tabs.indexOf(tab),
-    value: isMuted
+    index: win.tabs.indexOf(tab),
+    state: { isMuted }
   })
 }
 
@@ -351,8 +369,8 @@ export function removeTab(win: TabWindow, { tab, id }: { tab?: BrowserView, id?:
 export function attach(win: TabWindow, tab: Tab) {
   let getTabID = () => win.tabs.indexOf(tab)
 
-  function sendUpdate(type: string, value: any) {
-    win.chrome.webContents.send('tabUpdate', { type, id: getTabID(), value })
+  function sendUpdate(state: Partial<ChromeTabState>) {
+    win.chrome.webContents.send('tabUpdate', { index: getTabID(), state })
   }
 
   tab.owner = win;
@@ -459,13 +477,13 @@ export function attach(win: TabWindow, tab: Tab) {
       console.log("Unable to execute content script in %o: %s", frame.url, err);
     });
   })
-  tab.webContents.on('did-start-loading', () => sendUpdate('status', true))
-  tab.webContents.on('did-stop-loading', () => sendUpdate('status', false))
-  tab.webContents.on('media-started-playing', () => sendUpdate('playing', true))
-  tab.webContents.on('media-paused', () => sendUpdate('playing', false))
+  tab.webContents.on('did-start-loading', () => sendUpdate({ isLoading: true }))
+  tab.webContents.on('did-stop-loading', () => sendUpdate({ isLoading: false }))
+  tab.webContents.on('media-started-playing', () => sendUpdate({ isPlaying: true }))
+  tab.webContents.on('media-paused', () => sendUpdate({ isPlaying: false }))
 
   tab.webContents.on('page-title-updated', (_e, title, isExplicit) => {
-    sendUpdate('title', title);
+    sendUpdate({ title });
     if (win.currentTab == tab) {
       setTitleOfWindow(win, tab)
     }
@@ -494,7 +512,7 @@ export function attach(win: TabWindow, tab: Tab) {
     if (tab.private) {
       // If in private mode, better not to fetch a favicon (the less requests - the better)
       tab.faviconURL = null;
-      sendUpdate('favicon', `n-res://${nativeTheme.shouldUseDarkColors ? 'dark' : 'light'}/private.svg`);
+      sendUpdate({ favicon: `n-res://${nativeTheme.shouldUseDarkColors ? 'dark' : 'light'}/private.svg` });
       return;
     }
     
@@ -508,7 +526,7 @@ export function attach(win: TabWindow, tab: Tab) {
     } else {
       tab.faviconURL = null
     }
-    if (previousDataURL != tab.faviconDataURL) sendUpdate('favicon', tab.faviconDataURL)
+    if (previousDataURL != tab.faviconDataURL) sendUpdate({ favicon: tab.faviconDataURL })
     setImmediate(async () => {
       let history = await userData.history.get();
       const thisPage = history.find(entry => 
@@ -554,25 +572,30 @@ export function attach(win: TabWindow, tab: Tab) {
   tab.webContents.on('did-navigate', async(_e, _u, respCode) => {
     const url = tab.webContents.getURL(); // not using the url argument because it doesnt show `view-source:` urls
 
-    sendUpdate('url', url);
-    sendUpdate('title', tab.webContents.getTitle()); 
-    sendUpdate('nav', {
-      canGoBack: tab.webContents.canGoBack(),
-      canGoFwd: tab.webContents.canGoForward(),
+    sendUpdate({ url });
+    sendUpdate({ title: tab.webContents.getTitle() }); 
+    sendUpdate({
+      nav: {
+        canGoBack: tab.webContents.canGoBack(),
+        canGoFwd: tab.webContents.canGoForward(),
+      }
     })
 
-    sendUpdate('favicon', null)
+    sendUpdate({ favicon: null })
     tab.faviconURL = null;
 
-    sendUpdate('sec', checkSecurity(url))
+    sendUpdate({ security: checkSecurity(url) })
 
     pushToHistory(tab, respCode)
   })
   tab.webContents.on('did-navigate-in-page', (_e, _url, isMainFrame) => {
-    isMainFrame ? sendUpdate('url', tab.webContents.getURL()) : null;
-    sendUpdate('nav', {
-      canGoBack: tab.webContents.canGoBack(),
-      canGoFwd: tab.webContents.canGoForward(),
+    if (!isMainFrame) return;
+    sendUpdate({ url: tab.webContents.getURL() });
+    sendUpdate({
+      nav: {
+        canGoBack: tab.webContents.canGoBack(),
+        canGoFwd: tab.webContents.canGoForward(),
+      }
     })
 
     pushToHistory(tab)
@@ -581,25 +604,27 @@ export function attach(win: TabWindow, tab: Tab) {
     handleNetError(tab.webContents, e, code, desc, url, isMainFrame, ...args)
 
     if (!isMainFrame) return;
-    sendUpdate('url', url);
-    sendUpdate('nav', {
-      canGoBack: tab.webContents.canGoBack(),
-      canGoFwd: tab.webContents.canGoForward(),
+    sendUpdate({ url });
+    sendUpdate({
+      nav: {
+        canGoBack: tab.webContents.canGoBack(),
+        canGoFwd: tab.webContents.canGoForward(),
+      }
     })
     if (url.startsWith('file:')) {
-      sendUpdate('sec', 'local')
+      sendUpdate({ security: 'local' })
 
     } else if (url.startsWith('nereid:')) {
-      sendUpdate('sec', 'internal')
+      sendUpdate({ security: 'internal' })
 
     } else {
-      sendUpdate('sec', false)
+      sendUpdate({ security: false })
     }
   })
-  tab.webContents.on('render-process-gone', (_e, details) => {
-    sendUpdate('crash', details)
+  tab.webContents.on('render-process-gone', (_e, crashDetails) => {
+    sendUpdate({ crashDetails })
     tab.webContents.once('did-start-loading', () => {
-      sendUpdate('crash', null)
+      sendUpdate({ crashDetails: null })
     })
   })
   tab.webContents.on('zoom-changed', (_e, direction) => {
@@ -766,20 +791,20 @@ export function moveTab(tab: Tab, destination: { window: TabWindow, index: numbe
   }
 
   window.chrome.webContents.send('tabUpdate', {
-    type: 'title', id: index,
-    value: tab.webContents.getTitle() || tab.webContents.getURL()
+    index,
+    state: { title: tab.webContents.getTitle() || tab.webContents.getURL() }
   })
   window.chrome.webContents.send('tabUpdate', {
-    type: 'sec', id: index,
-    value: checkSecurity(tab.webContents.getURL())
+    index,
+    state: { security: checkSecurity(tab.webContents.getURL()) }
   })
   window.chrome.webContents.send('tabUpdate', {
-    type: 'playing', id: index,
-    value: tab.webContents.isCurrentlyAudible()
+    index,
+    state: { isPlaying: tab.webContents.isCurrentlyAudible() }
   })
   window.chrome.webContents.send('tabUpdate', {
-    type: 'muted', id: index,
-    value: tab.webContents.isAudioMuted()
+    index,
+    state: { isMuted: tab.webContents.isAudioMuted() }
   })
 
   selectTab(window, { id: index })

@@ -83,10 +83,10 @@
       isActive = false;
       setTop(false);
       if (hint.internal == 'url') {
-        ipcRenderer.send('@tab', 'navigate-hint', hint.url);
+        ipcRenderer.send('currentTab.navigate', hint.url, true);
         
       } else {
-        ipcRenderer.send('@tab', 'search', hint.text);
+        ipcRenderer.send('currentTab.search', hint.text);
       }
     }
   }

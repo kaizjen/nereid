@@ -117,7 +117,7 @@
   let matchIndexes = {};
 
   function stop(clear = false) {
-    ipcRenderer.send('@tab', 'stopFind', clear)
+    ipcRenderer.send('currentTab.stopFind', clear)
     shouldStop = true;
   }
 
@@ -171,7 +171,7 @@
       stop()
     }
     requestAnimationFrame(() => {
-      ipcRenderer.send('chrome:setHeight', document.body.getBoundingClientRect().height)
+      ipcRenderer.send('chrome.setHeight', document.body.getBoundingClientRect().height)
     })
   }
 
@@ -179,12 +179,12 @@
     if (!values[index]) return;
 
     shouldStop = false;
-    ipcRenderer.send('@tab', 'find', values[index], { newSearch: true, caseSensitive })
+    ipcRenderer.send('currentTab.find', values[index], { newSearch: true, caseSensitive })
   }
   function findNextF(forward) {
     return () => {
       if (!values[index]) return;
-      ipcRenderer.send('@tab', 'find', values[index], { forward, newSearch: false, caseSensitive })
+      ipcRenderer.send('currentTab.find', values[index], { forward, newSearch: false, caseSensitive })
     }
   }
 
