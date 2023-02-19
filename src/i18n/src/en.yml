@@ -1,9 +1,9 @@
 name: Nereid
 unimplemented: This feature is unimplemented
 configVersionMismatch:
-  title: The settings file is for a newer or unsupported version of Nereid, and,
-    therefore, cannot be read. Press "Overwrite" to overwrite the file, losing
-    all settings. Press "Exit" to exit Nereid.
+  title: The settings file is for a newer or unsupported version of Nereid so it
+    cannot be read. Press "Overwrite" to reset your data (including bookmarks
+    and history!). Press "Exit" to exit Nereid.
   button-overwrite: Overwrite
   button-exit: Exit
 common:
@@ -175,8 +175,8 @@ ui:
         functionality of ${hostname}, it's recommended to turn it on.
       malfunction: The adblocker failed to load correctly or a critical error occured
         while it was loading.
-      notReady: The page was loaded before the adblocker, so ads and trackers weren't
-        blocked.
+      notReady: The page was loaded before the adblocker, so not all ads and trackers
+        were blocked
       button-reload: Reload the page
   zoom:
     altMessage: Zoom is ${zoom}%
@@ -289,7 +289,7 @@ net-error:
       for example, in a frame on another page.
   blockedbyCSP:
     - The request was blocked by Content Security Policy.
-    - <a target='-blank'
+    - <a target='_blank'
       href='https://en.wikipedia.org/wiki/Content_Security_Policy'
       class='btn'>Learn more about CSP. (Wikipedia)</a>
   closed:
@@ -298,9 +298,8 @@ net-error:
     - The connection was reset.
     - >
       Something prevented Nereid from connecting to the host. Maybe your
-      firewall blocked the request,
-
-      or your internet provider might've blocked the connection, or the server unexpectedly stopped.
+      firewall blocked the request, or your internet provider might've blocked
+      the connection, or the server unexpectedly stopped.
   refused:
     - Connection refused.
   failed:
@@ -319,7 +318,7 @@ net-error:
   noHTTPS:
     - This site cannot establish a secure connection.
     - Perhaps, there was a mismatch of the SSL version used by the client and
-      the server. Also, check if this site supports HTTPS connection at all.
+      the server. Also, check if this site supports HTTPS connections at all.
   invalidURL:
     - The URL is invalid
     - The page at '<b>${url}</b>' doesn't exist or was moved to another address.
@@ -330,8 +329,8 @@ menu:
     newPrivateTab: New Private tab
     quit: Quit
   tray:
-    state-ready: ${this.name} is ready
-    state-processing: ${this.name} is running background processes...
+    state-ready: Nereid is ready
+    state-processing: Nereid is running background processes...
   tabs:
     close: Close tab
     openClosed: Open closed tab
@@ -419,11 +418,10 @@ pages:
       title: Choose your language
       note: >
         Note: not all languages are supported by Nereid. If you pick an
-        unsupported language, you will be additionally prompted to select
-
-        the language of Nereid. The websites will still be displayed in your selected language, but Nereid's interface will be in one that
-
-        you have selected for it specifically.
+        unsupported language, you will be additionally prompted to select the
+        language of Nereid. The websites will still be displayed in your
+        selected language, but Nereid's interface will be in one that you have
+        selected for it specifically.
       noTranslation: "Nereid is not translated to your language. Pick a language for Nereid:"
       restartNotice: Nereid will restart when you apply the change
     themes:
