@@ -686,9 +686,6 @@ export function init() {
       e.returnValue = { error: `Error: ${_err}` }
     }
   })
-  onInternal('userData', async(e, action, obj, obj2) => {
-    throw new Error(`[userData] is deprecated.`)
-  })
   onInternal('userData.config.get', () => {
     return userData.config.get()
   })
@@ -898,9 +895,6 @@ export function init() {
       buttonLabel: options.buttonLabel,
       filters: options.filters
     })
-  })
-  onInternal('cookies', async (e, action: string, options) => {
-    throw new Error(`[cookies] is deprecated`);
   })
   function onCookies(channel: string, handler: (e: Electron.IpcMainInvokeEvent, cookies: Electron.Cookies, options: any) => any) {
     onInternal('cookies.' + channel, (e, options) => {
