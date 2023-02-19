@@ -65,7 +65,7 @@
 <script>
   export let isOpen;
   export let tab;
-  const { ipcRenderer } = window.nereid
+  const { ipcRenderer, sendInternal } = window.nereid
   import { getContext } from 'svelte/internal';
   import { fly } from 'svelte/transition';
   import { appear } from "//lib/transition.js";
@@ -164,8 +164,7 @@
         {#each Object.keys(thisPermissions) as key}
           <Permission name={key} value={thisPermissions[key]} on:change={({ detail }) => {
             thisPermissions[key] = detail;
-            ipcRenderer.invoke('internal:userData', 'config:set', $config);
-            // TODO: make IPC shared by chrome and nereid:// pages
+            sendInternal('userData.config.set', $config);
           }} defaultValue={defaultPermissions[key]} />
         {/each}
       {/if}
