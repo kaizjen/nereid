@@ -621,6 +621,28 @@ export function attach(win: TabWindow, tab: Tab) {
       sendUpdate({ security: false })
     }
   })
+  tab.webContents.on('dom-ready', async() => {
+      // Update the thumbnail in bookmarks
+    const code = `document.querySelector('meta[property="og:image"]')?.getAttribute('content')`;
+    const ogImage = await tab.webContents.mainFrame.executeJavaScript(code)
+      .catch(e => console.log('ogImage failed:', e)) as string
+    ;
+    if (!ogImage) return;
+
+    let bookmarks = await userData.bookmarks.get();
+    for (const folder in bookmarks) {
+      const bms = bookmarks[folder];
+      const thisPage = bms.find(entry =>
+        entry.url == tab.webContents.getURL()
+      )
+      if (!thisPage) continue;
+      if (thisPage.thumbnailURL == ogImage) continue;
+
+      thisPage.thumbnailURL = ogImage;
+
+      await userData.bookmarks.set(bookmarks);
+    }
+  })
   tab.webContents.on('render-process-gone', (_e, crashDetails) => {
     sendUpdate({ crashDetails })
     tab.webContents.once('did-start-loading', () => {
