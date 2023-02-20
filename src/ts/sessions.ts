@@ -329,7 +329,7 @@ export function registerSession(ses: Session) {
     } else {
       item.setSaveDialogOptions({
         title: 'Save file',
-        defaultPath: '/',
+        defaultPath: item.getFilename(),
         properties: [ 'showHiddenFiles', 'createDirectory', 'showOverwriteConfirmation' ]
       })
     }
