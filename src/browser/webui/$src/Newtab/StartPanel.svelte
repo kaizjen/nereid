@@ -87,6 +87,7 @@
       currentName = bookmarks[i].name;
       currentURL = bookmarks[i].url;
       mode = MODE_EDITING;
+      window.lockKeyEvents()
     }
   }
 
@@ -129,7 +130,7 @@
         <b class="title">
           {mode == MODE_EDITING ? tt('edit-panel', { name: bookmarks[editTargetIndex].name }) : tt('add-panel')}
         </b>
-        <IconButton on:click={() => mode = MODE_NONE}>
+        <IconButton on:click={() => { mode = MODE_NONE; window.unlockKeyEvents() }}>
           <Icons.Close />
         </IconButton>
       </div>
@@ -162,7 +163,7 @@
             url: '#',
             iconURL: `//res/plus-${isDark ? 'white' : 'black'}.svg`,
             name: tt('addItem')
-            }} i={-1} isReal={false} on:click={() => mode = MODE_CREATING} />
+            }} i={-1} isReal={false} on:click={() => { mode = MODE_CREATING; window.lockKeyEvents(); }} />
       {/await}
     </div>
   </div>
