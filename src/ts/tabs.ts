@@ -544,6 +544,8 @@ export function attach(win: TabWindow, tab: RealTab) {
     if (previousDataURL != tab.faviconDataURL) sendUpdate({ favicon: tab.faviconDataURL })
     setImmediate(async () => {
       let history = await userData.history.get();
+      if (!tab.webContents) return; // sometimes the tab is already closed at this point
+
       const thisPage = history.find(entry => 
         entry.sessionUUID == global.SESSION_UUID &&
         entry.tabUID == tab.uniqueID &&
@@ -558,6 +560,8 @@ export function attach(win: TabWindow, tab: RealTab) {
     })
     setImmediate(async () => {
       let bookmarks = await userData.bookmarks.get();
+      if (!tab.webContents) return;
+
       for (const folder in bookmarks) {
         const bms = bookmarks[folder];
         const thisPage = bms.find(entry =>
