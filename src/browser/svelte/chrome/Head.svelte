@@ -76,6 +76,10 @@
     flex-shrink: 0;
     border: 1px solid transparent;
     border-bottom: 1px solid transparent !important;
+    border-radius: 0.25rem 0.25rem 0px 0px;
+    margin-top: 1px;
+    transform: translateY(-1px);
+    box-sizing: border-box;
   }
   *:active > .tab {
     transition: 0s;
@@ -85,7 +89,6 @@
   }
   .tab.selected {
     background: var(--active-background);
-    border-radius: 0.25rem 0.25rem 0px 0px;
     border-color: var(--t-white-5);
     box-shadow: 0px 1px 0px 0px var(--active-background); /* removes the part of the border of <Tools> */
     transition: 0s;
@@ -364,7 +367,7 @@
       class="tablist"
       on:mousedown={e => (e.button == 1) /* middle mb */ ? e.preventDefault() : null}
       on:wheel={e => e.deltaX == 0 ? smoothlyScroll(e.currentTarget, e.deltaY) : null}
-      style="--tab-width: {Math.max(14 - Math.sqrt(tabs.length), 8)}rem;"
+      style="--tab-width: {Math.max(15 - Math.sqrt(tabs.length), 9)}rem;"
     >
       {#each tabs as tab, id (tab)}
         <div
