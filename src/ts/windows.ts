@@ -190,7 +190,7 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
       let vars: { left: number, right: number } = JSON.parse(arg);
   
       function proceed() {
-        if (thisChange != currentChange) return; // geometrychange has been fired
+        if (thisChange != currentChange) return; // geometrychange has been fired and was already processed
         WCO_BOUNDS = {
           left: vars.left,
           right: w.getContentBounds().width - vars.right
