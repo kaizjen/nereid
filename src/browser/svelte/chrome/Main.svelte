@@ -220,7 +220,7 @@
     })
     tabs = tabs;
 
-    if (opts.position <= currentTab) {
+    if (opts.position <= currentTab && tabs.length > 1) {
       currentTab += 1;
     }
   })

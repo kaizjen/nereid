@@ -400,6 +400,7 @@ menu:
     duplicate: Дублировать вкладку
     sound-mute: Выключить звук на вкладке
     sound-unmute: Включить звук на вкладке
+    openInNewWindow: Вынести вкладку в отдельное окно
     close-this: Закрыть вкладку
     close-others: Закрыть другие вкладки
     close-right: Закрыть вкладки справа

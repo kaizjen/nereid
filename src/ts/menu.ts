@@ -6,7 +6,7 @@ import { isTabWindow, newWindow, setCurrentTabBounds } from './windows'
 import { bookmarks, config, control, downloads } from './userdata'
 import * as pathModule from "path";
 import * as fs from "fs"
-import { asRealTab, closeTab, createTab, openClosedTab, setMutedTab, toRealTab } from './tabs'
+import { asRealTab, closeTab, createTab, moveTab, openClosedTab, setMutedTab, toRealTab } from './tabs'
 import $ from './vars'
 import fetch from "electron-fetch";
 import type { Response } from "electron-fetch"
@@ -856,6 +856,11 @@ export function menuOfTab(win: TabWindow, tab: Tab) {
   } else {
     addItem({ label: $t('sound-mute'), click() { setMutedTab(win, tab, true) } })
   }
+  addItem(SEPARATOR)
+  addItem({ label: $t('openInNewWindow'), async click() {
+    const window = await newWindow([]);
+    moveTab(tab, { window, index: 0 })
+  } })
   addItem(SEPARATOR)
   addItem({
     label: $t('close-this'), accelerator: 'Ctrl+W', async click() {

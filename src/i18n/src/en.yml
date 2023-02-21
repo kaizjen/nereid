@@ -400,6 +400,7 @@ menu:
     duplicate: Duplicate tab
     sound-mute: Mute tab
     sound-unmute: Unmute tab
+    openInNewWindow: Open this tab in a new window
     close-this: Close tab
     close-others: Close other tabs
     close-right: Close tabs to the right

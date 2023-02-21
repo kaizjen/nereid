@@ -184,12 +184,16 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
     await w.webContents.loadURL('data:text/html,')
     let currentChange = -1;
     w.webContents.on('ipc-message', (_e, _ch, arg) => {
+      // This on('ipc-message') is called two times for reliability
       currentChange++;
       const thisChange = currentChange;
 
       let vars: { left: number, right: number } = JSON.parse(arg);
   
       function proceed() {
+        // Sometimes, the first call to proceed() will be executed after the second on('ipc-message')
+        // call, which is more reliable. (The second call to on() is done because of the 'geometrychange' event)
+        // Here, we prevent proceed() from running in this case.
         if (thisChange != currentChange) return; // geometrychange has been fired and was already processed
         WCO_BOUNDS = {
           left: vars.left,
