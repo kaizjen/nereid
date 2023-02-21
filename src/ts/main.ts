@@ -11,6 +11,7 @@ import * as pathModule from "path"
 import $ from "./vars";
 import { t } from "./i18n";
 import { setup } from "./adblocker";
+import { asRealTab } from "./tabs";
 
 require('tls').DEFAULT_ECDH_CURVE = 'auto' // fix handshake error
 
@@ -49,9 +50,10 @@ if (userData.lastlaunch.get().launchFailed) {
     if (c.ui.defaultZoomFactor != oldConfig.ui.defaultZoomFactor) {
       getAllTabWindows().forEach(w => {
         w.tabs.forEach(t => {
-          if (t.webContents.zoomFactor == oldConfig.ui.defaultZoomFactor) {
+          if (t.isGhost) return;
+          if (asRealTab(t).webContents.zoomFactor == oldConfig.ui.defaultZoomFactor) {
             // changes the zoom only if it hasn't been changed before
-            t.webContents.zoomFactor = c.ui.defaultZoomFactor;
+            asRealTab(t).webContents.zoomFactor = c.ui.defaultZoomFactor;
           }
         })
       })

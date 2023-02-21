@@ -4,7 +4,7 @@ import { ipcMain, BrowserWindow, clipboard, nativeTheme, safeStorage, dialog, sh
 import type { WebContents, IpcMainEvent } from "electron";
 import fetch from "electron-fetch";
 import * as userData from "./userdata";
-import type { TabWindow, TabOptions, Configuration } from "./types"
+import type { TabWindow, TabOptions, Configuration, RealTab } from "./types"
 import $ from "./vars";
 import * as tabManager from './tabs'
 import * as _url from "url";
@@ -27,7 +27,7 @@ export function createDialog(wc: WebContents, type: string, arg: any): Promise<s
     let win = BrowserWindow.fromWebContents(wc) as TabWindow;
     if (!win || !isTabWindow(win)) { resolve(null); return; }
 
-    let { uniqueID: id } = win.tabs.find(tab => tab.webContents == wc);
+    let { uniqueID: id } = win.tabs.find(tab => (tab as RealTab).webContents == wc);
     if (id == -1) { resolve(null); return; }
 
     function handleResponse(_e, channel: string, tabUID: number, response: string | null | boolean) {
@@ -314,17 +314,17 @@ export function init() {
 
   ipcMain.handle('getPageImageURL', async(e, imageType: 'preview' | 'thumbnail' | 'favicon', tabUID: number) => {
     const tab = tabManager.getTabByUID(tabUID);
-    if (!tab) return;
+    if (!tab || tab.isGhost) return;
 
     if (imageType == 'favicon') return tab.faviconURL;
 
     const code = `document.querySelector('meta[property="og:image"]')?.getAttribute('content')`;
-    const ogImage = await tab.webContents.mainFrame.executeJavaScript(code).catch(e => console.log('getPageImageURL failed:', e));
+    const ogImage = await tabManager.asRealTab(tab).webContents.mainFrame.executeJavaScript(code).catch(e => console.log('getPageImageURL failed:', e));
     if (ogImage) return ogImage;
 
     switch (imageType) {
       case 'preview': {
-        const screenshot = await tab.webContents.capturePage();
+        const screenshot = await tabManager.asRealTab(tab).webContents.capturePage();
         return 'data:image/png;base64,' + screenshot.toPNG().toString('base64')
       }
       case 'thumbnail': {
@@ -898,7 +898,7 @@ export function init() {
     const win = BrowserWindow.fromWebContents(e.sender) as TabWindow
     if (!win || !isTabWindow(win)) return;
 
-    let tab = win.tabs.find(t => t.webContents == e.sender);
+    let tab = win.tabs.find(t => (t as RealTab).webContents == e.sender);
     if (!tab) throw "No tab found in window"
 
     tabManager.closeTab(win, { tab })

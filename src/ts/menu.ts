@@ -1,12 +1,12 @@
 // Manages all menu stuff
 
 import { app, clipboard, dialog, Menu, MenuItem, session } from "electron";
-import { Bookmark, Tab, TabOptions, TabWindow } from "./types";
+import { Bookmark, RealTab, Tab, TabOptions, TabWindow } from "./types";
 import { isTabWindow, newWindow, setCurrentTabBounds } from './windows'
 import { bookmarks, config, control, downloads } from './userdata'
 import * as pathModule from "path";
 import * as fs from "fs"
-import { closeTab, createTab, openClosedTab, setMutedTab } from './tabs'
+import { asRealTab, closeTab, createTab, openClosedTab, setMutedTab, toRealTab } from './tabs'
 import $ from './vars'
 import fetch from "electron-fetch";
 import type { Response } from "electron-fetch"
@@ -549,7 +549,7 @@ export async function displayOptions(win: TabWindow, { x, y }) {
   })
 }
 
-export async function showContextMenu(win: TabWindow | false, tab: Tab, opts: Electron.ContextMenuParams) {
+export async function showContextMenu(win: TabWindow | false, tab: RealTab, opts: Electron.ContextMenuParams) {
   //console.log(opts);
 
   function createContextTab(opts: TabOptions) {
@@ -835,22 +835,22 @@ export function menuOfTab(win: TabWindow, tab: Tab) {
     focusChrome(win)
   } })
   addItem(SEPARATOR)
-  addItem({ label: t('navigation.reload'), click() { tab.webContents.reload() } })
+  addItem({ label: t('navigation.reload'), click() { toRealTab(tab).webContents.reload() } })
   addItem({
     label: $t('reloadAll'), click() {
       win.tabs.forEach(t => {
-        t.webContents.reload()
+        toRealTab(t).webContents.reload()
       })
     }
   })
-  addItem({ label: $t('copyURL'), click() { tab.webContents.getURL() } })
+  addItem({ label: $t('copyURL'), click() { toRealTab(tab).webContents.getURL() } })
   addItem(SEPARATOR)
   addItem({ label: $t('duplicate'), click() {
     createContextTab({
-      url: tab.webContents.getURL()
+      url: toRealTab(tab).webContents.getURL()
     })
   } })
-  if (tab.webContents.audioMuted) {
+  if (!tab.isGhost && asRealTab(tab).webContents.audioMuted) {
     addItem({ label: $t('sound-unmute'), click() { setMutedTab(win, tab, false) } })
 
   } else {

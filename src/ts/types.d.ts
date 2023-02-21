@@ -22,7 +22,7 @@ declare global {
  * `recentlyClosed` Array of tabs that were recently closed (wow)
 */
 export interface TabWindow extends BrowserWindow {
-  currentTab: Tab
+  currentTab: RealTab
   tabs: Tab[]
   chrome: BrowserView
   chromeHeight: number
@@ -44,6 +44,8 @@ export interface TabOptions {
   uid?: number
   initialFavicon?: string
   isOpenedAtStart?: boolean
+  isGhost?: boolean
+  initialTitle?: string
 }
 
 export interface CertficateCache {
@@ -51,7 +53,7 @@ export interface CertficateCache {
 }
 
 type NavigationReason = 'redirect' | 'input-url' | 'other' | 'created' | `searched:${string}`
-export interface Tab extends BrowserView {
+type TabProperties = {
   childWindow?: BrowserWindow
   private?: boolean
   faviconURL?: string
@@ -62,6 +64,16 @@ export interface Tab extends BrowserView {
   owner?: TabWindow
   isOpenedAtStart?: boolean
 }
+/**
+ * Upon starting Nereid, instead of loading all tabs at once,
+ * only one tab is loaded, the others are all loaded as ghost tabs.
+ * 
+ * Ghost Tabs don't have a `BrowserView`, they exist as a skeleton
+ * to load one upon selecting.
+ */
+export type GhostTab = ({ isGhost: true, url: string, title: string, owner: TabWindow } & TabProperties)
+export type RealTab = ({ isGhost?: false | undefined } & BrowserView & TabProperties)
+export type Tab = RealTab | GhostTab
 
 export interface ParsedURL extends URL {
   slashes: boolean

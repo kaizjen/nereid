@@ -1,6 +1,6 @@
 // This file does everything related to the current session and the electron sessions
 
-import type { CertficateCache, Permissions, TabWindow } from "./types";
+import type { CertficateCache, Permissions, RealTab, TabWindow } from "./types";
 import { app, BrowserWindow, ipcMain, protocol, session, Session, screen, nativeTheme } from "electron";
 import * as pathModule from "path"
 import $ from "./vars";
@@ -253,13 +253,13 @@ export function registerSession(ses: Session) {
 
     setImmediate(() => {
       getAllTabWindows().forEach(win => {
-        win.tabs.forEach(tab => {
+        win.tabs.forEach((tab: RealTab, index) => {
           // update the security icon of already loaded tabs
           if (!tab.webContents) return;
 
           let url = tab.webContents.getURL();
           if (URLParse(url).hostname == req.hostname) {
-            tab.webContents.send('tabUpdate', 'sec', true)
+            tab.webContents.send('tabUpdate', { index, state: { security: true } })
           }
         })
       })
@@ -558,7 +558,7 @@ export function registerSession(ses: Session) {
       let win = BrowserWindow.fromWebContents(wc) as TabWindow;
       if (!win || !isTabWindow(win)) return callback(false);
 
-      let uid = win.tabs.find(t => t.webContents == wc)?.uniqueID;
+      let uid = win.tabs.find(t => (t as RealTab).webContents == wc)?.uniqueID;
       if (uid == undefined) throw(new Error("No tab in window. This should NOT happen!"));
 
       win.chrome.webContents.send('permission-add', uid, {

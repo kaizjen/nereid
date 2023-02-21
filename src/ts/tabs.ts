@@ -1,6 +1,6 @@
 // Tabs' creation, removal and whatever else
 
-import type { TabWindow, TabOptions, Tab } from "./types";
+import type { TabWindow, TabOptions, Tab, RealTab, GhostTab } from "./types";
 import { BrowserView, BrowserWindow, dialog, nativeTheme, session, WebContents } from "electron";
 import fetch from "electron-fetch";
 import * as userData from './userdata'
@@ -58,6 +58,13 @@ type ChromeTabState = {
 export function getTabByUID(uid: number) {
   return tabUniqueIDs[uid];
 }
+export function asRealTab(tab: Tab) {
+  // This function isn't used when we're checking all tabs (like `win.tabs.find(tab => (tab as RealTab).webContents == wc)`)
+  // Otherwise, if there's at least one ghost tab, it will throw
+  if (tab.isGhost) throw new Error("Assertion failed: this tab is a Ghost Tab.");
+  if (!(tab as RealTab).webContents) throw new Error("Assertion failed: this tab does not have a WebContents attached to it.");
+  return tab as RealTab;
+}
 
 let _firstTime = true;
 export function updateSavedTabs() {
@@ -72,11 +79,17 @@ export function updateSavedTabs() {
 export function updateSavedTabsImmediately() {
   userData.lastlaunch.set({
     windows: getAllTabWindows().map(win => {
-      return win.tabs.filter(tab => !tab.private).map(tab => ({
-        title: tab.webContents.getTitle(),
-        url: tab.webContents.getURL(),
-        faviconURL: tab.faviconURL
-      }))
+      return win.tabs.filter(tab => !tab.private).map(tab => (
+        tab.isGhost ? {
+          title: tab.title,
+          url: tab.url,
+          faviconURL: tab.faviconURL
+        } : {
+          title: asRealTab(tab).webContents.getTitle(),
+          url: asRealTab(tab).webContents.getURL(),
+          faviconURL: tab.faviconURL
+        }
+      ))
     })
   })
 }
@@ -164,7 +177,8 @@ function handleBeforeUnload<T>(wc: WebContents, proceed: () => T): Promise<false
 }
 
 export function setMutedTab(win: TabWindow, tab: Tab, isMuted: boolean) {
-  tab.webContents.setAudioMuted(isMuted);
+  if (tab.isGhost) return;
+  asRealTab(tab).webContents.setAudioMuted(isMuted);
   win.chrome.webContents.send('tabUpdate', {
     index: win.tabs.indexOf(tab),
     state: { isMuted }
@@ -172,7 +186,7 @@ export function setMutedTab(win: TabWindow, tab: Tab, isMuted: boolean) {
 }
 
 
-function setTitleOfWindow(win: TabWindow, tab: Tab) {
+function setTitleOfWindow(win: TabWindow, tab: RealTab) {
   if (tab.private) {
     win.setTitle(t('name'))
 
@@ -213,7 +227,7 @@ function checkSecurity(url: string) {
 }
 
 async function pushToHistory(tab: Tab, responseCode: number = 0) {
-  const url = tab.webContents.getURL();
+  const url = asRealTab(tab).webContents.getURL();
 
   if (tab.private) return; // obviously
   if (tab.isOpenedAtStart) {
@@ -242,7 +256,7 @@ async function pushToHistory(tab: Tab, responseCode: number = 0) {
     timestamp: Date.now(),
     reason: responseCode.toString().startsWith('3') ? 'redirect' : tab.lastNavigationReason,
     url,
-    title: tab.webContents.getTitle(),
+    title: asRealTab(tab).webContents.getTitle(),
     faviconURL: tab.faviconURL
   })
   userData.history.set(history)
@@ -256,7 +270,7 @@ async function pushToHistory(tab: Tab, responseCode: number = 0) {
  * @param  opts<`TabOptions`> Options
  * @returns  {BrowserView} The created `BrowserView`
  */
-export function createBrowserView(opts: TabOptions): Tab {
+export function createBrowserView(opts: TabOptions): RealTab {
   let tab = new BrowserView({
     webPreferences: {
       nodeIntegration: false,
@@ -270,7 +284,7 @@ export function createBrowserView(opts: TabOptions): Tab {
       autoplayPolicy: autoplayWithDocumentActivation ? 'document-user-activation-required' : 'user-gesture-required',
       navigateOnDragDrop: true
     }
-  }) as Tab;
+  }) as RealTab;
 
   if (!opts.uid) {
     let uid = UIDsAmount;
@@ -287,11 +301,12 @@ export function createBrowserView(opts: TabOptions): Tab {
 
   tab.private = opts.private
   tab.isOpenedAtStart = opts.isOpenedAtStart
+  tab.isGhost = false;
 
   return tab;
 }
 
-export function destroyWebContents(bv: Tab) {
+export function destroyWebContents(bv: RealTab) {
   delayExecution(() => {
     (bv.webContents as any).close()
 
@@ -323,7 +338,7 @@ export function destroyWebContents(bv: Tab) {
  * Adds an already existing tab to a window
  * @param tab<`BrowserView`> the tab to be added
  */
-export function addTab(win: TabWindow, tab: BrowserView, opts: TabOptions) {
+export function addTab(win: TabWindow, tab: Tab, opts: TabOptions) {
   if ('position' in opts) {
     win.tabs.splice(opts.position, 0, tab)
 
@@ -335,7 +350,7 @@ export function addTab(win: TabWindow, tab: BrowserView, opts: TabOptions) {
   updateSavedTabs()
 }
 
-export function removeTab(win: TabWindow, { tab, id }: { tab?: BrowserView, id?: number }, keepAlive?: boolean) {
+export function removeTab(win: TabWindow, { tab, id }: { tab?: Tab, id?: number }, keepAlive?: boolean) {
   if (tab) {
     id = win.tabs.indexOf(tab);
     if (id == -1) throw(new Error(`tabManager.removeTab: no tab found in window`))
@@ -366,7 +381,7 @@ export function removeTab(win: TabWindow, { tab, id }: { tab?: BrowserView, id?:
   return true;
 }
 
-export function attach(win: TabWindow, tab: Tab) {
+export function attach(win: TabWindow, tab: RealTab) {
   let getTabID = () => win.tabs.indexOf(tab)
 
   function sendUpdate(state: Partial<ChromeTabState>) {
@@ -375,9 +390,9 @@ export function attach(win: TabWindow, tab: Tab) {
 
   tab.owner = win;
 
-  tab.webContents.setWindowOpenHandler(({ disposition, url, features }) => {
-    console.log('opening new window:', disposition);
-    
+  tab.webContents.setWindowOpenHandler(({ disposition, url, features, frameName }) => {
+    console.log('opening new window:', { disposition, url, features, frameName });
+
     switch (disposition) {
       case 'foreground-tab':
       case 'default': {
@@ -669,7 +684,7 @@ export function attach(win: TabWindow, tab: Tab) {
   })
 
   tab.webContents.on('enter-html-full-screen', () => {
-    tab.setBounds({ x: 0, y: 0, width: win.getContentBounds().width, height: win.getContentBounds().height })
+    asRealTab(tab).setBounds({ x: 0, y: 0, width: win.getContentBounds().width, height: win.getContentBounds().height })
   })
   tab.webContents.on('leave-html-full-screen', () => {
     setCurrentTabBounds(win, tab)
@@ -679,9 +694,32 @@ export function attach(win: TabWindow, tab: Tab) {
   })
 }
 
-export function detach(tab: Tab) {
+export function detach(tab: RealTab) {
   tab.webContents.removeAllListeners()
   tab.owner = null;
+}
+
+/**
+ * Converts a GhostTab to a real one. After the creation of the RealTab,
+ * the `tab` object passed to this function in discarded and should not be used.
+ */
+export function toRealTab(tab: Tab) {
+  if (!tab.isGhost) return asRealTab(tab);
+
+  const { owner } = tab;
+  const index = owner.tabs.indexOf(tab);
+  if (index == -1) throw new Error("Conversion failed: the specified GhostTab is not present in the window.");
+
+  let realTab = createBrowserView({
+    url: tab.url,
+    uid: tab.uniqueID,
+    private: tab.private,
+    isOpenedAtStart: tab.isOpenedAtStart
+  });
+  owner.tabs[index] = realTab;
+  attach(owner, realTab)
+
+  return realTab;
 }
 
 /**
@@ -696,18 +734,21 @@ export function selectTab(win: TabWindow, { tab, id }: { tab?: Tab, id?: number 
   tab = tab || win.tabs[id];
 
   if (win.currentTab) win.removeBrowserView(win.currentTab);
-  win.addBrowserView(tab)
-  win.currentTab = tab;
+  if (tab.isGhost) {
+    tab = toRealTab(tab);
+  }
+  win.addBrowserView(asRealTab(tab))
+  win.currentTab = asRealTab(tab);
   
   setCurrentTabBounds(win)
-  win.setTopBrowserView(tab);
+  win.setTopBrowserView(asRealTab(tab));
   win.chrome.webContents.send('tabChange', id)
-  win.chrome.webContents.send('zoomUpdate', tab.webContents.zoomFactor)
+  win.chrome.webContents.send('zoomUpdate', asRealTab(tab).webContents.zoomFactor)
     // Zoom is global and changed every time the tab is changed
     // That's because chrome has a same-origin zoom policy.
   //
 
-  setTitleOfWindow(win, tab)
+  setTitleOfWindow(win, asRealTab(tab))
 }
 
 /**
@@ -715,12 +756,33 @@ export function selectTab(win: TabWindow, { tab, id }: { tab?: Tab, id?: number 
  * @returns  {BrowserView} The created tab
  */
 export function createTab(window: TabWindow, options: TabOptions): Tab {
-  let bv = createBrowserView(options);
-  setCurrentTabBounds(window, bv) // better to resize here or will slow down the tab switching
-  addTab(window, bv, options);
-  attach(window, bv)
-  options.background || selectTab(window, { tab: bv })
-  return bv;
+  let tab: Tab;
+  if (options.isGhost) {
+    if (!options.uid) {
+      let uid = UIDsAmount;
+      UIDsAmount++;
+      options.uid = uid;
+    }
+    tab = {
+      isGhost: true,
+      url: options.url,
+      title: options.initialTitle,
+      faviconURL: options.initialFavicon,
+      uniqueID: options.uid,
+      private: options.private,
+      isOpenedAtStart: options.isOpenedAtStart,
+      owner: window
+    }
+    tabUniqueIDs[options.uid] = tab;
+
+  } else {
+    tab = createBrowserView(options);
+  }
+  setCurrentTabBounds(window, tab) // better to resize here or will slow down the tab switching
+  addTab(window, tab, options);
+  if (!tab.isGhost) attach(window, asRealTab(tab))
+  options.background || selectTab(window, { tab: tab })
+  return tab;
 }
 
 let beingClosed: Tab;
@@ -734,10 +796,21 @@ export function closeTab(win: TabWindow, desc: { tab?: Tab, id?: number }, keepA
     let remResult = removeTab(desc.tab.owner, desc, keepAlive);
     if (!remResult) return false;
 
-    detach(desc.tab)
-    let lastURL = desc.tab.webContents.getURL()
-    let lastTitle = desc.tab.webContents.getTitle()
-    let tab = destroyWebContents(desc.tab);
+    let lastURL: string;
+    let lastTitle: string;
+    let tab: Tab;
+
+    if (desc.tab.isGhost) {
+      lastURL = desc.tab.url
+      lastTitle = desc.tab.title || desc.tab.url
+      tab = desc.tab;
+
+    } else {
+      detach(asRealTab(desc.tab))
+      lastURL = asRealTab(desc.tab).webContents.getURL()
+      lastTitle = asRealTab(desc.tab).webContents.getTitle()
+      tab = destroyWebContents(asRealTab(desc.tab));
+    }
     if (tab.private) {
       delete tabUniqueIDs[tab.uniqueID];
       return tab;
@@ -763,7 +836,7 @@ export function closeTab(win: TabWindow, desc: { tab?: Tab, id?: number }, keepA
   }
   beingClosed = desc.tab;
   
-  return handleBeforeUnload(desc.tab.webContents, close)
+  return desc.tab.isGhost ? close() : handleBeforeUnload(asRealTab(desc.tab).webContents, close);
 }
 
 export function openClosedTab(win: TabWindow, index?: number, background: boolean = true) {
@@ -796,37 +869,39 @@ export function moveTab(tab: Tab, destination: { window: TabWindow, index: numbe
   const { window, index } = destination;
   if (!tab.owner) return;
 
+  if (tab.isGhost) tab = toRealTab(tab);
+
   let { owner } = tab
   if (owner != window) {
-    detach(tab)
+    detach(asRealTab(tab))
   }
   removeTab(owner, { tab: tab })
   addTab(window, tab, {
-    url: tab.webContents.getURL(),
+    url: asRealTab(tab).webContents.getURL(),
     initialFavicon: tab.faviconDataURL,
     private: tab.private,
     position: index,
     uid: tab.uniqueID
   })
   if (owner != window) {
-    attach(window, tab)
+    attach(window, asRealTab(tab))
   }
 
   window.chrome.webContents.send('tabUpdate', {
     index,
-    state: { title: tab.webContents.getTitle() || tab.webContents.getURL() }
+    state: { title: asRealTab(tab).webContents.getTitle() || asRealTab(tab).webContents.getURL() }
   })
   window.chrome.webContents.send('tabUpdate', {
     index,
-    state: { security: checkSecurity(tab.webContents.getURL()) }
+    state: { security: checkSecurity(asRealTab(tab).webContents.getURL()) }
   })
   window.chrome.webContents.send('tabUpdate', {
     index,
-    state: { isPlaying: tab.webContents.isCurrentlyAudible() }
+    state: { isPlaying: asRealTab(tab).webContents.isCurrentlyAudible() }
   })
   window.chrome.webContents.send('tabUpdate', {
     index,
-    state: { isMuted: tab.webContents.isAudioMuted() }
+    state: { isMuted: asRealTab(tab).webContents.isAudioMuted() }
   })
 
   selectTab(window, { id: index })

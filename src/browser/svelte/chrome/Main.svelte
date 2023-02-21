@@ -204,8 +204,8 @@
     tabs.splice(opts.position ?? tabs.length, 0, {
       background: opts.background,
       url: opts.url,
-      title: opts.url,
-      favicon: opts.initialFavicon,
+      title: opts.initialTitle || opts.url,
+      favicon: opts.initialFavicon?.startsWith('http') ? ('get:' + opts.initialFavicon) : opts.initialFavicon,
       private: opts.private,
       security: opts.security,
       isLoading: false,

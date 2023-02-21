@@ -71,7 +71,9 @@ export function init() {
             url: t.url,
             background: i != 0, // only select the first tab
             initialFavicon: t.faviconURL,
-            isOpenedAtStart: true
+            initialTitle: t.title,
+            isOpenedAtStart: true,
+            isGhost: i != 0
           }
         })
       ;
