@@ -716,7 +716,33 @@ export function attach(win: TabWindow, tab: RealTab) {
 }
 
 export function detach(tab: RealTab) {
-  tab.webContents.removeAllListeners()
+  // `tab.webContents.removeAllListeners()` doesn't work because it removes some of
+  // electron's internal listeners, which breaks the preload script completely
+  const listenersArray = [
+    'frame-created',
+    'did-start-loading',
+    'did-stop-loading',
+    'media-started-playing',
+    'media-paused',
+    'page-title-updated',
+    'page-favicon-updated',
+    'will-prevent-unload',
+    'did-navigate',
+    'did-navigate-in-page',
+    'did-fail-load',
+    'dom-ready',
+    'render-process-gone',
+    'zoom-changed',
+    'cursor-changed',
+    'found-in-page',
+    'enter-html-full-screen',
+    'leave-html-full-screen',
+    'context-menu'
+  ];
+  listenersArray.forEach(event => {
+    tab.webContents.removeAllListeners(event)
+  })
+  tab.webContents.setWindowOpenHandler(null)
   tab.owner = null;
 }
 
