@@ -1,6 +1,6 @@
 // Tabs' creation, removal and whatever else
 
-import type { TabWindow, TabOptions, Tab, RealTab, GhostTab } from "./types";
+import type { TabWindow, TabOptions, Tab, RealTab } from "./types";
 import { BrowserView, BrowserWindow, dialog, nativeTheme, session, WebContents } from "electron";
 import fetch from "electron-fetch";
 import * as userData from './userdata'
@@ -705,7 +705,7 @@ export function detach(tab: RealTab) {
 
 /**
  * Converts a GhostTab to a real one. After the creation of the RealTab,
- * the `tab` object passed to this function in discarded and should not be used.
+ * the `tab` object passed to this function is discarded and should not be used.
  */
 export function toRealTab(tab: Tab) {
   if (!tab.isGhost) return asRealTab(tab);
