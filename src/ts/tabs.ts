@@ -177,8 +177,7 @@ function handleBeforeUnload<T>(wc: WebContents, proceed: () => T): Promise<false
 }
 
 export function setMutedTab(win: TabWindow, tab: Tab, isMuted: boolean) {
-  if (tab.isGhost) return;
-  asRealTab(tab).webContents.setAudioMuted(isMuted);
+  toRealTab(tab).webContents.setAudioMuted(isMuted);
   win.chrome.webContents.send('tabUpdate', {
     index: win.tabs.indexOf(tab),
     state: { isMuted }
