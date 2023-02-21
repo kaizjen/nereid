@@ -396,10 +396,26 @@ export function attach(win: TabWindow, tab: RealTab) {
     switch (disposition) {
       case 'foreground-tab':
       case 'default': {
+        if (frameName && URLParse(tab.webContents.getURL()).origin == URLParse(url).origin) {
+          const targetTab = win.tabs.find(t => t.targetFrameName == frameName);
+
+          function doesURLMatch() {
+            const targetURL = toRealTab(targetTab).webContents.getURL();
+            return URLParse(targetURL).origin == URLParse(url).origin;
+          }
+          if (targetTab && doesURLMatch()) {
+            toRealTab(targetTab).webContents.loadURL(url);
+            selectTab(win, { tab: targetTab })
+
+          } else {
+            createTab(win, { url, private: tab.private, targetFrameName: frameName, position: getTabID() + 1 })
+          }
+          return { action: 'deny' }
+        }
         createTab(win, { url, private: tab.private, position: getTabID() + 1 })
         return { action: 'deny' }
       }
-      
+
       case 'background-tab': {
         createTab(win, { url, private: tab.private, background: true, position: getTabID() + 1 })
         return { action: 'deny' }
@@ -603,6 +619,8 @@ export function attach(win: TabWindow, tab: RealTab) {
     sendUpdate({ favicon: null })
     tab.faviconURL = null;
 
+    tab.targetFrameName = null;
+
     sendUpdate({ security: checkSecurity(url) })
 
     pushToHistory(tab, respCode)
@@ -783,6 +801,7 @@ export function createTab(window: TabWindow, options: TabOptions): Tab {
     tab = createBrowserView(options);
   }
   setCurrentTabBounds(window, tab) // better to resize here or will slow down the tab switching
+  tab.targetFrameName = options.targetFrameName;
   addTab(window, tab, options);
   if (!tab.isGhost) attach(window, asRealTab(tab))
   options.background || selectTab(window, { tab: tab })

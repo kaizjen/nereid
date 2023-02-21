@@ -46,6 +46,7 @@ export interface TabOptions {
   isOpenedAtStart?: boolean
   isGhost?: boolean
   initialTitle?: string
+  targetFrameName?: string
 }
 
 export interface CertficateCache {
@@ -63,6 +64,7 @@ type TabProperties = {
   isFullScreen?: boolean
   owner?: TabWindow
   isOpenedAtStart?: boolean
+  targetFrameName?: string
 }
 /**
  * Upon starting Nereid, instead of loading all tabs at once,
