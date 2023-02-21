@@ -116,7 +116,7 @@ export interface Configuration {
       name: string
       searchURL: string
       suggestURL: string
-      suggestAlgorithm: 'google-like' | 'startpage-like' | 'extension' | 'find' | `extension:${string}`
+      suggestAlgorithm: 'google-like' | 'startpage-like' | 'find'
     }[]
     selectedIndex: number
   }

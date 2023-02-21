@@ -62,12 +62,9 @@ export default {
 
       return json.suggestions.map(s => s.text)
     },
-    extension(): string[] {
+    error(): string[] {
       return [
-        'You are seeing this text',
-        "Because an extension hasn't yet taken control of the hinting algorithm.",
-        "Did you forget to use {nereid.search.setSearchHintingAlgorithm()}?",
-        "If you have no idea what any of that means, change your search engine in the settings."
+        "⚠ Something went wrong while trying to get hints. Check your config.json5 file."
       ]
     },
     async finder(res: Response): Promise<string[]> {

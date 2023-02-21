@@ -416,10 +416,8 @@ export function init() {
       let suggestAlgorithm: (res) => (Promise<string[]> | string[]) = $.searchHintAlgorithms[
         searchEngine.suggestAlgorithm == 'google-like' ? 'googleLike' :
           searchEngine.suggestAlgorithm == 'startpage-like' ? 'startpageLike' :
-            searchEngine.suggestAlgorithm == 'extension' ? 'extension' :
               searchEngine.suggestAlgorithm == 'find' ? 'finder' :
-                // if extension adds its own search engine with its own hinting alrorithm, use it instead.
-                searchEngine.suggestAlgorithm
+                'error'
       ]
 
       const response = await fetch(
