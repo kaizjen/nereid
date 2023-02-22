@@ -349,32 +349,32 @@ export function addTab(win: TabWindow, tab: Tab, opts: TabOptions) {
   updateSavedTabs()
 }
 
-export function removeTab(win: TabWindow, { tab, id }: { tab?: Tab, id?: number }, keepAlive?: boolean) {
+export function removeTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: number }, keepAlive?: boolean) {
   if (tab) {
-    id = win.tabs.indexOf(tab);
-    if (id == -1) throw(new Error(`tabManager.removeTab: no tab found in window`))
+    index = win.tabs.indexOf(tab);
+    if (index == -1) throw(new Error(`tabManager.removeTab: no tab found in window`))
   }
 
   if (win.currentTab == tab) {
     // select different tab if we're closing the current one
-    if (id == 0) {
+    if (index == 0) {
       if (win.tabs.length < 2) {
         if (keepAlive) return false;
         win.removeBrowserView(tab);
         win.close(); // close the window if this is the last tab
 
       } else {
-        selectTab(win, { id: 1 })
+        selectTab(win, { index: 1 })
       }
 
     } else {
-      selectTab(win, { id: id - 1 })
+      selectTab(win, { index: index - 1 })
     }
   }
   
-  win.tabs.splice(id, 1)
+  win.tabs.splice(index, 1)
   
-  win.chrome.webContents.send('removeTab', id)
+  win.chrome.webContents.send('removeTab', index)
 
   updateSavedTabs()
   return true;
@@ -771,14 +771,14 @@ export function toRealTab(tab: Tab) {
 
 /**
  * Selects an existing tab of the window `win`
- * @param  {object} description { `tab`: the tab to select, (or) `id`: the index of the tab to select from all the tabs on window }
+ * @param  {object} description { `tab`: the tab to select, (or) `index`: the index of the tab to select from all the tabs on window }
  */
-export function selectTab(win: TabWindow, { tab, id }: { tab?: Tab, id?: number }) {
+export function selectTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: number }) {
   if (tab) {
-    id = win.tabs.indexOf(tab);
-    if (id == -1) throw(new Error(`tabManager.selectTab: no tab found in window`))
+    index = win.tabs.indexOf(tab);
+    if (index == -1) throw(new Error(`tabManager.selectTab: no tab found in window`))
   }
-  tab = tab || win.tabs[id];
+  tab = tab || win.tabs[index];
 
   if (win.currentTab) win.removeBrowserView(win.currentTab);
   if (tab.isGhost) {
@@ -789,7 +789,7 @@ export function selectTab(win: TabWindow, { tab, id }: { tab?: Tab, id?: number 
   
   setCurrentTabBounds(win)
   win.setTopBrowserView(asRealTab(tab));
-  win.chrome.webContents.send('tabChange', id)
+  win.chrome.webContents.send('tabChange', index)
   win.chrome.webContents.send('zoomUpdate', asRealTab(tab).webContents.zoomFactor)
     // Zoom is global and changed every time the tab is changed
     // That's because chrome has a same-origin zoom policy.
@@ -834,9 +834,9 @@ export function createTab(window: TabWindow, options: TabOptions): Tab {
 }
 
 let beingClosed: Tab;
-export function closeTab(win: TabWindow, desc: { tab?: Tab, id?: number }, keepAlive?: boolean) {
-  if (!desc.tab) desc.tab = win.tabs[desc.id]
-  if (!desc.id) desc.id = win.tabs.indexOf(desc.tab)
+export function closeTab(win: TabWindow, desc: { tab?: Tab, index?: number }, keepAlive?: boolean) {
+  if (!desc.tab) desc.tab = win.tabs[desc.index]
+  if (!desc.index) desc.index = win.tabs.indexOf(desc.tab)
 
   function close() {
     beingClosed = null;
@@ -866,7 +866,7 @@ export function closeTab(win: TabWindow, desc: { tab?: Tab, id?: number }, keepA
     } else {
       win.recentlyClosed.push({
         tab,
-        index: desc.id,
+        index: desc.index,
         UID: tab.uniqueID,
         lastURL, lastTitle
       });
@@ -879,7 +879,7 @@ export function closeTab(win: TabWindow, desc: { tab?: Tab, id?: number }, keepA
   }
 
   if (beingClosed == desc.tab) {
-    console.log(`The tab ${desc.id} is already being closed`);
+    console.log(`The tab ${desc.index} is already being closed`);
     return;
   }
   beingClosed = desc.tab;
@@ -952,7 +952,7 @@ export function moveTab(tab: Tab, destination: { window: TabWindow, index: numbe
     state: { isMuted: asRealTab(tab).webContents.isAudioMuted() }
   })
 
-  selectTab(window, { id: index })
+  selectTab(window, { index })
 }
 
 

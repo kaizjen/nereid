@@ -895,7 +895,7 @@ export function menuOfTab(win: TabWindow, tab: Tab) {
         if (i <= index) return;
 
         try {
-          await closeTab(win, { tab, id: i }, true)
+          await closeTab(win, { tab, index: i }, true)
 
         } catch (e) {
           console.error('Menu item "Close tabs to the right" - error:', e)

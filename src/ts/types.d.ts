@@ -11,7 +11,7 @@ declare global {
  * 
  * `currentTab` The currently displayed tab of the window
  * 
- * `tabs` All tabs of the window. The index is the id of the tab
+ * `tabs` All tabs of the window. The index corresponds to the index of each tab in the chrome.
  * 
  * `chrome` The chrome (https://developer.mozilla.org/en-US/docs/Glossary/Chrome) of the window. 
  * 

@@ -243,33 +243,33 @@
 
   let headElement;
 
-  function handleClickF(id) {
+  function handleClickF(index) {
     // captial F stands for factory
     return function (e) {
       if (e.button == 1) {
         // middle mb
-        ipcRenderer.send('closeTab', id)
+        ipcRenderer.send('closeTab', index)
       } else if (e.button == 2) {
         // rightclick
-        ipcRenderer.send('chrome.menuOfTab', id)
+        ipcRenderer.send('chrome.menuOfTab', index)
       }
     }
   }
-  function handleSelectF(id) {
+  function handleSelectF(index) {
     return function (e) {
       if (e.button != 0) return
       // lmb
-      ipcRenderer.send('selectTab', id)
+      ipcRenderer.send('selectTab', index)
     }
   }
-  function handleDropF(id, zoneUID) {
+  function handleDropF(index, zoneUID) {
     /**
      * @param {DragEvent} e
      */
     return function (e) {
       if (e.dataTransfer.getData('text/newTab')) {
         console.log('dropped, new tab', e.dataTransfer.getData('text/tabUID'));
-        ipcRenderer.send('newTab', { position: id })
+        ipcRenderer.send('newTab', { position: index })
         return;
       }
       console.log('dropped, uid: %o', e.dataTransfer.getData('text/tabUID'));
@@ -278,7 +278,7 @@
       if (isNaN(movedUID)) return;
       if (movedUID == zoneUID) return;
 
-      ipcRenderer.send('chrome.moveTab', movedUID, id)
+      ipcRenderer.send('chrome.moveTab', movedUID, index)
     }
   }
 
@@ -369,7 +369,7 @@
       on:wheel={e => e.deltaX == 0 ? smoothlyScroll(e.currentTarget, e.deltaY) : null}
       style="--tab-width: {Math.max(15 - Math.sqrt(tabs.length), 9)}rem;"
     >
-      {#each tabs as tab, id (tab)}
+      {#each tabs as tab, i (tab)}
         <div
           class="tab"
           draggable="true"
@@ -377,12 +377,12 @@
           on:dragover={
             e => e.dataTransfer.types[0] == 'text/tabuid' || e.dataTransfer.types[0] == 'text/newtab' ? e.preventDefault() : null
           }
-          on:drop|capture={handleDropF(id, tab.uid)}
+          on:drop|capture={handleDropF(i, tab.uid)}
           use:dropzone
-          class:selected={id == currentTab}
+          class:selected={i == currentTab}
           class:private={tab.private}
-          on:mousedown={handleSelectF(id)}
-          on:auxclick={handleClickF(id)}
+          on:mousedown={handleSelectF(i)}
+          on:auxclick={handleClickF(i)}
           in:tab_anim={{ x: -50, y: 0, duration: 120 }}
           out:tab_anim={{ x: -50, y: 0, duration: 120 }}
           title={
@@ -394,7 +394,7 @@
           }
           role="tab"
         >
-          {#if tab.private && !(id == currentTab)}
+          {#if tab.private && !(i == currentTab)}
             <img src="n-res://{$colorTheme}/private.svg" alt={_.PRIVATE_TAB} class="favicon decoy">
           {:else}
             <img alt="" src={tab.isLoading ? `n-res://${$colorTheme}/clock.svg` : (tab.favicon ?? `n-res://${$colorTheme}/webpage.svg`)} class="favicon">
@@ -416,7 +416,7 @@
           <button
             class="close-tab"
             on:mousedown|stopPropagation={()=>null}
-            on:click={() => { console.log('clicked close'); ipcRenderer.send('closeTab', id) }}
+            on:click={() => { console.log('clicked close'); ipcRenderer.send('closeTab', i) }}
           >
             <img alt="Close tab" src="n-res://{$colorTheme}/cross.svg" >
           </button>

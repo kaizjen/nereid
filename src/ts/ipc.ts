@@ -233,8 +233,8 @@ export function init() {
   onWindow('chrome.browserMenu', (win, _e, pos) => {
     displayOptions(win, pos);
   })
-  onWindow('chrome.menuOfTab', (win, _e, tabID: number) => {
-    let tab = win.tabs[tabID];
+  onWindow('chrome.menuOfTab', (win, _e, tabIndex: number) => {
+    let tab = win.tabs[tabIndex];
     if (!tab) throw(new Error("ipcManager: no tab found in window"))
 
     menuOfTab(win, tab)
@@ -290,26 +290,26 @@ export function init() {
     options.url ||= $.newTabUrl;
     tabManager.createTab(win, options);
   })
-  ipcMain.on('selectTab', (e, id: number) => {
+  ipcMain.on('selectTab', (e, index: number) => {
     let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
     if (!win) return;
 
-    tabManager.selectTab(win, { id });
+    tabManager.selectTab(win, { index });
   })
-  ipcMain.on('closeTab', async(e, id: number, keepAlive?: boolean) => {
+  ipcMain.on('closeTab', async(e, index: number, keepAlive?: boolean) => {
     let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
     if (!win) return;
 
-    let tab = win.tabs[id];
+    let tab = win.tabs[index];
     if (!tab) return;
 
-    tabManager.closeTab(win, { id, tab }, keepAlive);
+    tabManager.closeTab(win, { index, tab }, keepAlive);
   })
-  ipcMain.on('setMutedTab', (e, tabID: number, isMuted: boolean) => {
+  ipcMain.on('setMutedTab', (e, tabIndex: number, isMuted: boolean) => {
     let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
     if (!win) return;
 
-    tabManager.setMutedTab(win, win.tabs[tabID], isMuted)
+    tabManager.setMutedTab(win, win.tabs[tabIndex], isMuted)
   })
 
   ipcMain.handle('getPageImageURL', async(e, imageType: 'preview' | 'thumbnail' | 'favicon', tabUID: number) => {

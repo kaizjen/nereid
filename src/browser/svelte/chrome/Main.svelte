@@ -224,56 +224,19 @@
       currentTab += 1;
     }
   })
-  ipcRenderer.on('removeTab', (_e, id) => {
-    console.log('removed', id);
-    tabs.splice(id, 1)
-    if (currentTab > id) {
+  ipcRenderer.on('removeTab', (_e, index) => {
+    console.log('removed', index);
+    tabs.splice(index, 1)
+    if (currentTab > index) {
       currentTab -= 1;
     }
     tabs = tabs;
   })
-  ipcRenderer.on('tabChange', (_e, id) => {
-    console.log('got', id);
-    currentTab = id;
+  ipcRenderer.on('tabChange', (_e, index) => {
+    console.log('got', index);
+    currentTab = index;
   })
 
-  ipcRenderer.on('tabUpdateLegacy', (_e, { type, id, value }) => {
-    console.log('updating %o %s %o', id, type, value);
-    switch (type) {
-      case 'title':
-        tabs[id].title = value;
-        break;
-      case 'url':
-        tabs[id].url = value;
-        break;
-      case 'favicon':
-        tabs[id].favicon = value;
-        break;
-      case 'status':
-        tabs[id].isLoading = value;
-        break;
-      case 'crash':
-        tabs[id].crashDetails = value
-        break;
-      case 'sec':
-        tabs[id].security = value
-        break;
-      case 'nav':
-        tabs[id].nav = value
-        break;
-      case 'playing':
-        tabs[id].isPlaying = value
-        break;
-      case 'muted':
-        tabs[id].isMuted = value
-        break;
-    
-      default:
-        alert("Error: tabUpdate: unknown type " + type)
-        break;
-    }
-    tabs = tabs;
-  })
   ipcRenderer.on('tabUpdate', (_e, { index, state }) => {
     console.log('updating tab %o with state %o', index, state);
     Object.assign(tabs[index], state)
