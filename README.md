@@ -32,7 +32,7 @@ First run `npm install`. That will install all dependencies.
 
 In `svelte`, there is a bug which adds empty style tags whenever the animation is done. So, to fix it, run `node svlc/hack_empty_svelte_styles.js`. 
 
-Localization sources (in `src/i18n/src/`) are in human-readable but slow YAML format. `npm run localize` transforms them into JSON
+Localization sources (in `src/i18n/src/`) are in a human-readable but slow YAML format. `npm run localize` transforms them into JSON
 
 Nereid is written using Typescript and Svelte. To start the app, you need to compile all the sources: `npm run build`.
 
