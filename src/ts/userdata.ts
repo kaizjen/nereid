@@ -303,23 +303,49 @@ export let lastlaunch = {
 function filterEntries(array: History) {
   return array.filter($.uniqBy((e1, e2) => e1.tabUID == e2.tabUID && e1.sessionUUID == e2.sessionUUID && e1.url == e2.url))
 }
+// These two variables lock the history so only one operation can be executed
+// at a time. Whenever history is being written, `historyLock` becomes a `Promise`
+// that resolves as soon as the write completes. If, in the time of resolving
+// that promise, the set() function is called more than once, then only the most
+// recent call goes through, thanks to the `currentSetCall` variable, others
+// return `false`.
 let historyLock: Promise<void> | null = null
+let currentSetCall = -1;
 export let history = {
   getSync(): History {
     return JSON.parse(fs.readFileSync(historyPath, 'utf-8'));
   },
   async get(): Promise<History> {
+    if (historyLock) await historyLock;
     return JSON.parse(await fs.promises.readFile(historyPath, 'utf-8'));
   },
   setSync(obj: History) {
     fs.writeFileSync(historyPath, JSON.stringify(filterEntries(obj)))
   },
+  /**
+   * Returns `false` if the operation was rejected by a more recent history write.
+   * 
+   * Returns `true` if the opertation was successful
+   */
   async set(obj: History) {
-    if (historyLock) await historyLock;
+    currentSetCall++;
+    const thisSetCall = currentSetCall;
+
+    if (historyLock) {
+      console.log(`History write #${thisSetCall} is waiting for the history lock...`);
+      await historyLock;
+    }
+    if (thisSetCall != currentSetCall) {
+      // priotitize the most recent set() call
+      console.warn(`History write #${thisSetCall} was rejected because a more recent write (#${currentSetCall}) is pending.`);
+      return false;
+    }
+
     historyLock = fs.promises.writeFile(historyPath, JSON.stringify(filterEntries(obj)));
 
     await historyLock;
     historyLock = null;
+    return true;
   }
 }
 
