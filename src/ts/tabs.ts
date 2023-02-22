@@ -833,13 +833,13 @@ export function createTab(window: TabWindow, options: TabOptions): Tab {
   return tab;
 }
 
-let beingClosed: Tab;
+const beingClosed: Tab[] = [];
 export function closeTab(win: TabWindow, desc: { tab?: Tab, index?: number }, keepAlive?: boolean) {
   if (!desc.tab) desc.tab = win.tabs[desc.index]
   if (!desc.index) desc.index = win.tabs.indexOf(desc.tab)
 
   function close() {
-    beingClosed = null;
+    beingClosed.splice(beingClosed.indexOf(desc.tab), 1);
 
     let remResult = removeTab(desc.tab.owner, desc, keepAlive);
     if (!remResult) return false;
@@ -878,11 +878,11 @@ export function closeTab(win: TabWindow, desc: { tab?: Tab, index?: number }, ke
     }
   }
 
-  if (beingClosed == desc.tab) {
-    console.log(`The tab ${desc.index} is already being closed`);
+  if (beingClosed.includes(desc.tab)) {
+    console.log(`The tab ${desc.tab?.uniqueID} (#${desc.index}) is already being closed`);
     return;
   }
-  beingClosed = desc.tab;
+  beingClosed.push(desc.tab);
   
   return desc.tab.isGhost ? close() : handleBeforeUnload(asRealTab(desc.tab).webContents, close);
 }
