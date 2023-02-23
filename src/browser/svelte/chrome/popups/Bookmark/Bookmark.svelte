@@ -89,7 +89,7 @@
   let confirmation = false;
 
   function update() {
-    sendInternal('userData.bookmarks:setFolder', { folder: selectedFolder, value: bookmarks[selectedFolder] })
+    sendInternal('userData.bookmarks.setFolder', { folder: selectedFolder, value: bookmarks[selectedFolder] })
   }
 
   function del() {
