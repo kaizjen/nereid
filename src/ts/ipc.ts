@@ -8,14 +8,15 @@ import type { TabWindow, TabOptions, Configuration, RealTab } from "./types"
 import $ from "./vars";
 import * as tabManager from './tabs'
 import * as _url from "url";
-import { appMenu, displayOptions, menuNewTab, menuOfBookmark, menuOfTab } from "./menu";
-import { getTabWindowByID, setHeadHeight, isTabWindow, newDialogWindow, setCurrentTabBounds } from "./windows";
+import { appMenu, displayOptions, menuNewTab, menuOfBookmark, menuOfProcess, menuOfTab } from "./menu";
+import { getTabWindowByID, setHeadHeight, isTabWindow, newDialogWindow, setCurrentTabBounds, getAllTabWindows, getIDOfTabWindow } from "./windows";
 import type TypeFuse from "fuse.js";
 import { certificateCache, DEFAULT_PARTITION, NO_CACHE_PARTITION, PRIVATE_PARTITION } from "./sessions";
 import { getSupportedLanguage, t, availableTranslations } from "./i18n";
 import { adBlockerError, isAdBlockerReady, webContentsABMap } from "./adblocker";
+import { kill } from "./process";
+// must use require here because these libraries, when require()d, don't have a .default property.
 const Fuse = require('fuse.js') as typeof TypeFuse;
-// must use require here because fuse.js, when require()d, doesnt have a .default property.
 
 const URLParse = $.URLParse
 
@@ -245,6 +246,7 @@ export function init() {
   onWindow('chrome.menuOfBookmark', (win, _e, bookmark, index: number) => {
     menuOfBookmark(win, bookmark, index)
   })
+
   onWindow('chrome.moveTab', (win, _e, tabUID: number, newIndex: number) => {
     tabManager.moveTab(tabManager.getTabByUID(tabUID), {
       window: win, index: newIndex
@@ -442,6 +444,83 @@ export function init() {
     }
     win.chrome.webContents.send('gotHints', hints)
     //console.log('gotHints:: ', hints);
+  })
+
+  ipcMain.handle('getProcesses', () => {
+    function $t(str: string, obj?: {}) {
+      return t('windows.taskManager.processes.' + str, obj)
+    }
+    const PIDMap: Record<number, string> = {};
+    const chromeProcesses: number[] = [];
+    
+    getAllTabWindows().forEach(tWin => {
+      PIDMap[tWin.chrome.webContents.getOSProcessId()] = $t('windowUI', { id: getIDOfTabWindow(tWin) });
+      chromeProcesses.push(tWin.chrome.webContents.getOSProcessId());
+
+      const dtWC = tWin.chrome.webContents.devToolsWebContents;
+      if (dtWC) {
+        PIDMap[dtWC.getOSProcessId()] = $t('windowDevTools', { id: getIDOfTabWindow(tWin) })
+      }
+
+      tWin.tabs.forEach(tab => {
+        if (tab.isGhost) return;
+        const wc = tabManager.asRealTab(tab).webContents;
+        PIDMap[wc.getOSProcessId()] = $t('tab', { title: wc.getTitle() });
+
+        const dtWC = wc.devToolsWebContents;
+        if (dtWC) {
+          PIDMap[dtWC.getOSProcessId()] = $t('devTools', { tabTitle: wc.getTitle() })
+        }
+      })
+    });
+
+    BrowserWindow.getAllWindows().forEach(win => {
+      if (isTabWindow(win)) return;
+      PIDMap[win.webContents.getOSProcessId()] = $t('helperWindowUI', { title: win.getTitle() })
+    })
+
+    const metrics = app.getAppMetrics();
+    for (const process of metrics) {
+      if (PIDMap[process.pid]) {
+        process.name = PIDMap[process.pid];
+        if (chromeProcesses.includes(process.pid)) {
+          process.serviceName = '$chrome'
+        }
+        continue;
+      }
+
+      switch (process.type) {
+        case 'Browser': {
+          process.name = $t('browser');
+          break;
+        }
+        case 'GPU': {
+          process.name = $t('gpu');
+          break;
+        }
+        case 'Utility': {
+          if (process.name) break;
+          process.name = $t('utility', { name: process.serviceName });
+          break;
+        }
+        case 'Tab': {
+          process.name = $t('unknownTab');
+          break;
+        }
+      
+        default: {
+          process.name = process.type;
+        }
+      }
+    }
+    return metrics;
+  })
+
+  ipcMain.handle('killProcess', (_e, pid: number) => {
+    return kill(pid);
+  })
+  ipcMain.on('menuOfProcess', (_e, process) => {
+    menuOfProcess(process)
   })
 
   ipcMain.on('showCertificate', async (e, hostname: string) => {

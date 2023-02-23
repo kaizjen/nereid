@@ -229,6 +229,40 @@ windows:
     data: Contents
     owner: Issuer's certificate
     root: This certificate is the root certificate.
+  taskManager:
+    title: Task manager
+    processes:
+      browser: Browser
+      utility: "Utility: ${name}"
+      tab: "Tab: ${title}"
+      unknownTab: Tab (unknown)
+      devTools: "Developer tools: ${tabTitle}"
+      windowDevTools: Window developer tools (window ID ${id})
+      windowUI: Window UI Process (ID ${id})
+      helperWindowUI: "Window: ${title}"
+      gpu: GPU process
+    table:
+      name: Name
+      pid: Process ID
+      cpu: CPU usage
+      memory: Memory usage
+      kb: KB
+      more-integrity: "Integrity level: ${value}"
+      more-peakMemory: "Peak memory usage: ${value}"
+      more-creationTime: "Creation time: ${value}"
+      more-sandboxed: Sandboxed
+      more-notSandboxed: Not sandboxed
+      integrityDescription:
+        untrusted: Untrusted
+        low: Low
+        medium: Medium
+        high: High
+        unknown: Unknown
+    button-finish: Finish process
+    button-restart: Restart process
+    confirmation: This is a system process (${name}). Finishing it might cause
+      instability or errors.
+    button-finishAnyway: Finish anyway
 net-error:
   common:
     local:
@@ -338,6 +372,7 @@ menu:
     onePageUp: Go one page up
   tools: Tools
   devTools: Developer tools
+  taskManager: Task manager
   currentTab: This tab
   recentlyClosedTabs: Recently closed
   openFile: Open file...

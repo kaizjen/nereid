@@ -24,7 +24,8 @@
     "i18next": "^21.8.3",
     "json5": "^2.2.2",
     "runtype-check": "^1.0.3",
-    "svelte": "^3.55.1"
+    "svelte": "^3.55.1",
+    "terminate": "^2.6.1"
   },
   "license": "MIT",
   "devDependencies": {

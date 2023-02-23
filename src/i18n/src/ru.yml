@@ -229,6 +229,40 @@ windows:
     data: Контент
     owner: Сертификат издателя
     root: Это коренной сертификат.
+  taskManager:
+    title: Диспетчер задач
+    processes:
+      browser: Браузер
+      utility: "Сервис: ${name}"
+      tab: "Вкладка: ${title}"
+      unknownTab: Вкладка (неизвестная)
+      devTools: "Инструменты разработчика: ${tabTitle}"
+      windowDevTools: DevTools для окна (ID окна ${id})
+      windowUI: Процесс интерфейса окна (ID ${id})
+      helperWindowUI: "Окно: ${title}"
+      gpu: Процесс графического процессора
+    table:
+      name: Название
+      pid: ID процесса
+      cpu: Загрузка ЦП
+      memory: Потребляемая память
+      kb: КБ
+      more-integrity: "Уровень доверия: ${value}"
+      more-peakMemory: "Максимальный объем потребляемой памяти: ${value}"
+      more-creationTime: "Время создания: ${value}"
+      more-sandboxed: Ограничен
+      more-notSandboxed: Неограничен
+      integrityDescription:
+        untrusted: Нет
+        low: Низкий
+        medium: Средний
+        high: Высокий
+        unknown: Неизвестно
+    button-finish: Завершить процесс
+    button-restart: Перезапустить процесс
+    confirmation: Это системный процесс. Его завершение может вызвать нестабильность
+      работы браузера.
+    button-finishAnyway: Все равно завершить
 net-error:
   common:
     local:
@@ -334,6 +368,7 @@ menu:
     onePageUp: На сегмент назад
   tools: Инструменты
   devTools: Developer tools
+  taskManager: Диспетчер задач
   currentTab: Эта вкладка
   recentlyClosedTabs: Недавно закрытые
   openFile: Открыть файл...

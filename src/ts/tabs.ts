@@ -380,6 +380,42 @@ export function removeTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: n
   return true;
 }
 
+export function updateTabState(win: TabWindow, { tab, index }: { tab?: Tab, index?: number }) {
+  if (tab) {
+    index = win.tabs.indexOf(tab);
+    if (index == -1) throw (new Error(`tabManager.updateTabState: no tab found in window`))
+  }
+  tab = tab || win.tabs[index]
+
+  if (tab.isGhost) {
+    win.chrome.webContents.send('tabUpdate', {
+      index,
+      state: {
+        title: tab.title,
+        url: tab.url,
+        private: tab.private,
+        uid: tab.uniqueID,
+        favicon: tab.faviconDataURL || tab.faviconURL
+      }
+    })
+
+  } else {
+    win.chrome.webContents.send('tabUpdate', {
+      index,
+      state: {
+        title: asRealTab(tab).webContents.getTitle() || asRealTab(tab).webContents.getURL(),
+        url: asRealTab(tab).webContents.getURL(),
+        security: checkSecurity(asRealTab(tab).webContents.getURL()),
+        isPlaying: asRealTab(tab).webContents.isCurrentlyAudible(),
+        isMuted: asRealTab(tab).webContents.isAudioMuted(),
+        private: tab.private,
+        uid: tab.uniqueID,
+        favicon: tab.faviconDataURL || tab.faviconURL
+      }
+    })
+  }
+}
+
 export function attach(win: TabWindow, tab: RealTab) {
   let getTabID = () => win.tabs.indexOf(tab)
 
@@ -935,22 +971,7 @@ export function moveTab(tab: Tab, destination: { window: TabWindow, index: numbe
     attach(window, asRealTab(tab))
   }
 
-  window.chrome.webContents.send('tabUpdate', {
-    index,
-    state: { title: asRealTab(tab).webContents.getTitle() || asRealTab(tab).webContents.getURL() }
-  })
-  window.chrome.webContents.send('tabUpdate', {
-    index,
-    state: { security: checkSecurity(asRealTab(tab).webContents.getURL()) }
-  })
-  window.chrome.webContents.send('tabUpdate', {
-    index,
-    state: { isPlaying: asRealTab(tab).webContents.isCurrentlyAudible() }
-  })
-  window.chrome.webContents.send('tabUpdate', {
-    index,
-    state: { isMuted: asRealTab(tab).webContents.isAudioMuted() }
-  })
+  updateTabState(window, { tab })
 
   selectTab(window, { index })
 }

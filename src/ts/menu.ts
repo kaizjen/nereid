@@ -1,8 +1,8 @@
 // Manages all menu stuff
 
-import { app, clipboard, dialog, Menu, MenuItem, session } from "electron";
+import { app, clipboard, dialog, ipcMain, Menu, MenuItem, session } from "electron";
 import { Bookmark, RealTab, Tab, TabOptions, TabWindow } from "./types";
-import { isTabWindow, newWindow, setCurrentTabBounds } from './windows'
+import { isTabWindow, newWindow, setCurrentTabBounds, newDialogWindow } from './windows'
 import { bookmarks, config, control, downloads } from './userdata'
 import * as pathModule from "path";
 import * as fs from "fs"
@@ -12,6 +12,7 @@ import fetch from "electron-fetch";
 import type { Response } from "electron-fetch"
 import { DEFAULT_PARTITION, PRIVATE_PARTITION } from "./sessions";
 import { t } from "./i18n";
+import { kill } from "./process";
 
 function obtainWebContents(win: Electron.BrowserWindow | TabWindow) {
   return isTabWindow(win) ? win.currentTab.webContents : win.webContents
@@ -412,6 +413,13 @@ export const appMenu = Menu.buildFromTemplate([
         click(_, win) {
           let wc = obtainWebContents(win)
           toggleDevTools(wc);
+        }
+      },
+      {
+        label: t('menu.taskManager'),
+        accelerator: 'Shift+Escape',
+        click() {
+          newDialogWindow({ type: 'taskmanager', options: { width: 650, resizable: true, minimizable: true } })
         }
       },
 
@@ -1005,4 +1013,38 @@ export function menuOfBookmark(win: TabWindow, bookmark: Bookmark, index: number
   })
 
   menu.popup();
+}
+
+export function menuOfProcess(process: Electron.ProcessMetric) {
+  console.log('mop');
+  
+  let menu = new Menu();
+  function addItem(options: Electron.MenuItemConstructorOptions) {
+    menu.append(new MenuItem(options))
+  }
+
+  function $t(str: string, obj?: {}) {
+    return t(`windows.taskManager.${str}`, obj)
+  }
+
+  let localizedIntegrity = $t('table.integrityDescription.unknown');
+  if (process.integrityLevel) {
+    localizedIntegrity = $t(`table.integrityDescription.${process.integrityLevel}`)
+  }
+
+  addItem({ label: $t('button-finish'), async click() {
+    try {
+      await kill(process.pid)
+      
+    } catch (error) {
+      dialog.showErrorBox('Failed to terminate the process', `Error: ${error}`)
+    }
+  } })
+  addItem(SEPARATOR)
+  addItem({ enabled: false, label: $t('table.more-integrity', { value: localizedIntegrity }) })
+  addItem({ enabled: false, label: $t('table.more-peakMemory', { value: process.memory.peakWorkingSetSize + ' ' + $t('table.kb') }) })
+  addItem({ enabled: false, label: $t('table.more-creationTime', { value: (new Date(process.creationTime)).toISOString() }) })
+  addItem({ enabled: false, label: process.sandboxed ? $t('table.more-sandboxed') : $t('table.more-notSandboxed') })
+
+  menu.popup()
 }

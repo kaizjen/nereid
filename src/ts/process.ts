@@ -8,6 +8,8 @@ import { createTab } from './tabs'
 import * as pathModule from 'path'
 import $ from './vars'
 import { TabOptions } from "./types";
+import type TypeTerminate from "terminate";
+const terminate = require('terminate') as typeof TypeTerminate;
 
 type Spec = {
   [key: string]: {
@@ -154,4 +156,11 @@ export function init() {
   }
 
   actArgv(argv, process.cwd())
+}
+
+export async function kill(pid: number) {
+  const processes = app.getAppMetrics();
+
+  if (!processes.find(p => p.pid = pid)) throw "Tried to kill a non-browser process";
+  return await terminate(pid);
 }

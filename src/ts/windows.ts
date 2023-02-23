@@ -245,6 +245,30 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
     chromeBV.webContents.send('wco', WCO_BOUNDS)
   }
 
+  chromeBV.webContents.on('render-process-gone', () => {
+    console.log("Chrome process crashed, reloading");
+    chromeBV.webContents.reload()
+  })
+
+  chromeBV.webContents.on('did-finish-load', async () => {
+    console.log("Chrome is ready, sending tab info");
+
+    chromeBV.webContents.send('wco', WCO_BOUNDS)
+    onConfigChange(config.get())
+    onBookmarksChange(await bookmarks.get())
+    w.tabs.forEach((tab, i) => {
+      chromeBV.webContents.send('addTab', {
+        position: i,
+        private: tab.private,
+        uid: tab.uniqueID,
+        url: 'nereid://newtab'
+      });
+      tabManager.updateTabState(w, { tab });
+    })
+
+    chromeBV.webContents.send('tabChange', w.tabs.indexOf(w.currentTab))
+  })
+
   config.listenCall(onConfigChange);
   bookmarks.listenCall(onBookmarksChange);
 
@@ -307,12 +331,14 @@ const defaultOptions: BrowserWindowConstructorOptions = {
 }
 export async function newDialogWindow(
   { type, init = '', options = defaultOptions }:
-  { type: 'cookieviewer' | 'certificate', init?: string, options?: BrowserWindowConstructorOptions }
+  { type: 'cookieviewer' | 'certificate' | 'taskmanager', init?: string, options?: BrowserWindowConstructorOptions }
 ) {
   options = Object.assign({}, defaultOptions, options)
   const w = new BrowserWindow(options);
   w.removeMenu();
   await w.loadURL(`n-internal://${type}/index.html#${init}`);
+
+  w.webContents.on('render-process-gone', () => w.close())
 
   if (control.options.open_devtools_for_window?.value || !app.isPackaged) {
     w.webContents.openDevTools({ mode: 'detach' })
