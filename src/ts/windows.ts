@@ -13,6 +13,8 @@ const WM_INITMENU = 0x0116; // windows' initmenu, explained later in the code
 let headHeight = 36; // px, height of the "head" of chrome
 
 export function setHeadHeight(hh: number) {
+  if (!platform.windows) return;
+
   headHeight = hh;
   getAllTabWindows().forEach(w => {
     w.setTitleBarOverlay({
