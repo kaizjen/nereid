@@ -150,19 +150,22 @@ export default {
     }
   },
   isValidURL(url: string) {
-    try {
-      new URL(url);
-      return true;
-
-    } catch (_) {
+    let urlPattern = /^(?:([a-z]+):)(\/{0,3})([0-9.\-a-z]+)(?::(\d+))?(?:\/([^?#]*))?(?:\?([^#]*))?(?:#(.*))?|([0-9\-A-Z]+)\.[A-Z]+/gmi;
+    if (urlPattern.test(url)) {
       try {
-        new URL('http://' + url);
+        new URL(url);
         return true;
-
+  
       } catch (_) {
-        return false;
+        try {
+          new URL('http://' + url);
+          return true;
+  
+        } catch (_) {
+          return false;
+        }
       }
-    }
+    } else return false
   },
   URLParse,
   /**
