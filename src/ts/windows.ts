@@ -209,7 +209,7 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
       }
   
       if (chromeBV.webContents.isLoading()) {
-        chromeBV.webContents.on('did-finish-load', proceed)
+        chromeBV.webContents.once('did-finish-load', proceed)
       } else proceed()
     })
   
