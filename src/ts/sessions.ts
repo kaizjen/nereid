@@ -202,22 +202,25 @@ export function registerSession(ses: Session) {
 
   ses.protocol.registerStreamProtocol('get', getProtocol)
 
-  ses.webRequest.onBeforeRequest({ urls: ['http://*/*'] }, ({ url }, callback) => {
-    if (!config.get().privacy.httpsOnly || URLParse(url).hostname == 'localhost') return callback({ cancel: false })
-
-    if (control.options.disallow_http?.value) {
-      callback({
-        cancel: true
-      })
-
-    } else {
-      callback({
-        redirectURL: url.replace('http:', 'https:')
-      })
-    }
-  })
-
   ses.webRequest.onBeforeRequest({ urls: ['*://*/*'] }, (details, callback) => {
+    if (
+      URLParse(details.url).protocol == 'http:' &&
+      config.get().privacy.httpsOnly &&
+      URLParse(details.url).hostname != 'localhost'
+    ) {
+      if (control.options.disallow_http?.value) {
+        return callback({
+          cancel: true
+        })
+  
+      } else {
+        return callback({
+          redirectURL: details.url.replace('http:', 'https:')
+        })
+      }
+    }
+
+
     const { redirect, match } = matchRequest(details);
     if (redirect) return callback({ redirectURL: redirect });
     if (match) return callback({ cancel: true });
