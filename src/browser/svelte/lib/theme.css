@@ -72,7 +72,7 @@ a:hover:active {
 
 @media (prefers-color-scheme: light) {
   :root {
-    --active-background: #dddfe2;
+    --active-background: var(--light-9);
     --text: var(--dark-1);
   }
 }

@@ -94,7 +94,7 @@
       box-shadow: none;
     }
     #addressbar:not(.noborder):not(.focus):hover {
-      background: var(--t-white-2);
+      background: var(--t-black-2);
     }
     #addressbar.focus {
       outline: none;
@@ -102,10 +102,10 @@
       background: var(--t-white-9);
     }
     .tab-state:hover {
-      background: var(--t-black-3);
+      background: var(--t-black-2);
     }
     .tab-state:hover:active, .tab-state.open {
-      background: var(--t-black-5);
+      background: var(--t-black-4);
     }
     #ab-input::placeholder {
       color: var(--t-black-9);

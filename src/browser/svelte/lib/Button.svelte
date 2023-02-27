@@ -36,10 +36,10 @@
       background: var(--t-black-base);
     }
     button:hover {
-      background: var(--t-black-4);
+      background: var(--t-black-3);
     }
     button:hover:active {
-      background: var(--t-black-5);
+      background: var(--t-black-4);
     }
     button.call-to-action {
       background: var(--accent-6);
