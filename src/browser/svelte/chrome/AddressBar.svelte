@@ -4,6 +4,7 @@
     transition: box-shadow 0.05s;
     border-radius: 0.25rem;
     display: flex;
+    align-items: center;
     cursor: text;
     overflow: hidden;
     -webkit-app-region: no-drag;
@@ -24,23 +25,13 @@
     box-shadow: 0px 0px 0px 2px var(--accent-5);
     background: var(--t-black-9)
   }
-  .ab-btn {
-    display: flex;
-  }
   .tab-state {
-    height: 1.15rem;
-    width: 1.15rem;
-    padding: 0.312rem;
-    padding-inline: 0.5rem;
+    display: flex;
+    padding: 0.4rem;
+    padding-inline: 0.35rem;
     border-radius: 0.25rem;
     transition: 0.15s;
     cursor: default;
-    flex-shrink: 0;
-  }
-  .sec {
-    width: 1.2rem;
-    height: 0.88rem;
-    padding: 0.45rem;
   }
   .tab-state:hover {
     background: var(--t-white-5);
@@ -48,6 +39,18 @@
   .tab-state:hover:active, .tab-state.open {
     background: var(--t-white-7);
     transition: 0s;
+  }
+  .tab-state img {
+    height: 1.15rem;
+    width: 1.15rem;
+    flex-shrink: 0;
+  }
+  .sec {
+    padding: 0.45rem;
+  }
+  .sec img {
+    width: 1.2rem;
+    height: 0.88rem;
   }
   #ab-txt {
     margin-left: 0.284rem;
@@ -336,15 +339,14 @@
   adblockerDialog = false;
 }} />
 <div class:noborder={anyDialog || noBorder} id="addressbar" class:focus={isActive}>
-  <button use:hover on:click={() => securityDialog = !securityDialog} class="ab-btn">
-    <img alt={_.SECURITY} class="tab-state sec"
+  <button use:hover on:click={() => securityDialog = !securityDialog} class="tab-state sec" class:open={securityDialog}>
+    <img alt={_.SECURITY}
       src={
         tab.security === true ? `n-res://${$colorTheme}/secure.svg` : 
         tab.security == 'internal' ? `n-res://${$colorTheme}/nereid-monochrome.svg` : 
         tab.security == 'local' ? `n-res://${$colorTheme}/file.svg` :
         `n-res://${$colorTheme}/insecure.svg`
       }
-      class:open={securityDialog}
     >
   </button>
   <button id="ab-txt"
@@ -379,46 +381,43 @@
   >
   {#if $globalZoom != $config?.ui.defaultZoomFactor}
     <button
-      class="ab-btn"
+      class="tab-state"
       on:click={() => zoomDialog = true}
       use:hover
+      class:open={zoomDialog}
     >
       <img
-        class="tab-state"
         src="n-res://{$colorTheme}/zoom{$globalZoom - $config?.ui.defaultZoomFactor > 0 ? 'in' : 'out'}.svg"
         alt={_.ALT_ZOOM({ zoom: Math.round($globalZoom * 100) })}
         title={_.ALT_ZOOM({ zoom: Math.round($globalZoom * 100) })}
-        class:open={zoomDialog}
       >
     </button>
   {/if}
   {#if url.protocol.startsWith('http')}
     <button
-      class="ab-btn"
+      class="tab-state"
       on:click={() => adblockerDialog = true}
       use:hover
+      class:open={adblockerDialog}
     >
       <img
-        class="tab-state"
         src="n-res://{$colorTheme}/shield{(abEnabled && !abError) ? '-good' : '-bad'}.svg"
         alt={(abEnabled && !abError) ? _.ADBLOCK_GOOD : _.ADBLOCK_BAD}
         title={(abEnabled && !abError) ? _.ADBLOCK_GOOD : _.ADBLOCK_BAD}
-        class:open={adblockerDialog}
       >
     </button>
   {/if}
   {#if url.protocol != 'nereid:' && !isANewTabURL()}
     <button
-      class="ab-btn"
+      class="tab-state"
       on:click={() => bookmarkDialog = true}
       use:hover
+      class:open={bookmarkDialog}
     >
       <img
-        class="tab-state"
         src="n-res://{$colorTheme}/bookmark{isInBookmarks ? '-selected' : ''}.svg"
         alt={isInBookmarks ? _.BOOKMARK_ADD_OR_RM : _.BOOKMARK_ADD}
         title={isInBookmarks ? _.BOOKMARK_ADD_OR_RM : _.BOOKMARK_ADD}
-        class:open={bookmarkDialog}
       >
     </button>
   {/if}
