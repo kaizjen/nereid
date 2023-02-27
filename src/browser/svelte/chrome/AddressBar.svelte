@@ -28,7 +28,7 @@
   .tab-state {
     display: flex;
     padding: 0.4rem;
-    padding-inline: 0.35rem;
+    padding-inline: 0.6rem;
     border-radius: 0.25rem;
     transition: 0.15s;
     cursor: default;
@@ -46,7 +46,8 @@
     flex-shrink: 0;
   }
   .sec {
-    padding: 0.45rem;
+    padding: 0.5rem;
+    padding-inline: 0.55rem;
   }
   .sec img {
     width: 1.2rem;
