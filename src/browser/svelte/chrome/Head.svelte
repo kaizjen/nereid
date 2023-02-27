@@ -17,25 +17,44 @@
   .traffic-lights {
     white-space: nowrap;
     background: var(--dark-1);
+    position: fixed;
     right: 0;
     max-height: 2rem;
     display: flex;
     z-index: 7;
   }
-  .traffic-lights > img {
-    width: 27px;
-    height: 20px;
-    padding: 8px;
-    padding-left: 12px;
-    padding-right: 12px;
+  .traffic-lights > button {
+    margin: calc((var(--head-height) - 15px - 10px) / 2); /* 10px are from padding */
+    margin-inline: 5px;
+    padding: 5px;
     transition: 0.2s;
     -webkit-app-region: no-drag;
+    border-radius: 50%;
   }
-  img#close:hover {
+  .traffic-lights img {
+    width: 15px;
+    height: 15px;
+  }
+  button#close {
+    margin: calc((var(--head-height) - 20px - 4px) / 2); /* 4px are from padding */
+    padding: 2px; /* the close button is bigger than others */
+    margin-right: 7px;
+  }
+  button#close > img {
+    width: 20px;
+    height: 20px;
+  }
+  button#close:hover {
     background: #ff5656a6;
   }
-  .traffic-lights > img:hover {
-    background: var(--dark-7);
+  button#close:hover:active {
+    background: #f77676d6;
+  }
+  .traffic-lights > button:hover {
+    background: var(--t-white-3);
+  }
+  .traffic-lights > button:hover:active {
+    background: var(--t-white-6);
     transition: 0s;
   }
 
@@ -170,8 +189,11 @@
     .traffic-lights {
       background: var(--light-5);
     }
-    .traffic-lights > img:hover {
-      background: var(--light-3);
+    .traffic-lights > button:hover {
+      background: var(--t-black-2);
+    }
+    .traffic-lights > button:hover:active {
+      background: var(--t-black-5);
     }
 
     .tab:hover {
@@ -224,6 +246,13 @@
   const URLParse = getContext('URLParse')
 
   const isOnLinux = process.platform == 'linux';
+  let trafficLightsElement;
+  let trafficLightsWidth = 0;
+  let internalHeadHeight = 0;
+
+  requestAnimationFrame(() => {
+    trafficLightsWidth = trafficLightsElement.getBoundingClientRect().width
+  })
 
   function tab_anim(node, { delay = 0, duration = 400, easing = quintOut, opacity = 0 }) {
     const style = getComputedStyle(node);
@@ -344,7 +373,8 @@
   function setHeadHeight() {
     if (!headElement) return;
 
-    ipcRenderer.send('chrome.headHeight', headElement.getBoundingClientRect().height)
+    internalHeadHeight = headElement.getBoundingClientRect().height
+    ipcRenderer.send('chrome.headHeight', internalHeadHeight)
   }
 
   requestAnimationFrame(() => {
@@ -358,7 +388,14 @@
 </script>
 
 
-<div class="head" bind:this={headElement}>
+<div
+  class="head"
+  bind:this={headElement}
+  style="
+    --head-height: {internalHeadHeight}px;
+    {isOnLinux ? `--titlebar-left: 0px; --titlebar-right: ${trafficLightsWidth}px;` : ''}
+  "
+>
   <img
     alt="" src="n-res://{$colorTheme}/nereid.svg" id="nereid-icn"
   >
@@ -422,27 +459,31 @@
           </button>
         </div>
       {/each}
-      </div>
-      <button
-        id="addtab"
-        on:click={newTab}
-        on:auxclick={() => ipcRenderer.send('chrome.menuNewTab')}
-        draggable="true"
-        on:dragstart={e => e.dataTransfer.setData('text/newTab', true)}
-      >
-        <img alt="" src="n-res://{$colorTheme}/plus.svg">
-      </button>
     </div>
-    <div
-      class="traffic-lights"
-      style:pointer-events={isOnLinux ? '' : 'none'}
-      style:display={isOnLinux ? '' : 'none'}
+    <button
+      id="addtab"
+      on:click={newTab}
+      on:auxclick={() => ipcRenderer.send('chrome.menuNewTab')}
+      draggable="true"
+      on:dragstart={e => e.dataTransfer.setData('text/newTab', true)}
     >
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <img role="button" alt="" src="n-res://{$colorTheme}/minimize.svg" on:click={winActionF('min')}>
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <img role="button" alt="" src="n-res://{$colorTheme}/restore.svg" on:click={winActionF('max')} width="24" height="24">
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <img role="button" alt="" src="n-res://{$colorTheme}/cross.svg" id="close" on:click={winActionF('close')}>
+      <img alt="" src="n-res://{$colorTheme}/plus.svg">
+    </button>
+  </div>
+  <div
+    class="traffic-lights"
+    style:pointer-events={isOnLinux ? '' : 'none'}
+    style:display={isOnLinux ? '' : 'none'}
+    bind:this={trafficLightsElement}
+  >
+    <button on:click={winActionF('min')}>
+      <img alt="" src="n-res://{$colorTheme}/minimize.svg" >
+    </button>
+    <button on:click={winActionF('max')}>
+      <img alt="" src="n-res://{$colorTheme}/restore.svg">
+    </button>
+    <button on:click={winActionF('close')} id="close">
+      <img alt="" src="n-res://{$colorTheme}/cross.svg">
+    </button>
   </div>
 </div>
