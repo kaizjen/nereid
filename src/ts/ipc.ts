@@ -49,32 +49,6 @@ export function init() {
     e.returnValue = t(str, other)
   })
 
-  /* ipcMain.on('@window', (e, action) => {
-    let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
-    if (!win) return
-
-    switch (action) {
-      case 'min':
-        win.minimize()
-        win.once('restore', () => {
-          // explanation at menu-mgr.ts, at the bottom of the only function there
-          win.chrome.webContents.sendInputEvent({
-            type: 'mouseMove',
-            x: 0, y: 0
-          })
-        })
-        break;
-      case 'max':
-        win.isMaximized() ? win.unmaximize() : win.maximize()
-        break;
-      case 'close':
-        win.close();
-        break;
-
-      default:
-        throw new Error("ipcManager.on[@window]: unknown action:" + action);
-    }
-  }); */
   function onWindow(channel: string, handler: (win: TabWindow, e: Electron.IpcMainEvent, ...args: any[]) => any) {
     ipcMain.on(channel, (e, ...args: any[]) => {
       let win = BrowserWindow.fromWebContents(e.sender);
