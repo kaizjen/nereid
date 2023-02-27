@@ -108,6 +108,10 @@ export function init() {
       wc.loadURL(SE.searchURL.replaceAll('%s', encodeURIComponent(q)))
     }
 
+    function loadURLWithHTTP() {
+      wc.loadURL('http://' + q)
+    }
+
     if ($.isValidURL(q) && !q.includes(' ')) {
       win.currentTab.lastNavigationReason = 'input-url'
       const parsed = URLParse(q);
@@ -118,11 +122,11 @@ export function init() {
           else {
             // the hostname was probably incorrectly assumed to be the protocol,
             // and whatever comes after the `:` is the port
-            wc.loadURL('http://' + q)
+            loadURLWithHTTP()
           }
         } else wc.loadURL(q);
 
-      } else wc.loadURL('http://' + q);
+      } else loadURLWithHTTP();
 
     } else search();
   })
