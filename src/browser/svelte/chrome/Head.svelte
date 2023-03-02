@@ -230,6 +230,7 @@
   const { ipcRenderer } = window.nereid;
   import { getContext } from "svelte/internal";
   import { quintOut } from 'svelte/easing'
+  import Spinner from "//lib/Spinner.svelte";
   export let tabs;
   export let currentTab;
 
@@ -434,7 +435,15 @@
           {#if tab.private && !(i == currentTab)}
             <img src="n-res://{$colorTheme}/private.svg" alt={_.PRIVATE_TAB} class="favicon decoy">
           {:else}
-            <img alt="" src={tab.isLoading ? `n-res://${$colorTheme}/clock.svg` : (tab.favicon ?? `n-res://${$colorTheme}/webpage.svg`)} class="favicon">
+            {#if tab.isLoading}
+              <Spinner
+                width="0.95rem" height="0.95rem"
+                thickness={10} style="flex-shrink: 0; padding: 0.1rem;"
+                color="var(--text)"
+              />
+            {:else}
+              <img alt="" src={tab.favicon ?? `n-res://${$colorTheme}/webpage.svg`} class="favicon">
+            {/if}
             {#if tab.isPlaying || tab.isMuted}
               <!-- svelte-ignore a11y-click-events-have-key-events -->
               <img
