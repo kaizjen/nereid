@@ -23,7 +23,7 @@
   #addressbar.focus {
     outline: none;
     box-shadow: 0px 0px 0px 2px var(--accent-5);
-    background: var(--t-black-9)
+    background: var(--dark-1)
   }
   .tab-state {
     display: flex;
@@ -54,6 +54,7 @@
   #ab-txt {
     margin-left: 0.284rem;
     display: inline-flex;
+    align-items: center;
     font-size: 0.9rem;
     white-space: nowrap;
     flex-grow: 1;
@@ -61,6 +62,7 @@
     overflow: hidden;
     cursor: text;
     direction: ltr;
+    height: 100%;
   }
   #ab-input {
     background: transparent;
