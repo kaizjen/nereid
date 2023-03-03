@@ -103,8 +103,8 @@ export function handleNetError(
       break;
     case -20:
       errInfo.info = $t('requestBlocked.0')
-      errInfo.detail = $t('requestBlocked.1') + control.options.disallow_http?.value ?
-        "<br>You have a control option disallow_http enabled. It's likely that the request was blocked because of this option." : ""
+      errInfo.detail = $t('requestBlocked.1') + (control.options.disallow_http?.value ?
+        "<br>You have a control option disallow_http enabled. It's likely that the request was blocked because of this option." : "")
       break;
     case -21:
       errInfo.info = $t('netChange.0')
