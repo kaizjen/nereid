@@ -10,16 +10,15 @@
     -webkit-app-region: no-drag;
     margin-inline: 0.375rem;
     height: 2rem;
-  }
-  #addressbar:not(.noborder) {
-    box-shadow: 0px 0px 0px 1px var(--t-white-3);
+    background: var(--t-black-8);
   }
   #addressbar:hover {
     box-shadow: none;
     transition: 0s;
   }
   #addressbar:not(.noborder):not(.focus):hover {
-    background: var(--t-black-4);
+    box-shadow: 0px 0px 0px 1px var(--t-white-3);
+    background: var(--t-black-9);
   }
   #addressbar.focus {
     outline: none;
@@ -36,10 +35,10 @@
     height: 100%;
   }
   .tab-state:hover {
-    background: var(--t-white-5);
+    background: var(--t-white-2);
   }
   .tab-state:hover:active, .tab-state.open {
-    background: var(--t-white-7);
+    background: var(--t-white-6);
     transition: 0s;
   }
   .tab-state img {
