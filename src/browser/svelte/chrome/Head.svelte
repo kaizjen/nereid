@@ -138,9 +138,6 @@
   .tab img.audio-control:active {
     background: var(--t-white-5);
   }
-  .tab img.audio-control.playing {
-    filter: invert(0.3) sepia(1) saturate(5) hue-rotate(177deg); /* creates a cyan color */
-  }
   .tab span {
     padding-left: 0.5rem;
     flex-grow: 1;
@@ -233,6 +230,9 @@
   import Spinner from "//lib/Spinner.svelte";
   export let tabs;
   export let currentTab;
+
+  const ACCENT_8 = '72b9f7';
+  const ACCENT_5 = '247ecd';
 
   export let changeToSetHeadHeight = {};
 
@@ -449,12 +449,16 @@
               <img
                 role="button"
                 tabindex="0"
-                alt={tab.isMuted ? _.MUTED : _.AUDIBLE }
-                src="n-res://{$colorTheme}/{tab.isMuted ? 'mute' : 'sound'}.svg"
+                alt={tab.isMuted ? _.MUTED : _.AUDIBLE}
+                src="
+                  n-res://{
+                    tab.isPlaying ?
+                    ($colorTheme == 'dark' ? ACCENT_8 : ACCENT_5) :
+                    $colorTheme
+                  }/{tab.isMuted ? 'mute' : 'sound'}.svg"
                 on:click={toggleMuteF(tab)}
                 on:mousedown|stopPropagation={()=>{}}
                 class="audio-control"
-                class:playing={tab.isPlaying}
               >
             {/if}
             <span>{tab.title}</span>

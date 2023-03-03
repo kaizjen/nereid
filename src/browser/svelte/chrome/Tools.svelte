@@ -9,6 +9,14 @@
     position: relative;
     border-top: 1px solid var(--t-white-5);
   }
+  .tool {
+    padding: 0.4rem;
+    padding-inline: 0.66rem;
+  }
+  .tool.wide {
+    /* Some icons have their natural padding, this class accounts for it (TODO: remove this?) */
+    padding-inline: 0.76rem;
+  }
   .tool img {
     height: 1.35rem;
   }
@@ -108,10 +116,10 @@
 <div class="tools" class:private={tab.private}>
   <button class="tool nav arrow-img" class:disabled={!tab.nav?.canGoBack} on:click={navBack}><img alt={_.BACK} src="n-res://{$colorTheme}/arrow.svg" class="rotated"></button>
   <button class="tool nav arrow-img" class:disabled={!tab.nav?.canGoFwd} on:click={navFwd}><img alt={_.FWD} src="n-res://{$colorTheme}/arrow.svg"></button>
-  <button class="tool nav" on:click={refresh}><img alt={tab.isLoading ? _.STOPLOAD : _.REFRESHLOAD} src={tab.isLoading ? `n-res://${$colorTheme}/cross.svg` : `n-res://${$colorTheme}/redo.svg`}></button>
+  <button class="tool nav wide" on:click={refresh}><img alt={tab.isLoading ? _.STOPLOAD : _.REFRESHLOAD} src={tab.isLoading ? `n-res://${$colorTheme}/cross.svg` : `n-res://${$colorTheme}/redo.svg`}></button>
   <AddressBar {tab} />
   <button
-    class="tool progressbar-container"
+    class="tool wide progressbar-container"
     class:open={downloadsDialog}
     on:click={() => downloadsDialog = !downloadsDialog}
   >

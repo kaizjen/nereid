@@ -683,9 +683,8 @@ app.once('ready', () => {
       }
 
       default: {
-        console.warn(`The hostname of the n-res:// URL should be a valid theme. "${theme}" is not.`);
-        respond({ error: -300 }) // Invalid URL
-        return;
+        color = '#' + theme;
+        break;
       }
     }
 

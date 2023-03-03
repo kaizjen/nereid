@@ -9,9 +9,6 @@
   .info > * {
     margin-left: 0.25rem;
   }
-  .info.secure {
-    filter: invert(0.5) sepia(1) saturate(3) hue-rotate(45deg);
-  }
   .more_info {
     padding: 0.375rem;
     opacity: 0.7;
@@ -70,6 +67,8 @@
   import { fly } from 'svelte/transition';
   import { appear } from "//lib/transition.js";
   import Permission from './Security/Permission.svelte';
+
+  const GREEN_COLOR = '74b22b';
 
   const { t } = window;
   const _ = {
@@ -134,9 +133,9 @@
 
 <div class="dialog" in:appear={{...window.flyoutProperties, isStatic: true}} out:fly={window.flyoutProperties} on:outroend={() => setTop(false)}>
   <div class="dialog-content">
-    <div class="info" class:secure={tab.security === true}>
+    <div class="info" style:color={tab.security === true ? ('#' + GREEN_COLOR) : ''}>
       <img src={
-        tab.security === true ? `n-res://${$colorTheme}/secure.svg` : 
+        tab.security === true ? `n-res://${GREEN_COLOR}/secure.svg` : 
         tab.security == 'internal' ? `n-res://${$colorTheme}/nereid.svg` : 
         tab.security == 'local' ? `n-res://${$colorTheme}/file.svg` :
         `n-res://${$colorTheme}/insecure.svg`

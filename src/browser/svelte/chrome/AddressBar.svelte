@@ -9,6 +9,7 @@
     overflow: hidden;
     -webkit-app-region: no-drag;
     margin-inline: 0.375rem;
+    height: 2rem;
   }
   #addressbar:not(.noborder) {
     box-shadow: 0px 0px 0px 1px var(--t-white-3);
@@ -27,11 +28,12 @@
   }
   .tab-state {
     display: flex;
-    padding: 0.4rem;
-    padding-inline: 0.6rem;
+    align-items: center;
+    padding-inline: 0.7rem;
     border-radius: 0.25rem;
     transition: 0.15s;
     cursor: default;
+    height: 100%;
   }
   .tab-state:hover {
     background: var(--t-white-5);
@@ -41,17 +43,14 @@
     transition: 0s;
   }
   .tab-state img {
-    height: 1.15rem;
     width: 1.15rem;
     flex-shrink: 0;
   }
   .sec {
-    padding: 0.5rem;
-    padding-inline: 0.55rem;
+    padding-inline: 0.9rem;
   }
   .sec img {
-    width: 1.2rem;
-    height: 0.88rem;
+    width: 0.88rem;
   }
   #ab-txt {
     margin-left: 0.284rem;
