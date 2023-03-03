@@ -53,8 +53,10 @@ function standardOptions() {
 }
 
 export function matchRequest(info: Electron.OnBeforeRequestListenerDetails) {
-  const pageURL = info.webContents?.getURL();
-  if (pageURL && !webContentsABMap[info.webContentsId]) {
+  if (!info.webContents) return {};
+
+  const pageURL = info.webContents.getURL();
+  if (!webContentsABMap[info.webContentsId]) {
     // write standard options to the adblocker map
     webContentsABMap[info.webContentsId] = standardOptions();
     info.webContents.on('did-navigate', () => {
@@ -64,7 +66,7 @@ export function matchRequest(info: Electron.OnBeforeRequestListenerDetails) {
   }
 
   if (!isAdBlockerReady) return {};
-  
+
   if (pageURL) {
     const { protocol, hostname } = $.URLParse(pageURL)
 
