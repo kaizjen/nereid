@@ -84,7 +84,7 @@
   }
   .tab {
     padding: 0.5rem;
-    transition: 0.15s;
+    transition: 0.25s;
     position: relative;
     white-space: nowrap;
     overflow: hidden;
@@ -133,10 +133,10 @@
   }
   .tab img.audio-control:hover {
     background: var(--t-white-3);
-    transition: 0s;
   }
-  .tab img.audio-control:active {
+  .tab img.audio-control:hover:active {
     background: var(--t-white-5);
+    transition: 0s;
   }
   .tab span {
     padding-left: 0.5rem;
@@ -144,7 +144,6 @@
   }
   .close-tab {
     padding: 0.135rem;
-    transition: 0.15s;
     border-radius: 0.25rem;
     display: flex;
   }
@@ -153,7 +152,6 @@
   }
   .close-tab:hover:active {
     background: var(--t-white-6);
-    transition: 0s;
   }
   .tab > span {
     text-overflow: ellipsis;
@@ -163,9 +161,10 @@
 
   #addtab {
     padding: 0.2rem;
+    padding-inline: 0.4rem;
     margin-left: 0.125rem;
     border-radius: 0.25rem;
-    transition: 0.1s;
+    transition: 0.25s;
     display: flex;
   }
   #addtab img {

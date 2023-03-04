@@ -22,17 +22,17 @@
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
-    transition: .1s;
+    transition: .25s;
     display: flex;
     align-items: center;
     margin-inline: 0.25rem;
   }
   .bookmark:hover {
     background: var(--t-white-2);
-    transition: 0s;
   }
-  .bookmark:active {
+  .bookmark:hover:active {
     background: var(--t-white-4);
+    transition: 0s;
   }
   .bookmark span {
     flex-grow: 1;

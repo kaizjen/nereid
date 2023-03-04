@@ -25,7 +25,7 @@
     padding: 0.5rem;
     align-items: center;
     border-radius: 0.25rem;
-    transition: .1s;
+    transition: .25s;
     opacity: 0.85;
     width: -webkit-fill-available;
   }

@@ -1,7 +1,7 @@
 <style>
   #addressbar {
     width: -webkit-fill-available;
-    transition: box-shadow 0.05s;
+    transition: box-shadow 0.1s;
     border-radius: 0.25rem;
     display: flex;
     align-items: center;
@@ -11,6 +11,7 @@
     margin-inline: 0.375rem;
     height: 2rem;
     background: var(--t-black-8);
+    padding: 0.08rem;
   }
   #addressbar:hover {
     box-shadow: none;
@@ -30,7 +31,7 @@
     align-items: center;
     padding-inline: 0.7rem;
     border-radius: 0.25rem;
-    transition: 0.15s;
+    transition: 0.25s;
     cursor: default;
     height: 100%;
   }

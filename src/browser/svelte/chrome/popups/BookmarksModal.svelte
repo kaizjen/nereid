@@ -33,7 +33,7 @@
     padding: 0.25rem;
     padding-inline: 0.625rem;
     border-radius: 0.25rem;
-    transition: .1s;
+    transition: .25s;
   }
   .folder:hover {
     background: var(--t-white-3);

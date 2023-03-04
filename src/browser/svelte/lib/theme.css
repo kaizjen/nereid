@@ -79,7 +79,7 @@ a:hover:active {
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --active-background: var(--dark-5);
+    --active-background: var(--dark-4);
     --text: white;
   }
 }

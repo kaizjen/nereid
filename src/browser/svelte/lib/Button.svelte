@@ -1,10 +1,10 @@
 <style>
   button {
-    padding: 0.375rem;
-    padding-inline: 0.55rem;
+    padding: 0.5rem;
+    padding-inline: 0.7rem;
     min-width: 80px;
     border-radius: 0.2rem;
-    transition: .15s;
+    transition: .25s;
   }
   button.with-bg {
     background: var(--t-white-base);
