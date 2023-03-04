@@ -424,7 +424,7 @@
     </button>
   {/if}
 </div>
-<div class="wrapper" style="z-index: {anyDialog ? '9' : '-1'};">
+<div class="wrapper" style="z-index: {anyDialog ? '10' : '-1'};">
   {#if securityDialog}
     <Security bind:isOpen={securityDialog} {tab} />
   {/if}
