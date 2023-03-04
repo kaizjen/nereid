@@ -14,8 +14,8 @@
   }
   .bookmark {
     flex-shrink: 1;
-    padding: 0.25rem;
-    padding-inline: 0.35rem;
+    padding: 0.35rem;
+    padding-inline: 0.6rem;
     border-radius: 0.25rem;
     max-width: 12.5rem;
     min-width: 3.125rem;
@@ -38,6 +38,12 @@
     flex-grow: 1;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  .icon-container {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
   }
   .icon {
     width: 1rem;
@@ -111,7 +117,9 @@
           on:contextmenu|preventDefault={ctxMenuF(bm, i)}
         >
           {#if bm.iconURL}
-            <img class="icon" src={'get:' + bm.iconURL} alt="" />
+            <div class="icon-container">
+              <img class="icon" src={'get:' + bm.iconURL} alt="" />
+            </div>
           {/if}
           <span>
             {bm.name}
