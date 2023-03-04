@@ -558,8 +558,6 @@ export async function displayOptions(win: TabWindow, { x, y }) {
 }
 
 export async function showContextMenu(win: TabWindow | false, tab: RealTab, opts: Electron.ContextMenuParams) {
-  //console.log(opts);
-
   function createContextTab(opts: TabOptions) {
     if (!win) return;
     return createTab(win, Object.assign({
@@ -638,18 +636,18 @@ export async function showContextMenu(win: TabWindow | false, tab: RealTab, opts
     addItem({ label: $t('search', { engine: selectedSE.name }), click() {
       createContextTab({ url: selectedSE.searchURL.replaceAll('%s', encodeURIComponent(opts.selectionText)) })
     } })
-    addItem({ role: 'copy', accelerator: 'CmdOrCtrl+C' })
+    addItem({ label: $t('copy'), role: 'copy', accelerator: 'CmdOrCtrl+C' })
     if (opts.editFlags.canCut) {
-      addItem({ role: 'cut', accelerator: 'CmdOrCtrl+X' })
+      addItem({ label: $t('cut'), role: 'cut', accelerator: 'CmdOrCtrl+X' })
     }
     if (opts.editFlags.canDelete) {
-      addItem({ role: 'delete', accelerator: 'Delete' })
+      addItem({ label: $t('delete'), role: 'delete', accelerator: 'Delete' })
     }
     addItem(SEPARATOR)
   }
   if (opts.editFlags.canPaste) {
-    addItem({ role: 'paste', accelerator: 'CmdOrCtrl+V' })
-    addItem({ role: 'pasteAndMatchStyle', accelerator: 'CmdOrCtrl+Shift+V' })
+    addItem({ label: $t('paste'), role: 'paste', accelerator: 'CmdOrCtrl+V' })
+    addItem({ label: $t('pasteAndMatchStyle'), role: 'pasteAndMatchStyle', accelerator: 'CmdOrCtrl+Shift+V' })
     addItem(SEPARATOR)
   }
 
@@ -812,6 +810,60 @@ export async function showContextMenu(win: TabWindow | false, tab: RealTab, opts
   addItem({ label: $t('openDevTools'), click() { toggleDevTools(tab.webContents) }, accelerator: 'Ctrl+Shift+I' })
 
   menu.popup()
+}
+
+export function chromeContextMenu(win: TabWindow, opts: Electron.ContextMenuParams) {
+  let menu = new Menu();
+
+  function addItem(obj: Electron.MenuItemConstructorOptions) {
+    menu.append(new MenuItem(obj))
+  }
+  /**
+   * Wrapper around the t(), adds "menu.contextMenu"
+   */
+  function $t(str: string, obj?: {}) {
+    return t(`menu.contextMenu.${str}`, obj)
+  }
+
+  if (opts.selectionText) {
+    let searchConfig = config.get().search;
+    let selectedSE = searchConfig.available[searchConfig.selectedIndex]
+    addItem({
+      label: $t('search', { engine: selectedSE.name }), click() {
+        createTab(win, { url: selectedSE.searchURL.replaceAll('%s', encodeURIComponent(opts.selectionText)) })
+      }
+    })
+    addItem({ label: $t('copy'), role: 'copy', accelerator: 'CmdOrCtrl+C' })
+    if (opts.editFlags.canCut) {
+      addItem({ label: $t('cut'), role: 'cut', accelerator: 'CmdOrCtrl+X' })
+    }
+    if (opts.editFlags.canDelete) {
+      addItem({ label: $t('delete'), role: 'delete', accelerator: 'Delete' })
+    }
+  }
+  if (opts.editFlags.canPaste) {
+    addItem(SEPARATOR)
+    addItem({ label: $t('paste'), role: 'paste', accelerator: 'CmdOrCtrl+V' })
+    addItem({ label: $t('pasteAndMatchStyle'), role: 'pasteAndMatchStyle', accelerator: 'CmdOrCtrl+Shift+V' })
+    const copied = clipboard.readText();
+    if (copied) {
+      addItem(SEPARATOR)
+      addItem({
+        label: $t($.isValidURL(copied) ? 'pasteAndGo' : 'pasteAndSearch', { query: copied }),
+        accelerator: 'CmdOrCtrl+Shift+V',
+        click() {
+          win.chrome.webContents.paste();
+          // TODO: stop using ipcMain.emit and switch to something
+          // more versatile
+          ipcMain.emit('currentTab.go', { sender: win.chrome.webContents }, copied)
+        }
+      })
+    }
+  }
+
+  if (menu.items.length == 0) return;
+
+  menu.popup();
 }
 
 export function menuOfTab(win: TabWindow, tab: Tab) {
@@ -1016,8 +1068,6 @@ export function menuOfBookmark(win: TabWindow, bookmark: Bookmark, index: number
 }
 
 export function menuOfProcess(process: Electron.ProcessMetric) {
-  console.log('mop');
-  
   let menu = new Menu();
   function addItem(options: Electron.MenuItemConstructorOptions) {
     menu.append(new MenuItem(options))

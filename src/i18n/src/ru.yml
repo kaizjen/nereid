@@ -390,9 +390,6 @@ menu:
   contextMenu:
     openLink: Открыть ссылку
     search: Поиск в ${engine}
-    copy: Копировать
-    cut: Вырезать
-    paste: Вставить
     pasteWithStyle: Вставить с форматированием
     open:
       newTab: Открыть в новой вкладке
@@ -405,6 +402,13 @@ menu:
     print: Печать
     viewSourceCode: Открыть исходный код
     openDevTools: Код элемента
+    copy: Копировать
+    cut: Вырезать
+    delete: Удалить
+    paste: Вставить
+    pasteAndMatchStyle: Вставить с исходным оформлением
+    pasteAndSearch: Вставить и найти "${query}"
+    pasteAndGo: 'Вставить и перейти: "${query}"'
     image:
       viewInNewTab: Открыть картинку в новой вкладке
       copy: Копировать картинку

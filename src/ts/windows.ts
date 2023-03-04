@@ -6,7 +6,7 @@ import * as tabManager from "./tabs";
 import * as _url from "url";
 import * as pathModule from "path";
 import { bookmarks, config, control, lastlaunch } from './userdata'
-import { showAppMenu } from "./menu";
+import { chromeContextMenu, showAppMenu } from "./menu";
 import { INTERNAL_PARTITION } from "./sessions";
 
 const WM_INITMENU = 0x0116; // windows' initmenu, explained later in the code
@@ -269,6 +269,10 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
     })
 
     chromeBV.webContents.send('tabChange', w.tabs.indexOf(w.currentTab))
+  })
+
+  chromeBV.webContents.on('context-menu', (_e, opts) => {
+    chromeContextMenu(w, opts)
   })
 
   config.listenCall(onConfigChange);

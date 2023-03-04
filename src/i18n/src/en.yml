@@ -405,6 +405,13 @@ menu:
     print: Print
     viewSourceCode: View source code
     openDevTools: Inspect
+    copy: Copy
+    cut: Cut
+    delete: Delete
+    paste: Paste
+    pasteAndMatchStyle: Paste and match style
+    pasteAndSearch: Paste and search for "${query}"
+    pasteAndGo: Paste and go to "${query}"
     image:
       viewInNewTab: View image in new tab
       copy: Copy image
