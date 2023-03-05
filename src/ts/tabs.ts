@@ -800,6 +800,9 @@ export function toRealTab(tab: Tab) {
     isOpenedAtStart: tab.isOpenedAtStart
   });
   owner.tabs[index] = realTab;
+  owner.chrome.webContents.send('tabUpdate', {
+    index: index, state: { isLoading: true }
+  })
   attach(owner, realTab)
 
   return realTab;
@@ -864,6 +867,9 @@ export function createTab(window: TabWindow, options: TabOptions): Tab {
   setCurrentTabBounds(window, tab) // better to resize here or will slow down the tab switching
   tab.targetFrameName = options.targetFrameName;
   addTab(window, tab, options);
+  if (!tab.isGhost) window.chrome.webContents.send('tabUpdate', {
+    index: window.tabs.indexOf(tab), state: { isLoading: true }
+  })
   if (!tab.isGhost) attach(window, asRealTab(tab))
   options.background || selectTab(window, { tab: tab })
   return tab;
