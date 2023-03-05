@@ -390,7 +390,6 @@ menu:
   contextMenu:
     openLink: Открыть ссылку
     search: Поиск в ${engine}
-    pasteWithStyle: Вставить с форматированием
     open:
       newTab: Открыть в новой вкладке
       newPrivateTab: Открыть в приватной вкладке
