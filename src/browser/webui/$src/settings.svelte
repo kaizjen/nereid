@@ -27,6 +27,7 @@
   .content {
     width: 18cm;
     padding-top: 30px;
+    padding-inline: 30px;
   }
   section {
     display: block;
