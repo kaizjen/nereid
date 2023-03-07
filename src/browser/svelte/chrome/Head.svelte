@@ -431,7 +431,7 @@
           }
           role="tab"
         >
-          {#if tab.private && !(i == currentTab)}
+          {#if tab.private && i != currentTab && !tabs[currentTab].private}
             <img src="n-res://{$colorTheme}/private.svg" alt={_.PRIVATE_TAB} class="favicon decoy">
           {:else}
             {#if tab.isLoading}
