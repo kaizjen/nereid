@@ -947,20 +947,13 @@ export function menuOfTab(win: TabWindow, tab: Tab) {
     }
   })
   addItem({
-    label: $t('close-right'), click() {
+    label: $t('close-right'), async click() {
       let index = win.tabs.indexOf(tab);
       if (index == -1) console.error('Menu item "Close tabs to the right" - no tab found in window');
 
-      win.tabs.forEach(async(tab, i) => {
-        if (i <= index) return;
-
-        try {
-          await closeTab(win, { tab, index: i }, true)
-
-        } catch (e) {
-          console.error('Menu item "Close tabs to the right" - error:', e)
-        }
-      })
+      while (win.tabs[index + 1]) {
+        await closeTab(win, { index: index + 1 }, true)
+      }
     }
   })
 
