@@ -65,6 +65,12 @@ type TabProperties = {
   owner?: TabWindow
   isOpenedAtStart?: boolean
   targetFrameName?: string
+  history?: {
+    title: string
+    url: string
+    faviconURL: string
+  }[]
+  currentHistoryIndex?: number
 }
 /**
  * Upon starting Nereid, instead of loading all tabs at once,

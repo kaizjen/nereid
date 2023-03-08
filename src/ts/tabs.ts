@@ -301,6 +301,8 @@ export function createBrowserView(opts: TabOptions): RealTab {
   tab.private = opts.private
   tab.isOpenedAtStart = opts.isOpenedAtStart
   tab.isGhost = false;
+  tab.history = [];
+  tab.currentHistoryIndex = -1;
 
   return tab;
 }
@@ -593,6 +595,9 @@ export function attach(win: TabWindow, tab: RealTab) {
       tab.faviconURL = null
     }
     if (previousDataURL != tab.faviconDataURL) sendUpdate({ favicon: tab.faviconDataURL })
+
+    tab.history[tab.currentHistoryIndex].faviconURL = tab.faviconURL;
+
     setImmediate(async () => {
       let history = await userData.history.get();
       if (!tab.webContents) return; // sometimes the tab is already closed at this point
@@ -651,9 +656,15 @@ export function attach(win: TabWindow, tab: RealTab) {
       }
     })
 
-    sendUpdate({ favicon: null })
-    tab.faviconURL = null;
+    if (tab.history[tab.currentHistoryIndex])
+    if (URLParse(tab.history[tab.currentHistoryIndex].url).hostname != URLParse(url).hostname) {
+      // if the host has changed, update the favicon
+      sendUpdate({ favicon: null })
+      tab.faviconURL = null;
+    }
 
+    tab.history.push({ title: tab.webContents.getTitle(), url, faviconURL: tab.faviconURL })
+    tab.currentHistoryIndex++;
     tab.targetFrameName = null;
 
     sendUpdate({ security: checkSecurity(url) })
@@ -834,6 +845,8 @@ export function selectTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: n
     // That's because chrome has a same-origin zoom policy.
   //
 
+  asRealTab(tab).webContents.focus();
+
   setTitleOfWindow(win, asRealTab(tab))
 }
 
@@ -857,7 +870,9 @@ export function createTab(window: TabWindow, options: TabOptions): Tab {
       uniqueID: options.uid,
       private: options.private,
       isOpenedAtStart: options.isOpenedAtStart,
-      owner: window
+      owner: window,
+      history: [],
+      currentHistoryIndex: -1
     }
     tabUniqueIDs[options.uid] = tab;
 
