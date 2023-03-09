@@ -907,7 +907,7 @@ export function menuOfTab(win: TabWindow, tab: Tab) {
   addItem(SEPARATOR)
   addItem({ label: $t('duplicate'), click() {
     createContextTab({
-      url: toRealTab(tab).webContents.getURL()
+      url: tab.isGhost ? tab.url : asRealTab(tab).webContents.getURL()
     })
   } })
   if (!tab.isGhost && asRealTab(tab).webContents.audioMuted) {
