@@ -77,6 +77,85 @@ function cloneObject<T extends object>(obj: T): T {
   return obj;
 }
 
+function uncompressObject(scheme: any[], data: any[]): any {
+  const output = {};
+  scheme.forEach((key, i) => {
+    if (!(i in data)) return;
+
+    if (Array.isArray(key)) {
+      const stringKey = key[0];
+      const type = key[1];
+      const scheme = key[2];
+
+      if (scheme) {
+        if (type == 'obj') {
+          // object
+          output[stringKey] = uncompressObject(scheme, data[i])
+        } else if (type == 'arr') {
+          // array
+          if (Array.isArray(scheme[0]) && scheme.length == 1) {
+            // a hack to make it work on arrays of arrays
+            const decArray = [];
+            console.log('dss', data[i], scheme);
+            data[i].forEach((dat: any[]) => {
+              decArray.push(uncompressArray(scheme[0], dat));
+            })
+            output[stringKey] = decArray
+
+          } else {
+            output[stringKey] = uncompressArray(scheme, data[i])
+          }
+        }
+
+      } else {
+        output[stringKey] = data[i]
+      }
+
+    } else {
+      output[key] = data[i]
+    }
+  })
+  return output;
+}
+function uncompressArray(scheme: any[], data: any[]) {
+  const output = [];
+
+  data.forEach(el => {
+    output.push(uncompressObject(scheme, el))
+  });
+
+  return output;
+}
+
+function compressObject(object: any, recursive?: boolean) {
+  const result = [];
+  for (const key in object) {
+    let el = object[key];
+    if (typeof el == 'object' && recursive) {
+      if (Array.isArray(el)) {
+        el = compressArray(el, recursive);
+
+      } else {
+        el = compressObject(el, recursive);
+      }
+    }
+    result.push(el);
+  }
+  return result;
+}
+function compressArray(array: any[], recursive?: boolean) {
+  const final = [];
+  array.forEach(item => {
+    if (Array.isArray(item)) {
+      final.push(compressArray(item, recursive))
+
+    } else {
+      final.push(compressObject(item, recursive));
+    }
+  });
+  return final;
+}
+
 
 
 try {
@@ -100,9 +179,34 @@ try {
   process.exit(1)
 }
 
+function uncompressLastLaunch(array: any[]) {
+  console.log('ucll', uncompressObject([
+    'exitedSafely', 'launchFailed', [
+      'windows', 'arr', [[
+        'title', 'url', 'faviconURL'
+      ]]
+    ], [
+      'bounds', 'obj', [
+        'x', 'y', 'width', 'height', 'maximized'
+      ]
+    ]
+  ], array));
+  return uncompressObject([
+    'exitedSafely', 'launchFailed', [
+      'windows', 'arr', [[
+        'title', 'url', 'faviconURL'
+      ]]
+    ], [
+      'bounds', 'obj', [
+        'x', 'y', 'width', 'height', 'maximized'
+      ]
+    ]
+  ], array)
+}
+
 try {
   configContent = JSON5.parse(fs.readFileSync(configPath, 'utf-8'))
-  lastlaunchContent = JSON.parse(fs.readFileSync(lastlaunchPath, 'utf-8'))
+  lastlaunchContent = uncompressLastLaunch(JSON.parse(fs.readFileSync(lastlaunchPath, 'utf-8')))
   controlContent = JSON.parse(fs.readFileSync(controlPath, 'utf-8'))
 
   // check the history and downloads for being readable
@@ -243,61 +347,6 @@ try {
   app.exit(11)
 })()
 
-function uncompressObject(scheme: any[], data: any[]) {
-  const output = {};
-  scheme.forEach((key, i) => {
-    if (!(i in data)) return;
-
-    if (Array.isArray(key)) {
-      const stringKey = key[0];
-      const type = key[1];
-      const scheme = key[2];
-
-      if (scheme) {
-        if (type == 0) {
-          // object
-          output[stringKey] = uncompressObject(scheme, data[i])
-        } else {
-          // array
-          output[stringKey] = uncompressArray(scheme, data[i])
-        }
-
-      } else {
-        output[stringKey] = data[i]
-      }
-
-    } else {
-      output[key] = data[i]
-    }
-  })
-  return output;
-}
-function uncompressArray(scheme: any[], data: any[]) {
-  const output = [];
-
-  data.forEach(el => {
-    output.push(uncompressObject(scheme, el))
-  });
-
-  return output;
-}
-
-function compressObject(object: any[]) {
-  const result = [];
-  for (const key in object) {
-    const el = object[key];
-    result.push(el);
-  }
-  return result;
-}
-function compressArray(array: any[]) {
-  const final = [];
-  array.forEach(item => {
-    final.push(compressObject(item));
-  });
-  return final;
-}
-
 
 export let config = {
   listeners: <((b: Configuration) => any)[]>[],
@@ -336,7 +385,7 @@ export let lastlaunch = {
   set(obj: Partial<LastLaunch>) {
     Object.assign(lastlaunchContent, obj);
 
-    fs.writeFileSync(lastlaunchPath, JSON.stringify(lastlaunchContent))
+    fs.writeFileSync(lastlaunchPath, JSON.stringify(compressObject(lastlaunchContent, true)))
 
     this.listeners.forEach(fn => fn(lastlaunchContent))
   },
@@ -483,11 +532,11 @@ export let control = {
     dialog.showErrorBox(
       "There was a problem.", 
       "The options (nereid://control) are corrupted or invalid." +
-      "They have been replaced with a working version, but Nereid needs to be restarted."
+      "They have been replaced with a working version, but Nereid has to restart."
     );
     process.exit();
   },
-  /** Needed for accessing even those settings, that aren't in effect yet */
+  /** Needed for accessing the settings that aren't in effect yet */
   dynamicControl: controlContent
 }
 console.timeEnd('userData init');
