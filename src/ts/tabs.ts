@@ -160,6 +160,7 @@ function handleBeforeUnload<T>(wc: WebContents, proceed: () => T): Promise<false
 
         } else {
           resolve(false)
+          beingClosed.splice(beingClosed.findIndex(tab => asRealTab(tab).webContents == wc), 1);
         }
 
       } else {
