@@ -275,6 +275,12 @@
     wco = wco;
   })
 
+  function finishNereidSetupF(isKey) {
+    return (e) => {
+      if (isKey && e.key != "Enter") return;
+      ipcRenderer.send('newTab', { url: 'nereid://welcome/' })
+    }
+  }
 </script>
 
 <!--svelte:head>
@@ -301,11 +307,23 @@
     : ''
   }">
   {#if tabs[currentTab]?.uid in dialogsMap}
-  <PagePopup tab={tabs[currentTab]} dialog={dialogsMap[tabs[currentTab]?.uid]} />
+    <PagePopup tab={tabs[currentTab]} dialog={dialogsMap[tabs[currentTab]?.uid]} />
   {/if}
   <Tools tab={tabs[currentTab]} />
   <BookmarkBar pageURL={tabs[currentTab]?.url} />
   <PermissionAccessor tab={tabs[currentTab]} />
   <FindInPage index={currentTab} {tabs} />
+  {#if $config?.welcomePhase <= 4}
+    <div class="dropdown-box">
+      <span>
+        {window.t('ui.nereidSetupNotification.text')}&nbsp;
+        <!-- svelte-ignore a11y-missing-attribute -->
+        <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+        <a tabindex="0" on:click={finishNereidSetupF(false)} on:keypress={finishNereidSetupF(true)}>
+          {window.t('ui.nereidSetupNotification.link')}
+        </a>
+      </span>
+    </div>
+  {/if}
 </div>
 </div>

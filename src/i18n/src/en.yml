@@ -195,6 +195,9 @@ ui:
     suggestion: Place your favorites here, in the bookmarks panel
     edit: Edit
     delete: Delete
+  nereidSetupNotification:
+    text: Nereid hasn't yet been set up and configured.
+    link: Finish the setup now
 windows:
   cookieViewer:
     title: Cookie files of ${hostname}

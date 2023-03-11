@@ -195,6 +195,9 @@ ui:
       notReady: Страница загрузилась до загрузки блокировщика рекламы, так что
         некоторые трекеры были проигнорированы.
       button-reload: Перезагрузить страницу
+  nereidSetupNotification:
+    text: Вы не закончили настройку Nereid.
+    link: Настроить сейчас
 windows:
   cookieViewer:
     title: Файлы куки ${hostname}

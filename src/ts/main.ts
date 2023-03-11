@@ -72,12 +72,7 @@ userData.lastlaunch.set({ launchFailed: true })
 app.on('ready', () => {
   ipcManager.init();
 
-  if (userData.config.get().welcomePhase <= 4) {
-    newWindow([ { url: 'nereid://welcome' } ])
-
-  } else {
-    thisProcess.init()
-  }
+  thisProcess.init()
 
   if (app.isPackaged && !userData.lastlaunch.get().exitedSafely) {
     dialog.showErrorBox("Oh no!", "Nereid's work ended abruptly last time. There might be some unsaved data.")

@@ -110,6 +110,11 @@ export function init() {
       }
 
     } else if (!isAlreadyLaunched) {
+      if (userData.config.get().welcomePhase <= 4) {
+        newWindow([{ url: 'nereid://welcome' }]);
+        getTabWindowByID(0).focus();
+        return;
+      }
       // This is the first launch, no arguments.
       if (onStart.type == 'page') {
         newWindow([ { url: onStart.url, isOpenedAtStart: true } ])
