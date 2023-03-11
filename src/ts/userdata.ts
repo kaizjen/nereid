@@ -243,6 +243,62 @@ try {
   app.exit(11)
 })()
 
+function uncompressObject(scheme: any[], data: any[]) {
+  const output = {};
+  scheme.forEach((key, i) => {
+    if (!(i in data)) return;
+
+    if (Array.isArray(key)) {
+      const stringKey = key[0];
+      const type = key[1];
+      const scheme = key[2];
+
+      if (scheme) {
+        if (type == 0) {
+          // object
+          output[stringKey] = uncompressObject(scheme, data[i])
+        } else {
+          // array
+          output[stringKey] = uncompressArray(scheme, data[i])
+        }
+
+      } else {
+        output[stringKey] = data[i]
+      }
+
+    } else {
+      output[key] = data[i]
+    }
+  })
+  return output;
+}
+function uncompressArray(scheme: any[], data: any[]) {
+  const output = [];
+
+  data.forEach(el => {
+    output.push(uncompressObject(scheme, el))
+  });
+
+  return output;
+}
+
+function compressObject(object: any[]) {
+  const result = [];
+  for (const key in object) {
+    const el = object[key];
+    result.push(el);
+  }
+  return result;
+}
+function compressArray(array: any[]) {
+  const final = [];
+  array.forEach(item => {
+    final.push(compressObject(item));
+  });
+  return final;
+}
+
+
 export let config = {
   listeners: <((b: Configuration) => any)[]>[],
   get() {
@@ -300,8 +356,13 @@ export let lastlaunch = {
 }
 
 
-function filterEntries(array: History) {
-  return array.filter($.uniqBy((e1, e2) => e1.tabUID == e2.tabUID && e1.sessionUUID == e2.sessionUUID && e1.url == e2.url))
+function compressHistory(array: History) {
+  return compressArray(
+    array.filter($.uniqBy((e1, e2) => e1.tabUID == e2.tabUID && e1.sessionUUID == e2.sessionUUID && e1.url == e2.url))
+  )
+}
+function parseHistory(array: any[]) {
+  return uncompressArray(['sessionUUID', 'tabUID', 'timestamp', 'reason', 'url', 'title', 'faviconURL'], array);
 }
 // These two variables lock the history so only one operation can be executed
 // at a time. Whenever history is being written, `historyLock` becomes a `Promise`
@@ -313,14 +374,14 @@ let historyLock: Promise<void> | null = null
 let currentSetCall = -1;
 export let history = {
   getSync(): History {
-    return JSON.parse(fs.readFileSync(historyPath, 'utf-8'));
+    return parseHistory(JSON.parse(fs.readFileSync(historyPath, 'utf-8')));
   },
   async get(): Promise<History> {
     if (historyLock) await historyLock;
-    return JSON.parse(await fs.promises.readFile(historyPath, 'utf-8'));
+    return parseHistory(JSON.parse(await fs.promises.readFile(historyPath, 'utf-8')));
   },
   setSync(obj: History) {
-    fs.writeFileSync(historyPath, JSON.stringify(filterEntries(obj)))
+    fs.writeFileSync(historyPath, JSON.stringify(compressHistory(obj)))
   },
   /**
    * Returns `false` if the operation was rejected by a more recent history write.
@@ -341,7 +402,7 @@ export let history = {
       return false;
     }
 
-    historyLock = fs.promises.writeFile(historyPath, JSON.stringify(filterEntries(obj)));
+    historyLock = fs.promises.writeFile(historyPath, JSON.stringify(compressHistory(obj)));
 
     await historyLock;
     historyLock = null;
@@ -349,11 +410,13 @@ export let history = {
   }
 }
 
-
+function parseDownloads(array: any[]) {
+  return uncompressArray(['url', 'urlChain', 'savePath', 'status', 'offset', 'length'], array);
+}
 export let downloads = {
   async get(): Promise<Downloads> {
     if (await exists(downloadsPath)) {
-      return JSON.parse(await fs.promises.readFile(downloadsPath, 'utf-8'))
+      return parseDownloads(JSON.parse(await fs.promises.readFile(downloadsPath, 'utf-8')))
 
     } else {
       await fs.promises.writeFile(downloadsPath, '[]')
@@ -361,7 +424,7 @@ export let downloads = {
     }
   },
   async set(data: Downloads) {
-    return await fs.promises.writeFile(downloadsPath, JSON.stringify(data, null, app.isPackaged ? null : 2))
+    return await fs.promises.writeFile(downloadsPath, JSON.stringify(compressArray(data), null, app.isPackaged ? null : 2))
   }
 }
 
