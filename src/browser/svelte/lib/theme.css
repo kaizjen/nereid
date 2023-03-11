@@ -59,20 +59,19 @@ a {
   transition: .2s;
 }
 a:hover {
-  color: var(--accent-7);
-  border-color: var(--accent-7);
+  color: var(--accent-8);
+  border-color: var(--accent-8);
 }
-a:hover:active {
+a:active {
   color: var(--accent-4);
   border-color: var(--accent-4);
-  transition: .2s;
-  transform: translateY(1px);
+  transition: 0s;
 }
 
 
 @media (prefers-color-scheme: light) {
   :root {
-    --active-background: var(--light-9);
+    --active-background: var(--light-8);
     --text: var(--dark-1);
   }
 }
