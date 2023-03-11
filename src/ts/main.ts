@@ -17,7 +17,7 @@ require('tls').DEFAULT_ECDH_CURVE = 'auto' // fix handshake error
 
 app.userAgentFallback = app.userAgentFallback
   .replace(/nereid\/.*? /, '')    // remove the 'nereid/x.y.z'
-  .replace(/Electron\/.*? /, '')    // and 'Electron/17.x.y' strings from the user agent string
+  .replace(/Electron\/.*? /, '')  // and 'Electron/17.x.y' strings from the user agent string
   + ` Nereid/${app.getVersion()}` // and add the correct Nereid string at the end
 ;
 app.enableSandbox()
