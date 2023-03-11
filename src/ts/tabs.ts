@@ -245,10 +245,6 @@ async function pushToHistory(tab: Tab, responseCode: number = 0) {
   ) { tab.lastNavigationReason = 'other'; return; }
 
   if (url.startsWith('nereid:')) return;
-  if (global.isStarting) {
-    // if the app is still starting, don't save the history
-    tab.lastNavigationReason = 'other'; return;
-  }
 
   history.unshift({
     sessionUUID: global.SESSION_UUID,

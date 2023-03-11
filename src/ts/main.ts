@@ -28,44 +28,34 @@ app.on('before-quit', () => {
   userData.lastlaunch.set({ exitedSafely: true })
 })
 
-if (userData.lastlaunch.get().launchFailed) {
-  global.isSafeMode = true;
-  dialog.showErrorBox("Oh no!",
-    "Nereid has failed to launch last time. So now it has launched in safe mode, which means all extensions have been\
- disabled, and the control options (nereid://control) were ignored. Restart Nereid to exit safe mode.")
+let oldConfig = userData.config.get()
 
-} else {
-  global.isSafeMode = false;
+userData.config.listenCall((c) => {
+  if (c.ui.theme != nativeTheme.themeSource) {
+    nativeTheme.themeSource = c.ui.theme;
+    getAllTabWindows().forEach(w => {
+      w.chrome.webContents.send('config', 'theme', c.ui.theme)
+    })
+  }
 
-  let oldConfig = userData.config.get()
-
-  userData.config.listenCall((c) => {
-    if (c.ui.theme != nativeTheme.themeSource) {
-      nativeTheme.themeSource = c.ui.theme;
-      getAllTabWindows().forEach(w => {
-        w.chrome.webContents.send('config', 'theme', c.ui.theme)
+  if (c.ui.defaultZoomFactor != oldConfig.ui.defaultZoomFactor) {
+    getAllTabWindows().forEach(w => {
+      w.tabs.forEach(t => {
+        if (t.isGhost) return;
+        if (asRealTab(t).webContents.zoomFactor == oldConfig.ui.defaultZoomFactor) {
+          // changes the zoom only if it hasn't been changed before
+          asRealTab(t).webContents.zoomFactor = c.ui.defaultZoomFactor;
+        }
       })
-    }
+    })
+  }
 
-    if (c.ui.defaultZoomFactor != oldConfig.ui.defaultZoomFactor) {
-      getAllTabWindows().forEach(w => {
-        w.tabs.forEach(t => {
-          if (t.isGhost) return;
-          if (asRealTab(t).webContents.zoomFactor == oldConfig.ui.defaultZoomFactor) {
-            // changes the zoom only if it hasn't been changed before
-            asRealTab(t).webContents.zoomFactor = c.ui.defaultZoomFactor;
-          }
-        })
-      })
-    }
+  if (c.behaviour.a11yEnabled !== oldConfig.behaviour.a11yEnabled) {
+    app.accessibilitySupportEnabled = c.behaviour.a11yEnabled ?? app.accessibilitySupportEnabled;
+  }
 
-    if (c.behaviour.a11yEnabled !== oldConfig.behaviour.a11yEnabled) {
-      app.accessibilitySupportEnabled = c.behaviour.a11yEnabled ?? app.accessibilitySupportEnabled;
-    }
-
-    oldConfig = c;
-  })
-}
+  oldConfig = c;
+})
 
 userData.lastlaunch.set({ launchFailed: true })
 

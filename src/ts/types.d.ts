@@ -2,8 +2,6 @@ import type { BrowserView, BrowserWindow, Request } from "electron";
 
 declare global {
   var SESSION_UUID: string
-  var isSafeMode: boolean
-  var isStarting: boolean
 }
 
 /** 
