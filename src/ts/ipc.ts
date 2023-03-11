@@ -5,7 +5,7 @@ import type { WebContents, IpcMainEvent } from "electron";
 import fetch from "electron-fetch";
 import * as userData from "./userdata";
 import type { TabWindow, TabOptions, Configuration, RealTab } from "./types"
-import $ from "./vars";
+import $ from "./common";
 import * as tabManager from './tabs'
 import * as _url from "url";
 import { appMenu, displayOptions, menuNewTab, menuOfBookmark, menuOfProcess, menuOfTab } from "./menu";

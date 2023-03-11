@@ -3,7 +3,7 @@
 import { ipcMain, WebContents, WebFrameMain, webFrameMain } from "electron";
 import * as fs from 'fs'
 import { t } from "./i18n";
-import $ from "./vars";
+import $ from "./common";
 import { control } from "./userdata";
 
 const URLParse = $.URLParse;

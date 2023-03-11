@@ -8,7 +8,7 @@ import * as userData from "./userdata";
 import { DEFAULT_PARTITION } from "./sessions";
 import * as thisProcess from "./process";
 import * as pathModule from "path"
-import $ from "./vars";
+import $ from "./common";
 import { t } from "./i18n";
 import { setup } from "./adblocker";
 import { asRealTab } from "./tabs";

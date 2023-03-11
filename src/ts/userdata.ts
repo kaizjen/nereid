@@ -5,7 +5,7 @@ import * as path from 'path'
 import { app, dialog } from 'electron'
 import type { Configuration, LastLaunch, History, Downloads, Details, Bookmarks } from './types'
 import * as JSON5 from 'json5';
-import $ from './vars';
+import $ from './common';
 import runType from 'runtype-check';
 
 console.time('userData init');

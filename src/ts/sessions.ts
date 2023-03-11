@@ -3,7 +3,7 @@
 import type { CertficateCache, Permissions, RealTab, TabWindow } from "./types";
 import { app, BrowserWindow, ipcMain, protocol, session, Session, screen, nativeTheme } from "electron";
 import * as pathModule from "path"
-import $ from "./vars";
+import $ from "./common";
 import { randomUUID } from 'crypto'
 import * as fs from "fs-extra"
 import { getAllTabWindows, isTabWindow } from './windows'

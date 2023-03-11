@@ -6,7 +6,7 @@ import fetch from "electron-fetch";
 import * as userData from './userdata'
 import { DEFAULT_PARTITION, NO_CACHE_PARTITION, PRIVATE_PARTITION, validateDomainByURL } from './sessions'
 import { handleNetError } from './net-error-analyzer'
-import $ from './vars'
+import $ from './common'
 import { showContextMenu } from "./menu";
 import { getAllTabWindows, newWindow, setCurrentTabBounds } from "./windows";
 import { t } from "./i18n";

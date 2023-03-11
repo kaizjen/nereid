@@ -7,7 +7,7 @@ import { bookmarks, config, control, downloads } from './userdata'
 import * as pathModule from "path";
 import * as fs from "fs"
 import { asRealTab, closeTab, createTab, moveTab, openClosedTab, setMutedTab, toRealTab } from './tabs'
-import $ from './vars'
+import $ from './common'
 import fetch from "electron-fetch";
 import type { Response } from "electron-fetch"
 import { DEFAULT_PARTITION, PRIVATE_PARTITION } from "./sessions";

@@ -3,7 +3,7 @@ import fetch from "electron-fetch";
 import * as fs from "fs-extra";
 import * as pt from "path";
 import { config, control, userdataDirectory } from "./userdata";
-import $ from "./vars"
+import $ from "./common"
 
 export let engine: FiltersEngine;
 export let isAdBlockerReady = false;

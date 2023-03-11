@@ -50,8 +50,10 @@ function URLParse(str: string): ParsedURL {
 };
 
 export default {
+  // TODO: when extensions are implemented, move this to an appropriate file
   newTabUrl: 'nereid://newtab',
   searchHintAlgorithms: {
+    // TODO: move this to a new file, 'omnibox.ts'
     async googleLike(res: Response): Promise<string[]> {
       const json: string[][] = await res.json();
   

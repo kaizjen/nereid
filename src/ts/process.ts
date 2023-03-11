@@ -6,7 +6,7 @@ import { app } from 'electron'
 import { getTabWindowByID, newWindow } from './windows'
 import { createTab } from './tabs'
 import * as pathModule from 'path'
-import $ from './vars'
+import $ from './common'
 import { TabOptions } from "./types";
 import type TypeTerminate from "terminate";
 const terminate = require('terminate') as typeof TypeTerminate;
