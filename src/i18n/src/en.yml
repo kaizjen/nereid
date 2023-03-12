@@ -383,7 +383,7 @@ menu:
   tools: Tools
   panes:
     close: Close panes
-    switch: Switch panes
+    switch: Swap panes
   devTools: Developer tools
   taskManager: Task manager
   currentTab: This tab
