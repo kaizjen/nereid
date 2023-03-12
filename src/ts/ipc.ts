@@ -8,8 +8,8 @@ import type { TabWindow, TabOptions, Configuration, RealTab } from "./types"
 import $ from "./common";
 import * as tabManager from './tabs'
 import * as _url from "url";
-import { appMenu, displayOptions, menuNewTab, menuOfBookmark, menuOfProcess, menuOfTab } from "./menu";
-import { getTabWindowByID, setHeadHeight, isTabWindow, newDialogWindow, setCurrentTabBounds, getAllTabWindows, getIDOfTabWindow } from "./windows";
+import { appMenu, displayOptions, menuNewTab, menuOfBookmark, menuOfPaneDivider, menuOfProcess, menuOfTab } from "./menu";
+import { getTabWindowByID, setHeadHeight, isTabWindow, newDialogWindow, setCurrentTabBounds, getAllTabWindows, getIDOfTabWindow, PANE_SEP_WIDTH } from "./windows";
 import type TypeFuse from "fuse.js";
 import { certificateCache, DEFAULT_PARTITION, NO_CACHE_PARTITION, PRIVATE_PARTITION } from "./sessions";
 import { getSupportedLanguage, t, availableTranslations } from "./i18n";
@@ -206,8 +206,34 @@ export function init() {
       win.setTopBrowserView(win.chrome)
 
     } else {
+      if (win.currentPaneView) {
+        // First get the not current pane on top, then get the current tab on top
+        // to ensure that the chrome remains at the bottom.
+        if (win.currentTab == win.currentPaneView.leftTab) {
+          win.setTopBrowserView(tabManager.asRealTab(win.currentPaneView.rightTab))
+
+        } else {
+          win.setTopBrowserView(tabManager.asRealTab(win.currentPaneView.leftTab))
+        }
+      }
       win.setTopBrowserView(win.currentTab)
     }
+  })
+  onWindow('chrome.movePanes', (win, _e, x: number) => {
+    if (!win.currentPaneView) return console.warn("Tried to move panes without a pane view.");
+
+    const leftTab = tabManager.asRealTab(win.currentPaneView.leftTab)
+    const rightTab = tabManager.asRealTab(win.currentPaneView.rightTab)
+
+    const fullFrame = win.currentPaneView.separatorPosition + leftTab.getBounds().width + rightTab.getBounds().width;
+    const position = (x - (PANE_SEP_WIDTH)) / fullFrame;
+
+    if (position > 1 || position < 0) throw("Invalid position.")
+    if (position < 0.2 || position > 0.8) return;
+
+    win.currentPaneView.separatorPosition = position;
+    setCurrentTabBounds(win);
+
   })
   onWindow('chrome.browserMenu', (win, _e, pos) => {
     displayOptions(win, pos);
@@ -223,6 +249,9 @@ export function init() {
   })
   onWindow('chrome.menuOfBookmark', (win, _e, bookmark, index: number) => {
     menuOfBookmark(win, bookmark, index)
+  })
+  onWindow('chrome.menuOfPaneDivider', (win) => {
+    menuOfPaneDivider(win)
   })
 
   onWindow('chrome.moveTab', (win, _e, tabUID: number, newIndex: number) => {

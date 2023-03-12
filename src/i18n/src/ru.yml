@@ -369,7 +369,17 @@ menu:
     openClosed: Открыть закрытую вкладку
     hardReload: Полная перезагрузка
     onePageUp: На сегмент назад
+    newTabInLeftPane: Новая вкладка в левой панели
+    newTabInRightPane: Новая вкладка в правой панели
+    openLeftTabIn: Открыть левую вкладку...
+    openRightTabIn: Открыть правую вкладку...
+    openTabIn:
+      leftPane: В левой панели
+      rightPane: В правой панели
   tools: Инструменты
+  panes:
+    close: Закрыть панели
+    switch: Поменять панели местами
   devTools: Developer tools
   taskManager: Диспетчер задач
   currentTab: Эта вкладка
@@ -398,6 +408,8 @@ menu:
       newPrivateTab: Открыть в приватной вкладке
       newWindow: Открыть в новом окне
       thisTab: Открыть в этой вкладке
+      leftPane: Открыть в левой панели
+      rightPane: Открыть в правой панели
     copyLink: Копировать адрес ссылки
     savePageAs: Сохранить страницу как...
     savePage_dialog: Сохранение страницы (${page})
@@ -433,6 +445,7 @@ menu:
     frame:
       reload: Перезагрузить фрейм
       viewSourceCode: Посмотреть исходный код фрейма
+    closePane: Закрыть панель
   tabMenu:
     createNewTab: Создать новую вкладку
     createNewPrivateTab: Создать новую приватную вкладку
@@ -445,6 +458,8 @@ menu:
     close-this: Закрыть вкладку
     close-others: Закрыть другие вкладки
     close-right: Закрыть вкладки справа
+    splitPaneLeft: Открыть в левой панели
+    splitPaneRight: Открыть в правой панели
   window:
     minimize: Свернуть
     unmaximize: Restore

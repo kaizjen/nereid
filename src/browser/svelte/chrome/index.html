@@ -21,6 +21,9 @@
       font-family: system-ui;
       overflow: hidden;
     }
+    body.background {
+      background: var(--dark-1);
+    }
     
     span.protocol, span.page, span.port {
       color: var(--t-white-9);
@@ -102,6 +105,9 @@
     }
 
     @media (prefers-color-scheme: light) {
+      body.background {
+        background: var(--light-5);
+      }
       span.protocol, span.page, span.port {
         color: var(--t-black-9);
       }

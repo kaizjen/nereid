@@ -1,6 +1,6 @@
 // Tabs' creation, removal and whatever else
 
-import type { TabWindow, TabOptions, Tab, RealTab } from "./types";
+import type { TabWindow, TabOptions, Tab, RealTab, PaneView } from "./types";
 import { BrowserView, BrowserWindow, dialog, nativeTheme, session, WebContents } from "electron";
 import fetch from "electron-fetch";
 import * as userData from './userdata'
@@ -327,7 +327,6 @@ export function destroyWebContents(bv: RealTab) {
     ses.clearHostResolverCache()
     ses.closeAllConnections()
     console.log('cleared all private data');
-    
   })
   return bv;
 }
@@ -354,6 +353,23 @@ export function removeTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: n
     if (index == -1) throw(new Error(`tabManager.removeTab: no tab found in window`))
   }
 
+  function selectOtherPane(ifNotInPaneView: () => any) {
+    if (tab.paneView) {
+      let otherTab: Tab;
+      if (tab.paneView.leftTab == tab) {
+        otherTab = tab.paneView.rightTab
+
+      } else {
+        otherTab = tab.paneView.leftTab
+      }
+
+      selectTab(win, { tab: otherTab })
+
+    } else {
+      ifNotInPaneView()
+    }
+  }
+
   if (win.currentTab == tab) {
     // select different tab if we're closing the current one
     if (index == 0) {
@@ -363,11 +379,11 @@ export function removeTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: n
         win.close(); // close the window if this is the last tab
 
       } else {
-        selectTab(win, { index: 1 })
+        selectOtherPane(() => selectTab(win, { index: 1 }))
       }
 
     } else {
-      selectTab(win, { index: index - 1 })
+      selectOtherPane(() => selectTab(win, { index: index - 1 }))
     }
   }
   
@@ -547,6 +563,10 @@ export function attach(win: TabWindow, tab: RealTab) {
   tab.webContents.on('media-started-playing', () => sendUpdate({ isPlaying: true }))
   tab.webContents.on('media-paused', () => sendUpdate({ isPlaying: false }))
 
+  tab.webContents.on('focus', () => {
+    // when this tab is a part of a PaneView, it needs to update the address bar URL
+    selectTab(win, { tab });
+  })
   tab.webContents.on('page-title-updated', (_e, title, isExplicit) => {
     sendUpdate({ title });
     if (win.currentTab == tab) {
@@ -750,9 +770,11 @@ export function attach(win: TabWindow, tab: RealTab) {
 
   tab.webContents.on('enter-html-full-screen', () => {
     asRealTab(tab).setBounds({ x: 0, y: 0, width: win.getContentBounds().width, height: win.getContentBounds().height })
+    win.chrome.webContents.send('paneDividerOnTop', true)
   })
   tab.webContents.on('leave-html-full-screen', () => {
     setCurrentTabBounds(win, tab)
+    win.chrome.webContents.send('paneDividerOnTop', false)
   })
   tab.webContents.on('context-menu', (_e, opts) => {
     showContextMenu(win, tab, opts)
@@ -768,6 +790,7 @@ export function detach(tab: RealTab) {
     'did-stop-loading',
     'media-started-playing',
     'media-paused',
+    'focus',
     'page-title-updated',
     'page-favicon-updated',
     'will-prevent-unload',
@@ -787,6 +810,9 @@ export function detach(tab: RealTab) {
     tab.webContents.removeAllListeners(event)
   })
   tab.webContents.setWindowOpenHandler(null)
+  if (tab.paneView) {
+    undividePanes(tab.owner, tab.paneView)
+  }
   tab.owner = null;
 }
 
@@ -831,9 +857,21 @@ export function selectTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: n
   if (tab.isGhost) {
     tab = toRealTab(tab);
   }
+
+  win.currentPaneView = null;
+  if (tab.paneView) {
+    if (tab == tab.paneView.leftTab) {
+      win.addBrowserView(asRealTab(tab.paneView.rightTab))
+      
+    } else {
+      win.addBrowserView(asRealTab(tab.paneView.leftTab))
+    }
+    win.currentPaneView = tab.paneView;
+  }
+
   win.addBrowserView(asRealTab(tab))
   win.currentTab = asRealTab(tab);
-  
+
   setCurrentTabBounds(win)
   win.setTopBrowserView(asRealTab(tab));
   win.chrome.webContents.send('tabChange', index)
@@ -845,6 +883,35 @@ export function selectTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: n
   asRealTab(tab).webContents.focus();
 
   setTitleOfWindow(win, asRealTab(tab))
+}
+
+export function dividePanes(win: TabWindow, panes: { right: Tab, left: Tab }) {
+  const right = toRealTab(panes.right);
+  const left = toRealTab(panes.left);
+
+  if (right.paneView) undividePanes(win, right.paneView)
+  if (left.paneView) undividePanes(win, left.paneView)
+
+  const paneView = { rightTab: right, leftTab: left, separatorPosition: 0.5 };
+
+  win.paneViews.push(paneView);
+
+  right.paneView = left.paneView = paneView;
+
+  // If the current tab is a part of the newly created pane view, this display it correctly
+  selectTab(win, { tab: win.currentTab })
+}
+
+export function undividePanes(win: TabWindow, paneView: PaneView) {
+  if (!win.paneViews.includes(paneView)) throw new Error("No PaneView found in window")
+
+  win.paneViews.splice(win.paneViews.indexOf(paneView), 1);
+
+  paneView.leftTab.paneView = paneView.rightTab.paneView = null;
+  win.removeBrowserView(paneView.leftTab)
+  win.removeBrowserView(paneView.rightTab)
+
+  selectTab(win, { tab: win.currentTab })
 }
 
 /**
@@ -974,10 +1041,10 @@ export function moveTab(tab: Tab, destination: { window: TabWindow, index: numbe
   if (tab.isGhost) tab = toRealTab(tab);
 
   let { owner } = tab
+  removeTab(owner, { tab: tab })
   if (owner != window) {
     detach(asRealTab(tab))
   }
-  removeTab(owner, { tab: tab })
   addTab(window, tab, {
     url: asRealTab(tab).webContents.getURL(),
     initialFavicon: tab.faviconDataURL,

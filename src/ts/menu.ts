@@ -6,7 +6,7 @@ import { isTabWindow, newWindow, setCurrentTabBounds, newDialogWindow } from './
 import { bookmarks, config, control, downloads } from './userdata'
 import * as pathModule from "path";
 import * as fs from "fs"
-import { asRealTab, closeTab, createTab, moveTab, openClosedTab, setMutedTab, toRealTab } from './tabs'
+import { asRealTab, closeTab, createTab, dividePanes, moveTab, openClosedTab, selectTab, setMutedTab, toRealTab, undividePanes } from './tabs'
 import $ from './common'
 import fetch from "electron-fetch";
 import type { Response } from "electron-fetch"
@@ -53,6 +53,105 @@ const SEPARATOR: Electron.MenuItemConstructorOptions = {
   type: 'separator'
 }
 
+const newTabInPanes: Electron.MenuItemConstructorOptions[] = [
+  {
+    label: t('menu.tabs.newTabInLeftPane'),
+    click(_m, win) {
+      if (!isTabWindow(win)) return;
+
+      let newTab = createTab(win, {
+        url: $.newTabUrl,
+        position: win.tabs.indexOf(win.currentTab),
+        background: true
+      })
+      dividePanes(win, { left: newTab, right: win.currentTab })
+      selectTab(win, { tab: newTab })
+
+      focusChrome(win)
+    },
+    accelerator: 'CmdOrCtrl+Alt+Left',
+  },
+  {
+    label: t('menu.tabs.newTabInRightPane'),
+    click(_m, win) {
+      if (!isTabWindow(win)) return;
+
+      let newTab = createTab(win, {
+        url: $.newTabUrl,
+        position: win.tabs.indexOf(win.currentTab) + 1,
+        background: true
+      })
+      dividePanes(win, { left: win.currentTab, right: newTab })
+      selectTab(win, { tab: newTab })
+
+      focusChrome(win)
+    },
+    accelerator: 'CmdOrCtrl+Alt+Right',
+  },
+]
+const openNearbyTabsInPanes: Electron.MenuItemConstructorOptions[] = [
+  {
+    label: t('menu.tabs.openLeftTabIn'),
+    submenu: [
+      {
+        label: t('menu.tabs.openTabIn.leftPane'),
+        accelerator: "CmdOrCtrl+Alt+,",
+        click(_, win) {
+          if (!isTabWindow(win)) return;
+          if (win.tabs.indexOf(win.currentTab) - 1 < 0) return;
+
+          dividePanes(win, {
+            left: win.tabs[win.tabs.indexOf(win.currentTab) - 1],
+            right: win.currentTab
+          })
+        }
+      },
+      {
+        label: t('menu.tabs.openTabIn.rightPane'),
+        click(_, win) {
+          if (!isTabWindow(win)) return;
+          if (win.tabs.indexOf(win.currentTab) - 1 < 0) return;
+
+          dividePanes(win, {
+            left: win.currentTab,
+            right: win.tabs[win.tabs.indexOf(win.currentTab) - 1]
+          })
+        }
+      },
+    ]
+  },
+  {
+    label: t('menu.tabs.openRightTabIn'),
+    submenu: [
+      {
+        label: t('menu.tabs.openTabIn.leftPane'),
+        click(_, win) {
+          if (!isTabWindow(win)) return;
+          if (!win.tabs[win.tabs.indexOf(win.currentTab) + 1]) return;
+
+          dividePanes(win, {
+            left: win.tabs[win.tabs.indexOf(win.currentTab) + 1],
+            right: win.currentTab
+          })
+        }
+      },
+      {
+        label: t('menu.tabs.openTabIn.rightPane'),
+        accelerator: "CmdOrCtrl+Alt+.",
+        click(_, win) {
+          if (!isTabWindow(win)) return;
+          if (!win.tabs[win.tabs.indexOf(win.currentTab) + 1]) return;
+
+          dividePanes(win, {
+            left: win.currentTab,
+            right: win.tabs[win.tabs.indexOf(win.currentTab) + 1]
+          })
+        }
+      },
+    ]
+  }
+]
+
 const tabs_windows: Electron.MenuItemConstructorOptions[] = [
   {
     label: t('menu.common.newTab'),
@@ -82,6 +181,19 @@ const tabs_windows: Electron.MenuItemConstructorOptions[] = [
     id: 'new-tab-p'
   },
   SEPARATOR,
+  ...newTabInPanes,
+  SEPARATOR,
+  {
+    label: t('menu.panes.close'),
+    click(_m, win) {
+      if (!isTabWindow(win)) return;
+      if (!win.currentPaneView) return;
+
+      undividePanes(win, win.currentPaneView)
+    },
+    accelerator: 'CmdOrCtrl+Alt+W',
+    id: 'close-panes'
+  },
   {
     label: t('menu.tabs.close'),
     click(_m, win) {
@@ -347,9 +459,23 @@ export const appMenu = Menu.buildFromTemplate([
         accelerator: 'Escape',
         click(_, win) {
           if (!isTabWindow(win)) return;
-          
+
           win.setFullScreen(false);
           setCurrentTabBounds(win);
+        }
+      },
+      {
+        label: 'switch-panes-hidden',
+        visible: false,
+        accelerator: 'CmdOrCtrl+Alt+S',
+        click(_, win) {
+          if (!isTabWindow(win)) return;
+          if (!win.currentPaneView) return;
+
+          dividePanes(win, {
+            left: win.currentPaneView.rightTab,
+            right: win.currentPaneView.leftTab
+          })
         }
       }
     ]
@@ -461,6 +587,10 @@ export const appMenu = Menu.buildFromTemplate([
         }
       },
       SEPARATOR,
+      ...newTabInPanes,
+      ...openNearbyTabsInPanes,
+      SEPARATOR,
+      tabs_windows.find(i => i.id == 'close-panes'),
       tabs_windows.find(i => i.id == 'close-tab')
     ]
   },
@@ -557,7 +687,7 @@ export async function displayOptions(win: TabWindow, { x, y }) {
   })
 }
 
-export async function showContextMenu(win: TabWindow | false, tab: RealTab, opts: Electron.ContextMenuParams) {
+export async function showContextMenu(win: TabWindow, tab: RealTab, opts: Electron.ContextMenuParams) {
   function createContextTab(opts: TabOptions) {
     if (!win) return;
     return createTab(win, Object.assign({
@@ -656,6 +786,15 @@ export async function showContextMenu(win: TabWindow | false, tab: RealTab, opts
     addItem({ label: $t('open.newPrivateTab'), click() { createContextTab({ url: opts.linkURL, private: true }) } })
     addItem({ label: $t('open.newWindow'), click() { newWindow([{ url: opts.linkURL, private: tab.private }]) } })
     addItem({ label: $t('open.thisTab'), click() { tab.webContents.loadURL(opts.linkURL) } })
+    addItem(SEPARATOR)
+    addItem({ label: $t('open.leftPane'), click() {
+      const newTab = createContextTab({ url: opts.linkURL, background: true })
+      dividePanes(win, { left: newTab, right: tab })
+    } })
+    addItem({ label: $t('open.rightPane'), click() {
+      const newTab = createContextTab({ url: opts.linkURL, background: true })
+      dividePanes(win, { left: tab, right: newTab })
+    } })
     addItem(SEPARATOR)
     addItem({ label: $t('copyLink'), click() { clipboard.writeText(opts.linkURL) } })
 
@@ -808,6 +947,18 @@ export async function showContextMenu(win: TabWindow | false, tab: RealTab, opts
   addItem(SEPARATOR)
   addItem({ label: $t('viewSourceCode'), click() { createContextTab({ url: `view-source:${tab.webContents.getURL()}` }) } })
   addItem({ label: $t('openDevTools'), click() { toggleDevTools(tab.webContents) }, accelerator: 'Ctrl+Shift+I' })
+  if (tab.paneView) {
+    addItem(SEPARATOR)
+    addItem({ label: $t('closePane'), click() {
+      if (tab == tab.paneView.leftTab) {
+        selectTab(win, { tab: tab.paneView.rightTab })
+
+      } else {
+        selectTab(win, { tab: tab.paneView.leftTab })
+      }
+      undividePanes(win, tab.paneView);
+    } })
+  }
 
   menu.popup()
 }
@@ -915,6 +1066,20 @@ export function menuOfTab(win: TabWindow, tab: Tab) {
 
   } else {
     addItem({ label: $t('sound-mute'), click() { setMutedTab(win, tab, true) } })
+  }
+  addItem(SEPARATOR)
+  if (tab == win.currentTab) {
+    openNearbyTabsInPanes.forEach(item => {
+      addItem(item)
+    })
+
+  } else {
+    addItem({ label: $t('splitPaneLeft'), click() {
+      dividePanes(win, { left: tab, right: win.currentTab })
+    } })
+    addItem({ label: $t('splitPaneRight'), click() {
+      dividePanes(win, { left: win.currentTab, right: tab })
+    } })
   }
   addItem(SEPARATOR)
   addItem({ label: $t('openInNewWindow'), async click() {
@@ -1088,6 +1253,33 @@ export function menuOfProcess(process: Electron.ProcessMetric) {
   addItem({ enabled: false, label: $t('table.more-peakMemory', { value: process.memory.peakWorkingSetSize + ' ' + $t('table.kb') }) })
   addItem({ enabled: false, label: $t('table.more-creationTime', { value: (new Date(process.creationTime)).toISOString() }) })
   addItem({ enabled: false, label: process.sandboxed ? $t('table.more-sandboxed') : $t('table.more-notSandboxed') })
+
+  menu.popup()
+}
+
+export function menuOfPaneDivider(win: TabWindow) {
+  let menu = new Menu();
+  function addItem(options: Electron.MenuItemConstructorOptions) {
+    menu.append(new MenuItem(options))
+  }
+
+  if (!win.currentPaneView) {
+    return dialog.showErrorBox("Error", "No panes opened")
+  }
+
+  function $t(str: string, obj?: {}) {
+    return t(`menu.panes.${str}`, obj)
+  }
+
+  addItem({ label: $t('close'), async click() {
+    undividePanes(win, win.currentPaneView)
+  }})
+  addItem({ label: $t('switch'), accelerator: 'CmdOrCtrl+Alt+S', async click() {
+    dividePanes(win, {
+      left: win.currentPaneView.rightTab,
+      right: win.currentPaneView.leftTab
+    })
+  }})
 
   menu.popup()
 }

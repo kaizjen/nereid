@@ -22,6 +22,8 @@ declare global {
 export interface TabWindow extends BrowserWindow {
   currentTab: RealTab
   tabs: Tab[]
+  currentPaneView: PaneView | null
+  paneViews: PaneView[]
   chrome: BrowserView
   chromeHeight: number
   winID: number
@@ -32,6 +34,13 @@ export interface TabWindow extends BrowserWindow {
     lastURL: string
     lastTitle: string
   }[]
+}
+
+export type PaneView = {
+  leftTab: RealTab
+  rightTab: RealTab
+  /** The part of space from the left occupied by the left pane. `0 < x < 1` */
+  separatorPosition: number
 }
 
 export interface TabOptions {
@@ -69,6 +78,7 @@ type TabProperties = {
     faviconURL: string
   }[]
   currentHistoryIndex?: number
+  paneView?: PaneView
 }
 /**
  * Upon starting Nereid, instead of loading all tabs at once,

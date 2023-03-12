@@ -19,6 +19,7 @@
   import PermissionAccessor from "./PermissionAccessor.svelte";
   import FindInPage from "./FindInPage.svelte";
   import BookmarkBar from "./BookmarkBar.svelte";
+  import PaneDivider from "./PaneDivider.svelte";
 
   const URLParse = (function(){
     const slashesRegex = /^[A-Za-z][A-Za-z0-9+-.]*:\/\//;
@@ -327,3 +328,4 @@
   {/if}
 </div>
 </div>
+<PaneDivider />

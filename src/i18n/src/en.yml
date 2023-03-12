@@ -373,7 +373,17 @@ menu:
     openClosed: Open closed tab
     hardReload: Hard refresh
     onePageUp: Go one page up
+    newTabInLeftPane: New tab in the left pane
+    newTabInRightPane: New tab in the right pane
+    openLeftTabIn: Open the left tab in...
+    openRightTabIn: Open the right tab in...
+    openTabIn:
+      leftPane: The left pane
+      rightPane: The right pane
   tools: Tools
+  panes:
+    close: Close panes
+    switch: Switch panes
   devTools: Developer tools
   taskManager: Task manager
   currentTab: This tab
@@ -402,6 +412,8 @@ menu:
       newPrivateTab: Open in new private tab
       newWindow: Open in new window
       thisTab: Open in this tab
+      leftPane: Open in the left pane
+      rightPane: Open in the right pane
     copyLink: Copy link address
     savePageAs: Save page as...
     savePage_dialog: Save page (${page})
@@ -437,6 +449,7 @@ menu:
     frame:
       reload: Reload frame
       viewSourceCode: View frame's source code
+    closePane: Close pane
   tabMenu:
     createNewTab: Create new tab
     createNewPrivateTab: Create new private tab
@@ -449,6 +462,8 @@ menu:
     close-this: Close tab
     close-others: Close other tabs
     close-right: Close tabs to the right
+    splitPaneLeft: Open in the left pane
+    splitPaneRight: Open in the right pane
   window:
     minimize: Minimize
     unmaximize: Restore

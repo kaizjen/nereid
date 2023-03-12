@@ -1,7 +1,7 @@
 // This file is for all types of windows
 
-import type { TabWindow, TabOptions, Tab, Configuration, Bookmarks } from "./types";
-import { app, BrowserView, BrowserWindow, BrowserWindowConstructorOptions, nativeTheme, screen } from "electron";
+import type { TabWindow, TabOptions, Tab, Configuration, Bookmarks, RealTab } from "./types";
+import { app, BrowserView, BrowserWindow, BrowserWindowConstructorOptions, nativeTheme, Rectangle, screen } from "electron";
 import * as tabManager from "./tabs";
 import * as _url from "url";
 import * as pathModule from "path";
@@ -10,6 +10,7 @@ import { chromeContextMenu, showAppMenu } from "./menu";
 import { INTERNAL_PARTITION } from "./sessions";
 
 const WM_INITMENU = 0x0116; // windows' initmenu, explained later in the code
+export const PANE_SEP_WIDTH = 12;
 let headHeight = 36; // px, height of the "head" of chrome
 
 export function setHeadHeight(hh: number) {
@@ -99,6 +100,7 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
   
   w.winID = windows.push(w) - 1;
   w.tabs = []; // BrowserViews will be here
+  w.paneViews = [];
   w.recentlyClosed = [];
 
   w.chromeHeight = 74; // initial value for chromeHeight if the chrome takes a long time to load
@@ -271,6 +273,12 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
     chromeBV.webContents.send('tabChange', w.tabs.indexOf(w.currentTab))
   })
 
+  chromeBV.webContents.on('focus', () => {
+    chromeBV.webContents.send('chromeFocus')
+  })
+  chromeBV.webContents.on('blur', () => {
+    chromeBV.webContents.send('chromeBlur')
+  })
   chromeBV.webContents.on('context-menu', (_e, opts) => {
     chromeContextMenu(w, opts)
   })
@@ -313,15 +321,40 @@ export function setCurrentTabBounds(win: TabWindow, tab?: Tab) {
   let rect: Electron.Rectangle;
   if (win.isFullScreen()) {
     rect = { x: 0, y: 0, width, height }
+    win.chrome.webContents.send('paneDividerOnTop', true)
 
   } else {
     rect = { x: 0, y: win.chromeHeight, width, height: height - win.chromeHeight }
+    win.chrome.webContents.send('paneDividerOnTop', false)
+  }
+
+  function setBoundsOfTab(tab: RealTab) {
+    if (tab.paneView) {
+      const leftPane = tab.paneView.leftTab;
+      const rightPane = tab.paneView.rightTab;
+
+      const leftRect = { ...rect, width: Math.round(rect.width * tab.paneView.separatorPosition) }
+      const rightRect = {
+        ...rect,
+        width: Math.round(rect.width * (1 - tab.paneView.separatorPosition) - PANE_SEP_WIDTH),
+        x: Math.round(rect.width * tab.paneView.separatorPosition + PANE_SEP_WIDTH)
+      }
+
+      tabManager.asRealTab(leftPane).setBounds(leftRect)
+      tabManager.asRealTab(rightPane).setBounds(rightRect)
+
+      win.chrome.webContents.send('paneDividerPosition', tab.paneView.separatorPosition)
+
+    } else {
+      tab.setBounds(rect)
+      win.chrome.webContents.send('paneDividerPosition', -0.5)
+    }
   }
   if (tab && !tab.isGhost) {
-    tabManager.asRealTab(tab).setBounds(rect)
+    setBoundsOfTab(tabManager.asRealTab(tab))
     
-  } else {
-    win.currentTab?.setBounds(rect)
+  } else if (win.currentTab) {
+    setBoundsOfTab(win.currentTab)
   }
 }
 
