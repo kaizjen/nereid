@@ -96,7 +96,6 @@ function uncompressObject(scheme: any[], data: any[]): any {
           if (Array.isArray(scheme[0]) && scheme.length == 1) {
             // a hack to make it work on arrays of arrays
             const decArray = [];
-            console.log('dss', data[i], scheme);
             data[i].forEach((dat: any[]) => {
               decArray.push(uncompressArray(scheme[0], dat));
             })
@@ -180,17 +179,6 @@ try {
 }
 
 function uncompressLastLaunch(array: any[]) {
-  console.log('ucll', uncompressObject([
-    'exitedSafely', 'launchFailed', [
-      'windows', 'arr', [[
-        'title', 'url', 'faviconURL'
-      ]]
-    ], [
-      'bounds', 'obj', [
-        'x', 'y', 'width', 'height', 'maximized'
-      ]
-    ]
-  ], array));
   return uncompressObject([
     'exitedSafely', 'launchFailed', [
       'windows', 'arr', [[
