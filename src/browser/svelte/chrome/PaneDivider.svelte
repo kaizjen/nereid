@@ -23,10 +23,10 @@
 
   @media (prefers-color-scheme: light) {
     .divider {
-      background: var(--light-5);
+      background: var(--light-8);
     }
     .dot {
-      background: var(--t-black-2);
+      background: var(--t-black-3);
     }
   }
 </style>
