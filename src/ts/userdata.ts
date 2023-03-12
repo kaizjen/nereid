@@ -130,7 +130,7 @@ function compressObject(object: any, recursive?: boolean) {
   const result = [];
   for (const key in object) {
     let el = object[key];
-    if (typeof el == 'object' && recursive) {
+    if (typeof el == 'object' && el != null && recursive) {
       if (Array.isArray(el)) {
         el = compressArray(el, recursive);
 
