@@ -565,6 +565,8 @@ export function attach(win: TabWindow, tab: RealTab) {
 
   tab.webContents.on('focus', () => {
     // when this tab is a part of a PaneView, it needs to update the address bar URL
+    if (win.currentTab == tab) return;
+
     selectTab(win, { tab });
   })
   tab.webContents.on('page-title-updated', (_e, title, isExplicit) => {
