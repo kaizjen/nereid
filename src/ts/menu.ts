@@ -963,7 +963,7 @@ export async function showContextMenu(win: TabWindow, tab: RealTab, opts: Electr
   menu.popup()
 }
 
-export function chromeContextMenu(win: TabWindow, opts: Electron.ContextMenuParams) {
+export function menuOfAddressBar(win: TabWindow, opts: { selectionText: string }) {
   let menu = new Menu();
 
   function addItem(obj: Electron.MenuItemConstructorOptions) {
@@ -985,31 +985,25 @@ export function chromeContextMenu(win: TabWindow, opts: Electron.ContextMenuPara
       }
     })
     addItem({ label: $t('copy'), role: 'copy', accelerator: 'CmdOrCtrl+C' })
-    if (opts.editFlags.canCut) {
-      addItem({ label: $t('cut'), role: 'cut', accelerator: 'CmdOrCtrl+X' })
-    }
-    if (opts.editFlags.canDelete) {
-      addItem({ label: $t('delete'), role: 'delete', accelerator: 'Delete' })
-    }
-  }
-  if (opts.editFlags.canPaste) {
+    addItem({ label: $t('cut'), role: 'cut', accelerator: 'CmdOrCtrl+X' })
+    addItem({ label: $t('delete'), role: 'delete', accelerator: 'Delete' })
     addItem(SEPARATOR)
-    addItem({ label: $t('paste'), role: 'paste', accelerator: 'CmdOrCtrl+V' })
-    addItem({ label: $t('pasteAndMatchStyle'), role: 'pasteAndMatchStyle', accelerator: 'CmdOrCtrl+Shift+V' })
-    const copied = clipboard.readText();
-    if (copied) {
-      addItem(SEPARATOR)
-      addItem({
-        label: $t($.isValidURL(copied) ? 'pasteAndGo' : 'pasteAndSearch', { query: copied }),
-        accelerator: 'CmdOrCtrl+Shift+V',
-        click() {
-          win.chrome.webContents.paste();
-          // TODO: stop using ipcMain.emit and switch to something
-          // more versatile
-          ipcMain.emit('currentTab.go', { sender: win.chrome.webContents }, copied)
-        }
-      })
-    }
+  }
+  addItem({ label: $t('paste'), role: 'paste', accelerator: 'CmdOrCtrl+V' })
+  addItem({ label: $t('pasteAndMatchStyle'), role: 'pasteAndMatchStyle', accelerator: 'CmdOrCtrl+Shift+V' })
+  const copied = clipboard.readText();
+  if (copied) {
+    addItem(SEPARATOR)
+    addItem({
+      label: $t($.isValidURL(copied) ? 'pasteAndGo' : 'pasteAndSearch', { query: copied }),
+      accelerator: 'CmdOrCtrl+Shift+V',
+      click() {
+        win.currentTab.webContents.focus();
+        // TODO: stop using ipcMain.emit and switch to something
+        // more versatile
+        ipcMain.emit('currentTab.go', { sender: win.chrome.webContents }, copied)
+      }
+    })
   }
 
   if (menu.items.length == 0) return;

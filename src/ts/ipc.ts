@@ -8,7 +8,7 @@ import type { TabWindow, TabOptions, Configuration, RealTab } from "./types"
 import $ from "./common";
 import * as tabManager from './tabs'
 import * as _url from "url";
-import { appMenu, displayOptions, menuNewTab, menuOfBookmark, menuOfPaneDivider, menuOfProcess, menuOfTab } from "./menu";
+import { appMenu, displayOptions, menuNewTab, menuOfAddressBar, menuOfBookmark, menuOfPaneDivider, menuOfProcess, menuOfTab } from "./menu";
 import { getTabWindowByID, setHeadHeight, isTabWindow, newDialogWindow, setCurrentTabBounds, getAllTabWindows, getIDOfTabWindow, PANE_SEP_WIDTH } from "./windows";
 import type TypeFuse from "fuse.js";
 import { certificateCache, DEFAULT_PARTITION, NO_CACHE_PARTITION, PRIVATE_PARTITION } from "./sessions";
@@ -252,6 +252,9 @@ export function init() {
   })
   onWindow('chrome.menuOfPaneDivider', (win) => {
     menuOfPaneDivider(win)
+  })
+  onWindow('chrome.menuOfAddressBar', (win, _e, options: { selectionText: string }) => {
+    menuOfAddressBar(win, options)
   })
 
   onWindow('chrome.moveTab', (win, _e, tabUID: number, newIndex: number) => {

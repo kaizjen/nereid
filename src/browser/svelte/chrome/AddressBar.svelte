@@ -328,6 +328,13 @@
       abEnabled = !$config?.privacy.adblockerWhitelist.includes(url.protocol + url.hostname);
     }()
   }
+
+  function handleMouseUp({ button }) {
+    if (button != 2) return;
+    ipcRenderer.send('chrome.menuOfAddressBar', {
+      selectionText: inputRef.value.slice(inputRef.selectionStart, inputRef.selectionEnd)
+    })
+  }
 </script>
 <svelte:window on:keydown={e => {
   if (e.key != "Escape" || !anyDialog) return;
@@ -377,6 +384,7 @@
       inputRef.select()
       isFirstTimeSelecting = false;
     }}
+    on:mouseup={handleMouseUp}
   >
   {#if $globalZoom != $config?.ui.defaultZoomFactor}
     <button
