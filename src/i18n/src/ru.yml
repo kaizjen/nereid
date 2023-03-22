@@ -120,6 +120,11 @@ ui:
     private: Приватная вкладка
     playingAudio: Воспроизводится аудио
     muted: Заглушена
+  groups:
+    namePlaceholder: Имя группы
+    newTab: Новая вкладка в группе
+    ungroup: Разгруппировать
+    closeAll: Закрыть все вкладки в группе
   addressBar-placeholder: Введите поисковый запрос или URL
   security:
     title: Безопасность
@@ -460,6 +465,8 @@ menu:
     close-right: Закрыть вкладки справа
     splitPaneLeft: Открыть в левой панели
     splitPaneRight: Открыть в правой панели
+    addToNewGroup: Добавить в новую группу
+    removeFromGroup: Удалить из группы
   window:
     minimize: Свернуть
     unmaximize: Restore

@@ -22,6 +22,7 @@ declare global {
 export interface TabWindow extends BrowserWindow {
   currentTab: RealTab
   tabs: Tab[]
+  tabGroups: TabGroup[]
   currentPaneView: PaneView | null
   paneViews: PaneView[]
   chrome: BrowserView
@@ -34,6 +35,17 @@ export interface TabWindow extends BrowserWindow {
     lastURL: string
     lastTitle: string
   }[]
+}
+
+/** A tab group is just an array of consecutive tabs in the window. */
+export type TabGroup = {
+  /** The index of the first tab in the group */
+  startIndex: number
+  /** The non-inclusive index at which the tab group ends */
+  endIndex: number
+  name: string
+  color: 'gray' | 'blue' | 'red' | 'yellow' | 'green' | 'magenta' | 'purple' | 'cyan' | 'orange'
+  id?: number
 }
 
 export type PaneView = {
@@ -54,6 +66,7 @@ export interface TabOptions {
   isGhost?: boolean
   initialTitle?: string
   targetFrameName?: string
+  groupID?: number
 }
 
 export interface CertficateCache {

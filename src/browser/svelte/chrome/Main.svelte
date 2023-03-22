@@ -72,7 +72,9 @@
   window.t = (arg1, arg2) => ipcRenderer.sendSync('t', arg1, arg2);
 
   let tabs = [];
-  let currentTab = 0;
+  let currentTabIndex = 0;
+
+  let tabGroups = [];
 
   let config = writable()
   setContext('config', config)
@@ -82,6 +84,9 @@
 
   let globalZoom = writable(1);
   setContext('globalZoom', globalZoom)
+
+  let keypressesLocked = writable(false);
+  setContext('keypressesLocked', keypressesLocked)
 
   const media = matchMedia('(prefers-color-scheme: dark)');
   let colorTheme = writable(media.matches ? 'dark' : 'light');
@@ -221,21 +226,21 @@
     })
     tabs = tabs;
 
-    if (opts.position <= currentTab && tabs.length > 1) {
-      currentTab += 1;
+    if (opts.position <= currentTabIndex && tabs.length > 1) {
+      currentTabIndex += 1;
     }
   })
   ipcRenderer.on('removeTab', (_e, index) => {
     console.log('removed', index);
     tabs.splice(index, 1)
-    if (currentTab > index) {
-      currentTab -= 1;
+    if (currentTabIndex > index) {
+      currentTabIndex -= 1;
     }
     tabs = tabs;
   })
   ipcRenderer.on('tabChange', (_e, index) => {
     console.log('got', index);
-    currentTab = index;
+    currentTabIndex = index;
   })
 
   ipcRenderer.on('tabUpdate', (_e, { index, state }) => {
@@ -246,6 +251,22 @@
 
   ipcRenderer.on('zoomUpdate', (_e, factor) => {
     $globalZoom = factor;
+  })
+
+  ipcRenderer.on('addTabGroup', (_e, group) => {
+    console.log('tab group added', group);
+    tabGroups.push(group)
+    tabGroups = tabGroups;
+  })
+  ipcRenderer.on('tabGroupUpdate', (_e, group) => {
+    console.log('tab group updated', group);
+    tabGroups[tabGroups.findIndex(g => g.id == group.id)] = group;
+    tabGroups = tabGroups;
+  })
+  ipcRenderer.on('removeTabGroup', (_e, groupID) => {
+    console.log('tab group removed', groupID);
+    tabGroups.splice(tabGroups.findIndex(g => g.id == groupID), 1);
+    tabGroups = tabGroups;
   })
 
 
@@ -291,7 +312,7 @@
 <div
   style="
     display: contents;{
-      tabs[currentTab]?.private ?
+      tabs[currentTabIndex]?.private ?
       ($colorTheme == 'light' ? "--active-background: var(--purple-9);" : "--active-background: var(--purple-2);")
       : ''
     }
@@ -301,19 +322,19 @@
   "
 >
 
-<Head {tabs} {currentTab} bind:changeToSetHeadHeight />
+<Head {tabs} {currentTabIndex} {tabGroups} bind:changeToSetHeadHeight />
 <div class="wrapper" style="{
-    tabs[currentTab]?.private ? 
+    tabs[currentTabIndex]?.private ? 
     ($colorTheme == 'light' ? "border-bottom-color: var(--purple-8);" : "border-bottom-color: var(--purple-1);")
     : ''
   }">
-  {#if tabs[currentTab]?.uid in dialogsMap}
-    <PagePopup tab={tabs[currentTab]} dialog={dialogsMap[tabs[currentTab]?.uid]} />
+  {#if tabs[currentTabIndex]?.uid in dialogsMap}
+    <PagePopup tab={tabs[currentTabIndex]} dialog={dialogsMap[tabs[currentTabIndex]?.uid]} />
   {/if}
-  <Tools tab={tabs[currentTab]} />
-  <BookmarkBar pageURL={tabs[currentTab]?.url} />
-  <PermissionAccessor tab={tabs[currentTab]} />
-  <FindInPage index={currentTab} {tabs} />
+  <Tools tab={tabs[currentTabIndex]} />
+  <BookmarkBar pageURL={tabs[currentTabIndex]?.url} />
+  <PermissionAccessor tab={tabs[currentTabIndex]} />
+  <FindInPage index={currentTabIndex} {tabs} />
   {#if $config?.welcomePhase <= 4}
     <div class="dropdown-box">
       <span>

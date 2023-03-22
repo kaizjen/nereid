@@ -120,6 +120,11 @@ ui:
     private: Private tab
     playingAudio: Playing audio
     muted: Muted
+  groups:
+    namePlaceholder: Group name
+    newTab: New tab in this group
+    ungroup: Ungroup
+    closeAll: Close all in this group
   addressBar-placeholder: Type a search query or a URL
   security:
     title: Security
@@ -464,6 +469,8 @@ menu:
     close-right: Close tabs to the right
     splitPaneLeft: Open in the left pane
     splitPaneRight: Open in the right pane
+    addToNewGroup: Add tab to new group
+    removeFromGroup: Remove tab from group
   window:
     minimize: Minimize
     unmaximize: Restore

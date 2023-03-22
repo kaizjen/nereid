@@ -15,6 +15,7 @@ import { certificateCache, DEFAULT_PARTITION, NO_CACHE_PARTITION, PRIVATE_PARTIT
 import { getSupportedLanguage, t, availableTranslations } from "./i18n";
 import { adBlockerError, isAdBlockerReady, webContentsABMap } from "./adblocker";
 import { kill } from "./process";
+import { addTabToGroup, getTabGroupByID, ungroup } from "./tabgroups";
 // must use require here because these libraries, when require()d, don't have a .default property.
 const Fuse = require('fuse.js') as typeof TypeFuse;
 
@@ -261,6 +262,22 @@ export function init() {
     tabManager.moveTab(tabManager.getTabByUID(tabUID), {
       window: win, index: newIndex
     })
+  })
+  onWindow('chrome.addTabToGroup', (win, _e, tabUID: number, gid: number) => {
+    addTabToGroup(win, getTabGroupByID(gid).group, tabManager.getTabByUID(tabUID))
+  })
+
+  ipcMain.on('chrome.changeGroupData', (_e, gid, data) => {
+    const desc = getTabGroupByID(gid);
+
+    if (data.id) dialog.showErrorBox("", "Tab Group ID cannot be changed")
+    Object.assign(desc.group, data)
+    desc.window.chrome.webContents.send('tabGroupUpdate', desc.group)
+  })
+  ipcMain.on('chrome.ungroup', (_e, gid) => {
+    const desc = getTabGroupByID(gid);
+
+    ungroup(desc.window, desc.group);
   })
 
 

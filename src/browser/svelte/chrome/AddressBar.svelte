@@ -166,6 +166,7 @@
   let config = getContext('config');
   let bookmarks = getContext('bookmarks');
   let globalZoom = getContext('globalZoom');
+  let keypressesLocked = getContext('keypressesLocked');
   const colorTheme = getContext('colorTheme');
 
   let selectedHint = -1
@@ -180,6 +181,7 @@
   function recieveKey({ key, code, ctrlKey }) {
     if (key.length > 1) return;
     if (isActive) return;
+    if ($keypressesLocked) return;
     if (!['nereid://private/', 'nereid://newtab/'].includes(tab?.url)) return;
     if (ctrlKey && code == 'KeyV') {
       key = nereid.sendInternalSync('clipboard', 'readText');

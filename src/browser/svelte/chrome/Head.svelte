@@ -6,6 +6,21 @@
     height: 2rem;
 
     padding-left: var(--titlebar-left);
+
+    --group-gray: #56606e;
+    --group-gray-text: white;
+    --group-blue: #128cf5;
+    --group-red: #dd463b;
+    --group-yellow: #ede844;
+    --group-yellow-text: black;
+    --group-green: #229920;
+    --group-green-text: white;
+    --group-magenta: #c332c3;
+    --group-purple: #8715cf;
+    --group-purple-text: white;
+    --group-cyan: #25c7cf;
+    --group-cyan-text: black;
+    --group-orange: #c37909;
   }
   #nereid-icn {
     width: 1.35rem;
@@ -82,81 +97,95 @@
     height: 100%;
     padding-right: 1px; /* The right side of the tablist is sometimes clipped */
   }
-  .tab {
-    padding: 0.5rem;
-    transition: 0.25s;
-    position: relative;
-    white-space: nowrap;
-    overflow: hidden;
-    width: var(--tab-width);
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-    border: 1px solid transparent;
-    border-bottom: 1px solid transparent !important;
-    border-radius: 0.25rem 0.25rem 0px 0px;
-    margin-top: 1px;
-    transform: translateY(-1px);
-    box-sizing: border-box;
-  }
-  *:active > .tab {
-    transition: 0s;
-  }
-  .tab:hover {
-    background: var(--t-white-2);
-  }
-  .tab.selected {
-    background: var(--active-background);
-    border-color: var(--t-white-5);
-    box-shadow: 0px 1px 0px 0px var(--active-background); /* removes the part of the border of <Tools> */
-    transition: 0s;
-  }
   .tabhead :global(.tab.dragover) {
     opacity: 0.5;
   }
-  .tab img {
-    height: 0.85rem;
-  }
-  .tab img.favicon {
-    padding: 0.15rem;
-  }
-  .tab img.favicon.decoy {
-    flex-grow: 1;
-  }
-  .tab img.audio-control {
-    transform: translate(9px, 5px);
-    position: absolute;
-    padding: 0.15rem;
-    border-radius: 50%;
+  .tabgroup {
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid var(--group-color);
+    flex-shrink: 0;
     transition: 0.2s;
   }
-  .tab img.audio-control:hover {
-    background: var(--t-white-3);
+  .tabgroup.begin {
+    /** Random visual glitch where 1px was missing */
+    translate: 1px;
   }
-  .tab img.audio-control:hover:active {
-    background: var(--t-white-5);
-    transition: 0s;
+  .tabgroup.end {
+    translate: -1px;
   }
-  .tab span {
-    padding-left: 0.5rem;
-    flex-grow: 1;
+  .tabgroup > span {
+    background: var(--group-color);
+    color: var(--group-text, inherit)
   }
-  .close-tab {
-    padding: 0.135rem;
-    border-radius: 0.25rem;
+  .tabgroup.begin > span {
     display: flex;
+    align-items: center;
+    padding: 0.1rem;
+    padding-inline: 0.35rem;
+    border-radius: 0.3rem 0rem 0rem 0.3rem;
+    margin-right: 2px;
+    margin-left: 0.1rem;
+    height: calc(100% - 0.6rem);
+    transition: 0.2s;
   }
-  .close-tab:hover {
-    background: var(--t-white-5);
+  .tabgroup.begin > span.noname {
+    border-radius: 50%;
+    width: 1rem;
+    height: 1rem;
+    padding: 0;
+    margin-right: 3px;
   }
-  .close-tab:hover:active {
-    background: var(--t-white-6);
+  .tabgroup.begin.hidden > span {
+    border-radius: 0.3rem;
   }
-  .tab > span {
-    text-overflow: ellipsis;
-    overflow: hidden;
-    max-width: calc(100% - 1.12rem);
+  .tabgroup.end > span {
+    border-radius: 0rem 0.2rem 0.2rem 0rem;
+    margin-left: 2px;
+    margin-right: 0.1rem;
+    width: 0.3rem;
+    height: calc(100% - 0.5rem);
+    transition: 0.2s;
+  }
+  .tabgroup.end.hidden > span {
+    width: 0px;
+  }
+
+  .tabgroup.gray {
+    --group-color: var(--group-gray);
+    --group-text: var(--group-gray-text);
+  }
+  .tabgroup.blue {
+    --group-color: var(--group-blue);
+    --group-text: var(--group-blue-text);
+  }
+  .tabgroup.red {
+    --group-color: var(--group-red);
+    --group-text: var(--group-red-text);
+  }
+  .tabgroup.yellow {
+    --group-color: var(--group-yellow);
+    --group-text: var(--group-yellow-text);
+  }
+  .tabgroup.green {
+    --group-color: var(--group-green);
+    --group-text: var(--group-green-text);
+  }
+  .tabgroup.magenta {
+    --group-color: var(--group-magenta);
+    --group-text: var(--group-magenta-text);
+  }
+  .tabgroup.purple {
+    --group-color: var(--group-purple);
+    --group-text: var(--group-purple-text);
+  }
+  .tabgroup.cyan {
+    --group-color: var(--group-cyan);
+    --group-text: var(--group-cyan-text);
+  }
+  .tabgroup.orange {
+    --group-color: var(--group-orange);
+    --group-text: var(--group-orange-text);
   }
 
   #addtab {
@@ -181,6 +210,11 @@
   @media (prefers-color-scheme: light) {
     .head {
       background: var(--light-5);
+
+      --group-blue: #44a6fb;
+      --group-red: #ef776e;
+      --group-magenta: #ff6fff;
+      --group-orange: #ffa621;
     }
     .traffic-lights {
       background: var(--light-5);
@@ -190,27 +224,6 @@
     }
     .traffic-lights > button:hover:active {
       background: var(--t-black-5);
-    }
-
-    .tab:hover {
-      background: var(--t-white-2);
-    }
-    .tab.selected {
-      background: var(--active-background);
-      border-color: var(--t-black-6);
-      box-shadow: 0px 1px 0px 0px var(--active-background); /* removes the part of the border of <Tools> */
-    }
-    .tab img.audio-control:hover {
-      background: var(--t-black-3);
-    }
-    .tab img.audio-control:active {
-      background: var(--t-black-5);
-    }
-    .close-tab:hover {
-      background: var(--t-black-2);
-    }
-    .close-tab:hover:active {
-      background: var(--t-black-4);
     }
 
     #addtab:hover {
@@ -225,13 +238,12 @@
 <script>
   const { ipcRenderer } = window.nereid;
   import { getContext } from "svelte/internal";
-  import { quintOut } from 'svelte/easing'
-  import Spinner from "//lib/Spinner.svelte";
+  import Tab from "./Tab.svelte";
+  import TabGroup from "./popups/TabGroup.svelte";
   export let tabs;
-  export let currentTab;
+  export let currentTabIndex;
 
-  const ACCENT_8 = '72b9f7';
-  const ACCENT_5 = '247ecd';
+  export let tabGroups;
 
   export let changeToSetHeadHeight = {};
 
@@ -243,104 +255,33 @@
   }
 
   const colorTheme = getContext('colorTheme')
-  const URLParse = getContext('URLParse')
+  let keypressesLocked = getContext('keypressesLocked')
 
   const isOnLinux = process.platform == 'linux';
   let trafficLightsElement;
   let trafficLightsWidth = 0;
   let internalHeadHeight = 0;
 
+  let editingTabGroup = null;
+  let hiddenGroups = [];
+
+  let groupIDToElementMap = {};
+
+  $: {
+    // lock keypresses so that addressbar won't
+    // intercept them when the user is editing a group
+    $keypressesLocked = !!editingTabGroup
+  }
+  $: if (editingTabGroup) {
+    editingTabGroup.group;
+    tabGroups = tabGroups;
+  }
+
   requestAnimationFrame(() => {
     trafficLightsWidth = trafficLightsElement.getBoundingClientRect().width
   })
 
-  function tab_anim(node, { delay = 0, duration = 400, easing = quintOut, opacity = 0 }) {
-    const style = getComputedStyle(node);
-    const target_opacity = +style.opacity;
-    const od = target_opacity * (1 - opacity);
-    const w = parseInt(style.width)
-    return {
-      delay,
-      duration,
-      easing,
-      css: (t, u) => `
-        width: ${Math.round(w * t)}px;
-        opacity: ${target_opacity - (od * u)}
-      `
-    };
-  }
-
   let headElement;
-
-  function handleClickF(index) {
-    // captial F stands for factory
-    return function (e) {
-      if (e.button == 1) {
-        // middle mb
-        ipcRenderer.send('closeTab', index)
-      } else if (e.button == 2) {
-        // rightclick
-        ipcRenderer.send('chrome.menuOfTab', index)
-      }
-    }
-  }
-  function handleSelectF(index) {
-    return function (e) {
-      if (e.button != 0) return
-      // lmb
-      ipcRenderer.send('selectTab', index)
-    }
-  }
-  function handleDropF(index, zoneUID) {
-    /**
-     * @param {DragEvent} e
-     */
-    return function (e) {
-      if (e.dataTransfer.getData('text/newTab')) {
-        console.log('dropped, new tab', e.dataTransfer.getData('text/tabUID'));
-        ipcRenderer.send('newTab', { position: index })
-        return;
-      }
-      console.log('dropped, uid: %o', e.dataTransfer.getData('text/tabUID'));
-      let movedUID = Number(e.dataTransfer.getData('text/tabUID') || NaN);
-
-      if (isNaN(movedUID)) return;
-      if (movedUID == zoneUID) return;
-
-      ipcRenderer.send('chrome.moveTab', movedUID, index)
-    }
-  }
-
-  function dropzone(el) {
-    let counter = 0;
-    function dragenter(e) {
-      console.log('dd', e.dataTransfer.types);
-      // all data types are lowercase for some reason
-      if (e.dataTransfer.types[0] == 'text/tabuid') {
-        el.classList.add('dragover')
-      }
-      counter++;
-    }
-    function dragleave() {
-      counter--;
-      if (counter == 0) {
-        el.classList.remove('dragover')
-      }
-    }
-
-    el.addEventListener('dragenter', dragenter, true)
-    el.addEventListener('dragleave', dragleave, true)
-    el.addEventListener('drop', dragleave, true)
-
-    return {
-      destroy() {
-        el.removeEventListener('dragenter', dragenter)
-        el.removeEventListener('dragleave', dragleave)
-        el.removeEventListener('drop', dragleave)
-      }
-    }
-  }
-
 
   function smoothlyScroll(element, left, frames = 6) {
     let framesLeft = frames;
@@ -354,9 +295,41 @@
     scroll()
   }
 
-  function toggleMuteF(tab) {
-    return function () {
-      ipcRenderer.send('setMutedTab', tabs.indexOf(tab), !tab.isMuted)
+  function getGroupAtIndex(index) {
+    for (const group of tabGroups) {
+      if (index < group.endIndex && index >= group.startIndex) {
+        return group;
+      }
+    }
+  }
+  function toggleHideGroupF(group) {
+    return () => {
+      if (hiddenGroups.includes(group.id)) {
+        hiddenGroups.splice(hiddenGroups.indexOf(group.id), 1);
+
+      } else {
+        hiddenGroups.push(group.id)
+        if (currentTabIndex >= group.startIndex && currentTabIndex < group.endIndex) {
+          // The group has a selected tab
+          if (tabs.length > group.endIndex) {
+            // Select the tab to the left
+            ipcRenderer.send('selectTab', group.endIndex)
+
+          } else {
+            // No tab on the left, create one
+            ipcRenderer.send('newTab', { position: group.endIndex })
+          }
+        }
+      }
+      hiddenGroups = hiddenGroups;
+    }
+  }
+  function editTabGroupF(group) {
+    return (e) => {
+      if (e.button != 2) return;
+      const rect = groupIDToElementMap[group.id].getBoundingClientRect()
+
+      editingTabGroup = { group, position: { x: rect.x, y: rect.y } }
     }
   }
 
@@ -377,6 +350,14 @@
     ipcRenderer.send('chrome.headHeight', internalHeadHeight)
   }
 
+  function unhideSelectedTabGroup() {
+    const selectedTabGroup = tabGroups.find(g => currentTabIndex >= g.startIndex && currentTabIndex < g.endIndex)
+    if (selectedTabGroup && hiddenGroups.includes(selectedTabGroup.id)) {
+      hiddenGroups.splice(hiddenGroups.indexOf(selectedTabGroup.id), 1);
+      hiddenGroups = hiddenGroups;
+    }
+  }
+
   requestAnimationFrame(() => {
     setHeadHeight();
   })
@@ -385,6 +366,17 @@
     changeToSetHeadHeight;
     setHeadHeight();
   }
+
+  $: {
+    currentTabIndex;
+    unhideSelectedTabGroup()
+  }
+  
+  ipcRenderer.on('addTabGroup', (_e, { id }) => {
+    requestAnimationFrame(() => {
+      editTabGroupF(tabGroups.find(g => g.id == id))({ button: 2 });
+    })
+  })
 </script>
 
 
@@ -406,70 +398,35 @@
       on:wheel={e => e.deltaX == 0 ? smoothlyScroll(e.currentTarget, e.deltaY) : null}
       style="--tab-width: {Math.max(15 - Math.sqrt(tabs.length), 9)}rem;"
     >
-      {#each tabs as tab, i (tab)}
-        <div
-          class="tab"
-          draggable="true"
-          on:dragstart={e => e.dataTransfer.setData('text/tabUID', tab.uid)}
-          on:dragover={
-            e => e.dataTransfer.types[0] == 'text/tabuid' || e.dataTransfer.types[0] == 'text/newtab' ? e.preventDefault() : null
-          }
-          on:drop|capture={handleDropF(i, tab.uid)}
-          use:dropzone
-          class:selected={i == currentTab}
-          class:private={tab.private}
-          on:mousedown={handleSelectF(i)}
-          on:auxclick={handleClickF(i)}
-          in:tab_anim={{ x: -50, y: 0, duration: 120 }}
-          out:tab_anim={{ x: -50, y: 0, duration: 120 }}
-          title={
-            tab.private ? '' : (
-              tab.title +
-              `\n• ${URLParse(tab.url).hostname}` +
-              (tab.isMuted ? '\n• ' + _.MUTED : (tab.isPlaying ? '\n• ' + _.AUDIBLE : ''))
-            )
-          }
-          role="tab"
-        >
-          {#if tab.private && i != currentTab && !tabs[currentTab].private}
-            <img src="n-res://{$colorTheme}/private.svg" alt={_.PRIVATE_TAB} class="favicon decoy">
-          {:else}
-            {#if tab.isLoading}
-              <Spinner
-                width="0.95rem" height="0.95rem"
-                thickness={10} style="flex-shrink: 0; padding: 0.1rem;"
-                color="var(--text)"
-              />
-            {:else}
-              <img alt="" src={tab.favicon ?? `n-res://${$colorTheme}/webpage.svg`} class="favicon">
-            {/if}
-            {#if tab.isPlaying || tab.isMuted}
-              <!-- svelte-ignore a11y-click-events-have-key-events -->
-              <img
-                role="button"
-                tabindex="0"
-                alt={tab.isMuted ? _.MUTED : _.AUDIBLE}
-                src="
-                  n-res://{
-                    tab.isPlaying ?
-                    ($colorTheme == 'dark' ? ACCENT_8 : ACCENT_5) :
-                    $colorTheme
-                  }/{tab.isMuted ? 'mute' : 'sound'}.svg"
-                on:click={toggleMuteF(tab)}
-                on:mousedown|stopPropagation={()=>{}}
-                class="audio-control"
-              >
-            {/if}
-            <span>{tab.title}</span>
+      {#each tabs as tab, index (tab)}
+        {@const group = getGroupAtIndex(index, tabGroups)}
+        {#if group}
+          {#if group.startIndex == index}
+            <button
+              on:click={toggleHideGroupF(group)}
+              on:auxclick={editTabGroupF(group)}
+              class="tabgroup begin {group.color}"
+              class:hidden={hiddenGroups.includes(group.id)}
+              bind:this={groupIDToElementMap[group.id]}
+            >
+              <span class:noname={group.name == ''}>
+                {group.name}
+              </span>
+            </button>
           {/if}
+        {/if}
+        {#if !group || !hiddenGroups.includes(group.id)}
+          <Tab {tab} {index} currentTab={tabs[currentTabIndex]} {currentTabIndex} {group} />
+        {/if}
+        {#if group?.endIndex == index + 1}
           <button
-            class="close-tab"
-            on:mousedown|stopPropagation={()=>null}
-            on:click={() => { console.log('clicked close'); ipcRenderer.send('closeTab', i) }}
+            on:click={toggleHideGroupF(group)}
+            class="tabgroup end {group.color}"
+            class:hidden={hiddenGroups.includes(group.id)}
           >
-            <img alt="Close tab" src="n-res://{$colorTheme}/cross.svg" >
+            <span style="background: var(--group-{group.color})"></span>
           </button>
-        </div>
+        {/if}
       {/each}
     </div>
     <button
@@ -498,4 +455,7 @@
       <img alt="" src="n-res://{$colorTheme}/cross.svg">
     </button>
   </div>
+  {#if editingTabGroup}
+    <TabGroup bind:editingTabGroup />
+  {/if}
 </div>

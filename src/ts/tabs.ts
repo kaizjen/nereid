@@ -1,6 +1,6 @@
 // Tabs' creation, removal and whatever else
 
-import type { TabWindow, TabOptions, Tab, RealTab, PaneView } from "./types";
+import type { TabWindow, TabOptions, Tab, RealTab, PaneView, TabGroup } from "./types";
 import { BrowserView, BrowserWindow, dialog, nativeTheme, session, WebContents } from "electron";
 import fetch from "electron-fetch";
 import * as userData from './userdata'
@@ -10,6 +10,7 @@ import $ from './common'
 import { showContextMenu } from "./menu";
 import { getAllTabWindows, newWindow, setCurrentTabBounds } from "./windows";
 import { t } from "./i18n";
+import { addTabToGroup, destroyEmptyGroups, getTabGroupByID, getTabGroupByTab, removeTabFromGroup } from "./tabgroups";
 
 const { URLParse } = $
 
@@ -344,7 +345,20 @@ export function addTab(win: TabWindow, tab: Tab, opts: TabOptions) {
   } else {
     win.tabs.push(tab);
   }
+  win.tabGroups.forEach(g => {
+    if (win.tabs.indexOf(tab) <= g.startIndex) {
+      g.startIndex++;
+    }
+    if (win.tabs.indexOf(tab) < g.endIndex) {
+      g.endIndex++;
+    }
+    win.chrome.webContents.send('tabGroupUpdate', g)
+  })
   win.chrome.webContents.send('addTab', opts)
+
+  if (opts.groupID != undefined) {
+    addTabToGroup(win, getTabGroupByID(opts.groupID).group, tab)
+  }
 
   updateSavedTabs()
 }
@@ -390,7 +404,19 @@ export function removeTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: n
   }
   
   win.tabs.splice(index, 1)
-  
+
+  win.tabGroups.forEach(g => {
+    if (index < g.startIndex) {
+      g.startIndex--;
+    }
+    if (index < g.endIndex) {
+      g.endIndex--;
+    }
+    win.chrome.webContents.send('tabGroupUpdate', g)
+  })
+
+  destroyEmptyGroups(win)
+
   win.chrome.webContents.send('removeTab', index)
 
   updateSavedTabs()
@@ -434,16 +460,19 @@ export function updateTabState(win: TabWindow, { tab, index }: { tab?: Tab, inde
 }
 
 export function attach(win: TabWindow, tab: RealTab) {
-  let getTabID = () => win.tabs.indexOf(tab)
+  let getTabIndex = () => win.tabs.indexOf(tab)
 
   function sendUpdate(state: Partial<ChromeTabState>) {
-    win.chrome.webContents.send('tabUpdate', { index: getTabID(), state })
+    win.chrome.webContents.send('tabUpdate', { index: getTabIndex(), state })
   }
 
   tab.owner = win;
 
   tab.webContents.setWindowOpenHandler(({ disposition, url, features, frameName }) => {
     console.log('opening new window:', { disposition, url, features, frameName });
+
+    const tabGroup = getTabGroupByTab(tab);
+    const gid = tabGroup ? tabGroup.id : null
 
     switch (disposition) {
       case 'foreground-tab':
@@ -460,16 +489,21 @@ export function attach(win: TabWindow, tab: RealTab) {
             selectTab(win, { tab: targetTab })
 
           } else {
-            createTab(win, { url, private: tab.private, targetFrameName: frameName, position: getTabID() + 1 })
+            createTab(win, {
+              url, private: tab.private,
+              targetFrameName: frameName,
+              position: getTabIndex() + 1,
+              groupID: gid
+            })
           }
           return { action: 'deny' }
         }
-        createTab(win, { url, private: tab.private, position: getTabID() + 1 })
+        createTab(win, { url, private: tab.private, position: getTabIndex() + 1, groupID: gid })
         return { action: 'deny' }
       }
 
       case 'background-tab': {
-        createTab(win, { url, private: tab.private, background: true, position: getTabID() + 1 })
+        createTab(win, { url, private: tab.private, background: true, position: getTabIndex() + 1, groupID: gid })
         return { action: 'deny' }
       }
 
@@ -769,7 +803,7 @@ export function attach(win: TabWindow, tab: RealTab) {
     win.chrome.webContents.send('tabCursorChange', cursor)
   })
   tab.webContents.on('found-in-page', (_e, result) => {
-    win.chrome.webContents.send('found', getTabID(), result)
+    win.chrome.webContents.send('found', getTabIndex(), result)
   })
 
   tab.webContents.on('enter-html-full-screen', () => {
@@ -949,11 +983,11 @@ export function createTab(window: TabWindow, options: TabOptions): Tab {
   }
   setCurrentTabBounds(window, tab) // better to resize here or will slow down the tab switching
   tab.targetFrameName = options.targetFrameName;
+  if (!tab.isGhost) attach(window, asRealTab(tab))
   addTab(window, tab, options);
   if (!tab.isGhost) window.chrome.webContents.send('tabUpdate', {
     index: window.tabs.indexOf(tab), state: { isLoading: true }
   })
-  if (!tab.isGhost) attach(window, asRealTab(tab))
   options.background || selectTab(window, { tab: tab })
   return tab;
 }
@@ -1040,14 +1074,15 @@ export function openClosedTab(win: TabWindow, index?: number, background: boolea
 
 export function moveTab(tab: Tab, destination: { window: TabWindow, index: number }) {
   const { window, index } = destination;
-  if (!tab.owner) return;
+  if (!tab.owner) return false;
 
   if (tab.isGhost) tab = toRealTab(tab);
 
   let { owner } = tab
-  removeTab(owner, { tab: tab })
+  removeTab(owner, { tab })
   if (owner != window) {
     detach(asRealTab(tab))
+    attach(window, asRealTab(tab))
   }
   addTab(window, tab, {
     url: asRealTab(tab).webContents.getURL(),
@@ -1056,13 +1091,11 @@ export function moveTab(tab: Tab, destination: { window: TabWindow, index: numbe
     position: index,
     uid: tab.uniqueID
   })
-  if (owner != window) {
-    attach(window, asRealTab(tab))
-  }
 
   updateTabState(window, { tab })
 
   selectTab(window, { index })
+  return true;
 }
 
 

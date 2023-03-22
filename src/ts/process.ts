@@ -2,7 +2,7 @@
 
 import * as _argvParse from "argv-parse";
 import * as userData from "./userdata";
-import { app } from 'electron'
+import { app, dialog } from 'electron'
 import { getTabWindowByID, newWindow } from './windows'
 import { createTab } from './tabs'
 import * as pathModule from 'path'
@@ -55,6 +55,11 @@ if (!global.isSafeMode) {
     app.commandLine.appendSwitch(name, value)
   })
 }
+
+process.on('uncaughtException', (e) => {
+  dialog.showErrorBox('Error', e.stack);
+  console.error('!', e);
+})
 
 export function init() {
   if (argv.help) {

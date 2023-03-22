@@ -1,7 +1,7 @@
 // Manages all menu stuff
 
 import { app, clipboard, dialog, ipcMain, Menu, MenuItem, session } from "electron";
-import { Bookmark, RealTab, Tab, TabOptions, TabWindow } from "./types";
+import { Bookmark, RealTab, Tab, TabGroup, TabOptions, TabWindow } from "./types";
 import { isTabWindow, newWindow, setCurrentTabBounds, newDialogWindow } from './windows'
 import { bookmarks, config, control, downloads } from './userdata'
 import * as pathModule from "path";
@@ -13,6 +13,7 @@ import type { Response } from "electron-fetch"
 import { DEFAULT_PARTITION, PRIVATE_PARTITION } from "./sessions";
 import { t } from "./i18n";
 import { kill } from "./process";
+import { createTabGroup, getTabGroupByTab, removeTabFromGroup } from "./tabgroups";
 
 function obtainWebContents(win: Electron.BrowserWindow | TabWindow) {
   return isTabWindow(win) ? win.currentTab.webContents : win.webContents
@@ -687,14 +688,24 @@ export async function displayOptions(win: TabWindow, { x, y }) {
   })
 }
 
-export async function showContextMenu(win: TabWindow, tab: RealTab, opts: Electron.ContextMenuParams) {
-  function createContextTab(opts: TabOptions) {
+function createContextTabF(win: TabWindow, tab: Tab) {
+  return function createContextTab(opts: TabOptions) {
     if (!win) return;
+
+    const group = getTabGroupByTab(tab);
+    let groupID = null;
+    if (group) groupID = group.id;
+
     return createTab(win, Object.assign({
       private: tab.private,
-      position: win.tabs.indexOf(tab) + 1 || win.tabs.length
+      position: win.tabs.indexOf(tab) + 1 || win.tabs.length,
+      groupID
     }, opts))
   }
+}
+
+export async function showContextMenu(win: TabWindow, tab: RealTab, opts: Electron.ContextMenuParams) {
+  const createContextTab = createContextTabF(win, tab)
 
   let menu = new Menu();
 
@@ -1012,12 +1023,7 @@ export function menuOfAddressBar(win: TabWindow, opts: { selectionText: string }
 }
 
 export function menuOfTab(win: TabWindow, tab: Tab) {
-  function createContextTab(opts: TabOptions) {
-    return createTab(win, Object.assign({
-      private: tab.private,
-      position: win.tabs.indexOf(tab) + 1 || win.tabs.length
-    }, opts))
-  }
+  const createContextTab = createContextTabF(win, tab)
 
   let menu = new Menu();
   function addItem(options: Electron.MenuItemConstructorOptions) {
@@ -1060,6 +1066,22 @@ export function menuOfTab(win: TabWindow, tab: Tab) {
 
   } else {
     addItem({ label: $t('sound-mute'), click() { setMutedTab(win, tab, true) } })
+  }
+  addItem(SEPARATOR)
+  if (getTabGroupByTab(tab)) {
+    addItem({ label: $t('removeFromGroup'), click() {
+      removeTabFromGroup(win, getTabGroupByTab(tab) as TabGroup, tab);
+    } })
+
+  } else {
+    addItem({ label: $t('addToNewGroup'), click() {
+      createTabGroup(win, {
+        startIndex: win.tabs.indexOf(tab),
+        endIndex: win.tabs.indexOf(tab) + 1,
+        name: '',
+        color: 'gray'
+      })
+    } })
   }
   addItem(SEPARATOR)
   if (tab == win.currentTab) {
