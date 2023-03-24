@@ -30,6 +30,9 @@
   button:disabled {
     opacity: 0.8;
   }
+  button:disabled:hover {
+    background: var(--t-white-base);
+  }
 
   @media (prefers-color-scheme: light) {
     button.with-bg {
@@ -50,6 +53,9 @@
     }
     button.call-to-action:hover:active {
       background: var(--accent-9);
+    }
+    button:disabled:hover {
+      background: var(--t-black-base);
     }
   }
 </style>
