@@ -110,9 +110,13 @@
   .tabgroup.begin {
     /** Random visual glitch where 1px was missing */
     translate: 1px;
+    margin-left: 0.2rem;
   }
   .tabgroup.end {
     translate: -1px;
+  }
+  .tabgroup.end.hidden {
+    margin-right: calc(0.2rem + 1px);
   }
   .tabgroup > span {
     background: var(--group-color);
@@ -138,6 +142,7 @@
   }
   .tabgroup.begin.hidden > span {
     border-radius: 0.3rem;
+    margin-right: 0;
   }
   .tabgroup.end > span {
     border-radius: 0rem 0.2rem 0.2rem 0rem;
@@ -149,6 +154,7 @@
   }
   .tabgroup.end.hidden > span {
     width: 0px;
+    margin: 0;
   }
 
   .tabgroup.gray {

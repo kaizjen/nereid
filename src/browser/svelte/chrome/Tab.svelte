@@ -1,7 +1,9 @@
 <style>
   .tab {
-    padding: 0.5rem;
-    transition: 0.25s;
+    --border-width: 1px; /* when the tab isn't selected, the border is replaced by padding */
+    padding: calc(0.5rem + var(--border-width));
+    padding-bottom: 0.5rem;
+    transition: background 0.25s;
     position: relative;
     white-space: nowrap;
     overflow: hidden;
@@ -10,8 +12,7 @@
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    border: 1px solid transparent;
-    border-bottom: 1px solid var(--group-color, transparent) !important;
+    border-bottom: var(--border-width) solid transparent !important;
     border-radius: 0.25rem 0.25rem 0px 0px;
     margin-top: 1px;
     transform: translateY(-1px);
@@ -24,11 +25,12 @@
     background: var(--t-white-2);
   }
   .tab.selected {
+    padding: 0.5rem;
     background: var(--active-background);
-    border-color: var(--group-color, var(--t-white-5));
+    border: var(--border-width) solid var(--t-white-5);
     box-shadow: 0px 1px 0px 0px var(--active-background); /* removes the part of the border of <Tools> */
     transition: 0s;
-    border-bottom: 1px solid transparent !important;
+    border-bottom: var(--border-width) solid transparent !important;
   }
   .tab img {
     height: 0.85rem;
@@ -75,15 +77,15 @@
   }
 
   .tab.group {
-    border: 2px solid transparent;
-    border-bottom: 2px solid var(--group-color, transparent) !important;
+    --border-width: 2px;
+    border-bottom-color: var(--group-color, transparent) !important;
     border-radius: 0.25rem 0.25rem 0px 0px;
     margin-top: 0;
     transform: none;
   }
   .tab.group.selected {
     border-color: var(--group-color, var(--t-white-5));
-    border-bottom: 2px solid transparent !important;
+    border-bottom-color: transparent !important;
   }
 
   .tab.group.gray {
