@@ -13,7 +13,7 @@
     align-items: center;
     flex-shrink: 0;
     border-bottom: var(--border-width) solid transparent !important;
-    border-radius: 0.25rem 0.25rem 0px 0px;
+    border-radius: 0.25rem 0.25rem 0 0;
     margin-top: 1px;
     transform: translateY(-1px);
     box-sizing: border-box;
@@ -28,7 +28,7 @@
     padding: 0.5rem;
     background: var(--active-background);
     border: var(--border-width) solid var(--t-white-5);
-    box-shadow: 0px 1px 0px 0px var(--active-background); /* removes the part of the border of <Tools> */
+    box-shadow: 0 1px 0 0 var(--active-background); /* removes the part of the border of <Tools> */
     transition: 0s;
     border-bottom: var(--border-width) solid transparent !important;
   }
@@ -79,7 +79,7 @@
   .tab.group {
     --border-width: 2px;
     border-bottom-color: var(--group-color, transparent) !important;
-    border-radius: 0.25rem 0.25rem 0px 0px;
+    border-radius: 0.25rem 0.25rem 0 0;
     margin-top: 0;
     transform: none;
   }
@@ -123,7 +123,7 @@
     .tab.selected {
       background: var(--active-background);
       border-color: var(--t-black-6);
-      box-shadow: 0px 1px 0px 0px var(--active-background); /* removes the part of the border of <Tools> */
+      box-shadow: 0 1px 0 0 var(--active-background); /* removes the part of the border of <Tools> */
     }
     .tab img.audio-control:hover {
       background: var(--t-black-3);

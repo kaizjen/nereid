@@ -7,7 +7,7 @@
     top: 100%;
     left: 0;
     width: 100%;
-    /* border-radius: 0px 0px 10px 10px; */
+    /* border-radius: 0 0 10px 10px; */
     overflow: hidden;
     z-index: 1;
     -webkit-app-region: no-drag;

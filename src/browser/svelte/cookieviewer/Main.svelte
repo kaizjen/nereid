@@ -5,7 +5,7 @@
     font-size: small;
   }
   .cookielist {
-    padding: 0px;
+    padding: 0;
     border: 1px solid var(--gray-2);
     height: 30vh;
     overflow: auto;

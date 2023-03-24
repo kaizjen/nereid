@@ -17,12 +17,12 @@
     transition: 0s;
   }
   #addressbar:not(.noborder):not(.focus):hover {
-    box-shadow: 0px 0px 0px 1px var(--t-white-3);
+    box-shadow: 0 0 0 1px var(--t-white-3);
     background: var(--t-black-9);
   }
   #addressbar.focus {
     outline: none;
-    box-shadow: 0px 0px 0px 2px var(--accent-5);
+    box-shadow: 0 0 0 2px var(--accent-5);
     background: var(--dark-1)
   }
   .tab-state {
@@ -95,12 +95,12 @@
       background: var(--t-white-8);
     }
     #addressbar:not(.noborder):not(.focus):hover {
-      box-shadow: 0px 0px 0px 1px var(--t-black-3);
+      box-shadow: 0 0 0 1px var(--t-black-3);
       background: var(--t-white-9);
     }
     #addressbar.focus {
       outline: none;
-      box-shadow: 0px 0px 0px 2px var(--accent-5);
+      box-shadow: 0 0 0 2px var(--accent-5);
       background: var(--t-white-9)
     }
     .tab-state:hover {

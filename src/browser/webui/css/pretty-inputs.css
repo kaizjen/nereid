@@ -10,7 +10,7 @@ button {
 button:focus, button:focus-visible {
   border-color: black;
   outline: none;
-  box-shadow: 0px 0px 0px 2px #00a0ff;
+  box-shadow: 0 0 0 2px #00a0ff;
 }
 input, select {
   border: 1px solid transparent;

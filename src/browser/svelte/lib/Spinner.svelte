@@ -12,7 +12,7 @@
   }
 
   circle.small {
-    stroke-dasharray: 0px 1000px;
+    stroke-dasharray: 0 1000px;
     stroke-linecap: round;
     transform-origin: center;
     fill: none;
@@ -30,7 +30,7 @@
 
   @keyframes fancy {
     0% {
-      stroke-dashoffset: 0px;
+      stroke-dashoffset: 0;
     }
     100% {
       stroke-dashoffset: -399px; /* {stroke-dasharray} * 2 - 1 */

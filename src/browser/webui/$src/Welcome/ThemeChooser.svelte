@@ -54,7 +54,7 @@
     padding: 30px;
   }
   .themer {
-    box-shadow: black 3px 4px 14px 0px;
+    box-shadow: black 3px 4px 14px 0;
     padding: var(--themer-box);
     border-radius: 8px;
   }

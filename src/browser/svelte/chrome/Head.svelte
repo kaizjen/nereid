@@ -127,7 +127,7 @@
     align-items: center;
     padding: 0.1rem;
     padding-inline: 0.35rem;
-    border-radius: 0.3rem 0rem 0rem 0.3rem;
+    border-radius: 0.3rem 0 0 0.3rem;
     margin-right: 2px;
     margin-left: 0.1rem;
     height: calc(100% - 0.6rem);
@@ -145,7 +145,7 @@
     margin-right: 0;
   }
   .tabgroup.end > span {
-    border-radius: 0rem 0.2rem 0.2rem 0rem;
+    border-radius: 0 0.2rem 0.2rem 0;
     margin-left: 2px;
     margin-right: 0.1rem;
     width: 0.3rem;
@@ -153,7 +153,7 @@
     transition: 0.2s;
   }
   .tabgroup.end.hidden > span {
-    width: 0px;
+    width: 0;
     margin: 0;
   }
 
@@ -391,7 +391,7 @@
   bind:this={headElement}
   style="
     --head-height: {internalHeadHeight}px;
-    {isOnLinux ? `--titlebar-left: 0px; --titlebar-right: ${trafficLightsWidth}px;` : ''}
+    {isOnLinux ? `--titlebar-left: 0; --titlebar-right: ${trafficLightsWidth}px;` : ''}
   "
 >
   <img
