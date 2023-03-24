@@ -10,6 +10,9 @@
     align-items: center;
     justify-content: center;
   }
+  .biginfo > img {
+    margin-right: 0.6rem;
+  }
   .amount {
     display: block;
     color: var(--gray-8);
