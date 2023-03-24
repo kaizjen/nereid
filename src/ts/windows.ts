@@ -271,6 +271,10 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
       tabManager.updateTabState(w, { tab });
     })
 
+    w.tabGroups.forEach(group => {
+      w.chrome.webContents.send('addTabGroup', group)
+    })
+
     chromeBV.webContents.send('tabChange', w.tabs.indexOf(w.currentTab))
   })
 
