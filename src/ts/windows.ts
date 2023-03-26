@@ -349,7 +349,7 @@ export function setCurrentTabBounds(win: TabWindow, tab?: Tab) {
 
     } else {
       tab.setBounds(rect)
-      win.chrome.webContents.send('paneDividerPosition', -0.5)
+      if (win.currentTab == tab) win.chrome.webContents.send('paneDividerPosition', -0.5)
     }
   }
   if (tab && !tab.isGhost) {
