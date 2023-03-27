@@ -129,7 +129,6 @@
     padding-inline: 0.35rem;
     border-radius: 0.3rem 0 0 0.3rem;
     margin-right: 2px;
-    margin-left: 0.1rem;
     height: calc(100% - 0.6rem);
     transition: 0.2s;
   }
