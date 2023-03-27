@@ -1,6 +1,6 @@
 // Handles net errors. It's just so large i needed to put it in another file
 
-import { ipcMain, WebContents, WebFrameMain, webFrameMain } from "electron";
+import { ipcMain, net, WebContents, WebFrameMain, webFrameMain } from "electron";
 import * as fs from 'fs'
 import { t } from "./i18n";
 import $ from "./common";
@@ -137,6 +137,10 @@ export function handleNetError(
     case -106:
       errInfo.info = $t('internetLost.0')
       errInfo.detail = $t('internetLost.1')
+      errInfo.moreJS = `
+        document.getElementById('nointernet-icon').style.display = 'block';
+        document.getElementById('other-icon').style.display = 'none';
+      `
       break;
     case -107:
       errInfo.info = $t('SSL.0')

@@ -347,7 +347,9 @@ net-error:
   failed:
     - Connection failed.
   internetLost:
-    - The internet connection has been lost.
+    - No internet connection.
+    - Your device seems to be offline. Try checking your Wi-Fi network or
+      Ethernet connection.
   SSL:
     - An SSL error occured.
     - That means we couldn't establish a secure connection with the website.
