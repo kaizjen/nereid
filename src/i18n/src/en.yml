@@ -167,7 +167,7 @@ ui:
   adblocker:
     status-good: Ads and trackers are blocked
     status-bad: Ads and trackers weren't blocked
-    status-neutral: No ads found on the page
+    status-neutral: No ads found on this page
     blockedAmount: "Ads/trackers blocked: ${count}"
     list: List of trackers
     switch-off: Turn off adblock on ${hostname}
@@ -178,8 +178,7 @@ ui:
       inactive: Ads and trackers on ${hostname} are not being blocked because you have
         whitelisted the website. Unless the adblock is hurting performance or
         functionality of ${hostname}, it's recommended to turn it on.
-      malfunction: The adblocker failed to load correctly or a critical error occured
-        while it was loading.
+      malfunction: A critical error occured while the adblocker was loading.
       notReady: The page was loaded before the adblocker, so not all ads and trackers
         were blocked
       button-reload: Reload the page
@@ -243,7 +242,7 @@ windows:
       browser: Browser
       utility: "Utility: ${name}"
       tab: "Tab: ${title}"
-      unknownTab: Tab (unknown)
+      unknownTab: Renderer (unknown)
       devTools: "Developer tools: ${tabTitle}"
       windowDevTools: Window developer tools (window ID ${id})
       windowUI: Window UI Process (ID ${id})

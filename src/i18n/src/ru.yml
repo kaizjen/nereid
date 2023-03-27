@@ -35,7 +35,7 @@ common:
       prompt: ${hostname} хочет получить доступ к вашем местоположении
     fullscreen:
       name: Полный экран
-      desc: Переходить в полноэкранный режим
+      desc: Позволяет переходить в полноэкранный режим
       prompt: ${hostname} хочет перейти в полнноэкранный режим
     popups:
       name: Всплывающие окна
@@ -103,7 +103,7 @@ ui:
     load-refresh: Перезагрузить страницу
     downloads:
       title: Загрузки
-      current: "Сейчас зашружается:"
+      current: "Сейчас загружается:"
       actions:
         resume: Продолжить
         pause: Пауза
@@ -128,9 +128,9 @@ ui:
   addressBar-placeholder: Введите поисковый запрос или URL
   security:
     title: Безопасность
-    message-secure: Ваше подключение защищено
+    message-secure: Ваше подключение защищено.
     message-internal: Это внутренняя страница Nereid.
-    message-local: Это локальный файл
+    message-local: Это локальный файл.
     message-insecure: Ваше подключение не защищено.
     description-secure: >
       Ваша информация (пароли или номера кредитных карт) будет передана этому
@@ -174,7 +174,7 @@ ui:
       next: Далее
       error-alreadyExists: Имя папки занято
       error-empty: Имя папки не может быть пусто
-      error-illegalName: Неверное имя папки
+      error-illegalName: Недопустимое имя папки
     edit:
       name: Название
       url: URL-адрес
@@ -243,7 +243,7 @@ windows:
       browser: Браузер
       utility: "Сервис: ${name}"
       tab: "Вкладка: ${title}"
-      unknownTab: Вкладка (неизвестная)
+      unknownTab: Неизвестный отрисовщик
       devTools: "Инструменты разработчика: ${tabTitle}"
       windowDevTools: DevTools для окна (ID окна ${id})
       windowUI: Процесс интерфейса окна (ID ${id})
@@ -275,7 +275,7 @@ net-error:
   common:
     local:
       - Произошла неизвестная локальная ошибка
-      - Что-то пошло не так на вашем девайсе.
+      - Что-то пошло не так на вашем устройстве.
     connection:
       - Произошла неизвестная ошибка подключения
       - Не удалось подключиться к серверу
@@ -335,9 +335,8 @@ net-error:
     - Соединение прервано.
     - >
       Что-то не позволило Nereid подключиться к серверу. Возможно, ваш файерволл
-      или интернет-провайдер заблокировали запрос
-
-      или сервер внезапно остановился.
+      или интернет-провайдер заблокировали запрос или сервер внезапно
+      остановился.
   refused:
     - Соединение отказано.
   failed:
@@ -369,8 +368,8 @@ menu:
     newPrivateTab: Новая приватная вкладка
     quit: Выйти
   tray:
-    state-ready: ${this.name} готов
-    state-processing: ${this.name} работает в фоне...
+    state-ready: Nereid готов
+    state-processing: Nereid работает в фоне...
   tabs:
     close: Закрыть вкладку
     openClosed: Открыть закрытую вкладку
@@ -448,7 +447,7 @@ menu:
       viewInNewTab: Открыть в новой вкладке
       copyURL: Скопировать URL
       controls: Элементы управления
-      pictureInPicture: Режим картинка-в-картинке
+      pictureInPicture: Картинка в картинке
     frame:
       reload: Перезагрузить фрейм
       viewSourceCode: Посмотреть исходный код фрейма
@@ -471,8 +470,8 @@ menu:
     removeFromGroup: Удалить из группы
   window:
     minimize: Свернуть
-    unmaximize: Restore
-    maximize: Maximize
+    unmaximize: Восстановить
+    maximize: Развернуть
     close: Закрыть
 pages:
   welcome:
@@ -484,9 +483,9 @@ pages:
       title: Выберите язык
       note: >
         Nereid поддерживает не все языки. Если вы выберите неподдерживаемый
-        язык, вам будет предложено выбрать другой язык из
-
-        списка поддерживаемых Nereid. Сайты все равно будут показываться на изначально выбранном языке
+        язык, вам будет предложено выбрать другой язык из списка поддерживаемых
+        Nereid. Сайты все равно будут показываться на изначально выбранном
+        языке.
       noTranslation: "Nereid не поддерживает ваш язык. Выберите язык для Nereid:"
       restartNotice: Nereid перезапустится, чтобы применить изменения
     themes:
@@ -636,7 +635,7 @@ pages:
       button-add: Создать
       error-alreadyExists: Имя папки занято
       error-empty: Имя папки не может быть пусто
-      error-illegalName: Неверное имя папки
+      error-illegalName: Недопустимое имя папки
     folder:
       rename: Переименовать папку
       confirmDelete: Вы точно хотите удалить эту папку?
