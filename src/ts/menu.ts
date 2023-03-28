@@ -1141,7 +1141,7 @@ export function menuOfTab(win: TabWindow, tab: Tab) {
   menu.popup()
 }
 
-export function menuNewTab(win: TabWindow) {
+export function menuNewTab(win: TabWindow, group?: TabGroup) {
   function $t(str: string, obj?: {}) {
     return t(`menu.tabMenu.${str}`, obj)
   }
@@ -1151,7 +1151,7 @@ export function menuNewTab(win: TabWindow) {
       label: $t('createNewTab'),
       accelerator: 'CmdOrCtrl+T',
       click() {
-        createTab(win, { url: $.newTabUrl })
+        createTab(win, { url: $.newTabUrl, groupID: group?.id })
         focusChrome(win)
       }
     },
@@ -1159,18 +1159,11 @@ export function menuNewTab(win: TabWindow) {
       label: $t('createNewPrivateTab'),
       accelerator: 'CmdOrCtrl+P',
       click() {
-        createTab(win, { url: 'nereid://private', private: true })
+        createTab(win, { url: 'nereid://private', private: true, groupID: group?.id })
         focusChrome(win)
       }
     },
   ]).popup()
-}
-export function menuGroupNewTab(win: TabWindow) {
-  function $t(str: string, obj?: {}) {
-    return t(`menu.tabMenu.${str}`, obj)
-  }
-
-  //
 }
 
 export function menuOfBookmark(win: TabWindow, bookmark: Bookmark, index: number) {

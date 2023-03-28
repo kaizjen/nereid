@@ -559,7 +559,7 @@
         <button
           class="tablist-button"
           on:click={newGroupTab}
-          on:auxclick={() => ipcRenderer.send('chrome.menuGroupNewTab')}
+          on:auxclick={() => ipcRenderer.send('chrome.menuGroupNewTab', currentTabGroup.id)}
         >
           <img alt="" src="n-res://{$colorTheme}/plus.svg">
         </button>

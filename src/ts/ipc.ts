@@ -8,7 +8,7 @@ import type { TabWindow, TabOptions, Configuration, RealTab } from "./types"
 import $ from "./common";
 import * as tabManager from './tabs'
 import * as _url from "url";
-import { appMenu, displayOptions, menuGroupNewTab, menuNewTab, menuOfAddressBar, menuOfBookmark, menuOfPaneDivider, menuOfProcess, menuOfTab } from "./menu";
+import { appMenu, displayOptions, menuNewTab, menuOfAddressBar, menuOfBookmark, menuOfPaneDivider, menuOfProcess, menuOfTab } from "./menu";
 import { getTabWindowByID, setHeadHeight, isTabWindow, newDialogWindow, setCurrentTabBounds, getAllTabWindows, getIDOfTabWindow, PANE_SEP_WIDTH } from "./windows";
 import type TypeFuse from "fuse.js";
 import { certificateCache, DEFAULT_PARTITION, NO_CACHE_PARTITION, PRIVATE_PARTITION } from "./sessions";
@@ -254,8 +254,8 @@ export function init() {
   onWindow('chrome.menuNewTab', (win) => {
     menuNewTab(win)
   })
-  onWindow('chrome.menuGroupNewTab', (win) => {
-    menuGroupNewTab(win)
+  onWindow('chrome.menuGroupNewTab', (win, _e, groupID: number) => {
+    menuNewTab(win, getTabGroupByID(groupID).group)
   })
   onWindow('chrome.menuOfBookmark', (win, _e, bookmark, index: number) => {
     menuOfBookmark(win, bookmark, index)
