@@ -206,32 +206,30 @@
     const targetRect = e.currentTarget.getBoundingClientRect();
     const droppedX = e.x - targetRect.x;
     const droppedRatio = droppedX / targetRect.width;
-    console.log({droppedRatio});
     console.log('dropped, uid: %o', e.dataTransfer.getData('text/tabUID'));
+
     let movedUID = Number(e.dataTransfer.getData('text/tabUID') || NaN);
+    let moveToIndex = index;
 
     if (isNaN(movedUID)) return;
     if (movedUID == tab.uid) return;
 
-    console.log(e.currentTarget, droppedRatio, {currentTabIndex, index});
-
     if (droppedRatio >= 0.5) {
-      if (currentTabIndex >= index) {
+      if (currentTabIndex >= moveToIndex) {
         // If the tab is dropped on the right side
         // AND the selected tab is to the right of the dropzone tab,
         // drop the tab to the right of the dropzone
-        index++;
+        moveToIndex++;
       }
       // Otherwise, once the selected tab disappears, all
       // tab indexes are decreased, that's why we don't increase the index here.
-    } else if (currentTabIndex < index) {
+    } else if (currentTabIndex < moveToIndex) {
       // The tab is dropped on the left side, and the
       // currentTab is to the left of the dropzone
-      index--;
+      moveToIndex--;
     }
-    console.log('final index', index);
 
-    ipcRenderer.send('chrome.moveTab', movedUID, index)
+    ipcRenderer.send('chrome.moveTab', movedUID, moveToIndex)
     if (group) {
       ipcRenderer.send('chrome.addTabToGroup', movedUID, group.id)
     }
