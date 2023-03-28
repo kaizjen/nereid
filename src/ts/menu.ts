@@ -1165,6 +1165,13 @@ export function menuNewTab(win: TabWindow) {
     },
   ]).popup()
 }
+export function menuGroupNewTab(win: TabWindow) {
+  function $t(str: string, obj?: {}) {
+    return t(`menu.tabMenu.${str}`, obj)
+  }
+
+  //
+}
 
 export function menuOfBookmark(win: TabWindow, bookmark: Bookmark, index: number) {
   let menu = new Menu();

@@ -517,6 +517,15 @@ pages:
       bookmarkBar-never: Никогда
       pageZoom: "Масштаб страниц по умолчанию:"
       uiZoom: "Масштаб интерфейса Nereid:"
+      tabGroups:
+        title: Группы вкладок
+        onlyShowCurrentTabGroup:
+          title: Показывать только вкладки из выбранной группы
+          description: Когда вы выбираете группу вкладок, в панели вкладок будут показаны
+            только вкладки этой группы.
+        stillShowTabGroupColor:
+          title: Красить вкладки групп
+          description: Когда выбрана группа вкладок, красить все вкладки в ней в ее цвет.
     privacy:
       title: Конфиденциальность
       clearData:

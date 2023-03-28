@@ -1,5 +1,5 @@
 <script>
-  import { TextBlock, ComboBox, Checkbox, InfoBar, Slider } from "fluent-svelte";
+  import { TextBlock, ComboBox, ToggleSwitch, Slider } from "fluent-svelte";
   import { getContext } from "svelte/internal";
   import noFirstTime from "nereid://js/nft.js"
 
@@ -61,6 +61,19 @@
     chromeZoom = chromeZoom_proxy
   });
   $: {chromeZoom_proxy; chromeZoonereidrottled()}
+
+  let onlyCurrentTabGroup = $config.ui.onlyShowCurrentTabGroup;
+  const updateOnlyCTG = noFirstTime(() => {
+    $config.ui.onlyShowCurrentTabGroup = onlyCurrentTabGroup;
+    update()
+  })
+  $: {onlyCurrentTabGroup; updateOnlyCTG()}
+  let stillShowColor = $config.ui.showTabGroupColor;
+  const updateStillShowColor = noFirstTime(() => {
+    $config.ui.showTabGroupColor = stillShowColor;
+    update()
+  })
+  $: {stillShowColor; updateStillShowColor()}
 </script>
 
 <div class="s-option">
@@ -102,3 +115,26 @@
     min={1} max={200}
   />
 </div>
+<div class="s-option">
+  <TextBlock variant="subtitle">{t('pages.settings.appearance.tabGroups.title')}</TextBlock>
+</div>
+<div class="s-option">
+  <TextBlock>
+    {t('pages.settings.appearance.tabGroups.onlyShowCurrentTabGroup.title')} <br>
+    <TextBlock variant="caption" style="color: gray;">
+      {t('pages.settings.appearance.tabGroups.onlyShowCurrentTabGroup.description')}
+    </TextBlock>
+  </TextBlock>
+  <ToggleSwitch bind:checked={onlyCurrentTabGroup} />
+</div>
+{#if onlyCurrentTabGroup}
+  <div class="s-option">
+    <TextBlock>
+      {t('pages.settings.appearance.tabGroups.stillShowTabGroupColor.title')} <br>
+      <TextBlock variant="caption" style="color: gray;">
+        {t('pages.settings.appearance.tabGroups.stillShowTabGroupColor.description')}
+      </TextBlock>
+    </TextBlock>
+    <ToggleSwitch bind:checked={stillShowColor} />
+  </div>
+{/if}

@@ -139,6 +139,8 @@ export interface Configuration {
     chromeZoomFactor: number
     showBookmarks: 'newtab' | 'all' | 'none'
     backgroundImage: string
+    onlyShowCurrentTabGroup: boolean
+    showTabGroupColor: boolean
   }
   search: {
     available: {

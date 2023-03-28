@@ -257,7 +257,9 @@ try {
       defaultZoomFactor: 'realnumber',
       chromeZoomFactor: 'realnumber',
       showBookmarks: ['"newtab"', '"all"', '"none"'],
-      backgroundImage: 'string'
+      backgroundImage: 'string',
+      onlyShowCurrentTabGroup: 'boolean',
+      showTabGroupColor: 'boolean'
     },
     search: {
       available: [[

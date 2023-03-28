@@ -7,7 +7,9 @@
     defaultZoomFactor: 1,
     chromeZoomFactor: 1,
     showBookmarks: 'newtab',
-    backgroundImage: "${userdata}/background_images/${theme}/${size}/"
+    backgroundImage: "${userdata}/background_images/${theme}/${size}/",
+    onlyShowCurrentTabGroup: false,
+    showTabGroupColor: false
   },
   search: {
     available: [

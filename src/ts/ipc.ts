@@ -1,6 +1,6 @@
 // Manages the recieving IPC
 
-import { ipcMain, BrowserWindow, clipboard, nativeTheme, safeStorage, dialog, shell, session, app, Menu } from "electron";
+import { ipcMain, BrowserWindow, clipboard, nativeTheme, safeStorage, dialog, shell, session, app, Menu, nativeImage } from "electron";
 import type { WebContents, IpcMainEvent } from "electron";
 import fetch from "electron-fetch";
 import * as userData from "./userdata";
@@ -8,7 +8,7 @@ import type { TabWindow, TabOptions, Configuration, RealTab } from "./types"
 import $ from "./common";
 import * as tabManager from './tabs'
 import * as _url from "url";
-import { appMenu, displayOptions, menuNewTab, menuOfAddressBar, menuOfBookmark, menuOfPaneDivider, menuOfProcess, menuOfTab } from "./menu";
+import { appMenu, displayOptions, menuGroupNewTab, menuNewTab, menuOfAddressBar, menuOfBookmark, menuOfPaneDivider, menuOfProcess, menuOfTab } from "./menu";
 import { getTabWindowByID, setHeadHeight, isTabWindow, newDialogWindow, setCurrentTabBounds, getAllTabWindows, getIDOfTabWindow, PANE_SEP_WIDTH } from "./windows";
 import type TypeFuse from "fuse.js";
 import { certificateCache, DEFAULT_PARTITION, NO_CACHE_PARTITION, PRIVATE_PARTITION } from "./sessions";
@@ -73,6 +73,12 @@ export function init() {
   })
   onWindow('window.close', (win) => {
     win.close();
+  })
+  onWindow('window.resetDragRegions', (win) => {
+    // By resetting the zoomFactor, the drag regions are recalculated properly.
+
+    win.chrome.webContents.zoomFactor++;
+    win.chrome.webContents.zoomFactor--;
   })
 
   function onCurrentTab(channel: string, handler: (wc: WebContents, win: TabWindow, e: Electron.IpcMainEvent, ...args: any[]) => any) {
@@ -247,6 +253,9 @@ export function init() {
   })
   onWindow('chrome.menuNewTab', (win) => {
     menuNewTab(win)
+  })
+  onWindow('chrome.menuGroupNewTab', (win) => {
+    menuGroupNewTab(win)
   })
   onWindow('chrome.menuOfBookmark', (win, _e, bookmark, index: number) => {
     menuOfBookmark(win, bookmark, index)

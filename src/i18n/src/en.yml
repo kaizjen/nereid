@@ -522,6 +522,16 @@ pages:
       bookmarkBar-never: Never
       pageZoom: "Default page zoom:"
       uiZoom: "Nereid's UI zoom:"
+      tabGroups:
+        title: Tab groups
+        onlyShowCurrentTabGroup:
+          title: Only show the active tab group
+          description: When you select a tab group, only the tabs in this tab group will
+            be shown in the tab bar.
+        stillShowTabGroupColor:
+          title: Still color grouped tabs
+          description: When showing only the active tab group, use the group color for its
+            tabs.
     privacy:
       title: Privacy
       clearData:

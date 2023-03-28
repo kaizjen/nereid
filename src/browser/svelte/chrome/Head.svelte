@@ -106,6 +106,11 @@
     border-bottom: 2px solid var(--group-color);
     flex-shrink: 0;
     transition: 0.2s;
+    height: 100%;
+    box-sizing: border-box;
+  }
+  .tabgroup.nobottomborder {
+    border-bottom-width: 0;
   }
   .tabgroup.begin {
     /** Random visual glitch where 1px was missing */
@@ -138,6 +143,9 @@
     height: 1rem;
     padding: 0;
     margin-right: 3px;
+  }
+  .tabgroup.nobottomborder > span {
+    border-radius: 0.3rem;
   }
   .tabgroup.begin.hidden > span {
     border-radius: 0.3rem;
@@ -193,7 +201,7 @@
     --group-text: var(--group-orange-text);
   }
 
-  #addtab {
+  .tablist-button {
     padding: 0.2rem;
     padding-inline: 0.4rem;
     margin-left: 0.125rem;
@@ -201,13 +209,13 @@
     transition: 0.25s;
     display: flex;
   }
-  #addtab img {
+  .tablist-button img {
     height: 1.25rem;
   }
-  #addtab:hover {
+  .tablist-button:hover {
     background: var(--t-white-3);
   }
-  #addtab:hover:active {
+  .tablist-button:hover:active {
     background: var(--t-white-6);
     transition: 0s;
   }
@@ -231,10 +239,10 @@
       background: var(--t-black-5);
     }
 
-    #addtab:hover {
+    .tablist-button:hover {
       background: var(--t-black-2);
     }
-    #addtab:hover:active {
+    .tablist-button:hover:active {
       background: var(--t-black-4);
     }
   }
@@ -245,6 +253,7 @@
   import { getContext } from "svelte/internal";
   import Tab from "./Tab.svelte";
   import TabGroup from "./popups/TabGroup.svelte";
+  import { fly } from "svelte/transition";
   export let tabs;
   export let currentTabIndex;
 
@@ -260,6 +269,7 @@
   }
 
   const colorTheme = getContext('colorTheme')
+  const config = getContext('config')
   let keypressesLocked = getContext('keypressesLocked')
 
   const isOnLinux = process.platform == 'linux';
@@ -272,6 +282,28 @@
 
   let groupIDToElementMap = {};
 
+  let currentTabGroup;
+
+  // These shenanigans make sure that the head doesn't re-render
+  // because the main doesn't send all updates in the same tick,
+  // so this ensures they get properly queued up before re-rendering.
+  // If we don't do this, then in the group-only mode all the tabs will be
+  // re-animated constantly.
+  let __STGUpdateScheduled = false;
+  function updateCurrentTabGroup() {
+    if (__STGUpdateScheduled) return;
+
+    __STGUpdateScheduled = true;
+    requestIdleCallback(() => {
+      __STGUpdateScheduled = false;
+      currentTabGroup = tabGroups.find(g => currentTabIndex >= g.startIndex && currentTabIndex < g.endIndex)
+    })
+  }
+  $: {tabGroups; currentTabIndex; updateCurrentTabGroup()}
+
+  $: onlyShowCurrentTabGroup = $config?.ui.onlyShowCurrentTabGroup;
+  $: shouldBeColored = $config?.ui.showTabGroupColor;
+
   $: {
     // lock keypresses so that addressbar won't
     // intercept them when the user is editing a group
@@ -281,6 +313,17 @@
     editingTabGroup.group;
     tabGroups = tabGroups;
   }
+
+  /** The animation of the tab group will be played from this position */
+  let animateTabGroupFromX = 0;
+  let tabGroupListElement;
+
+  let tabsFromSelectedGroup = [];
+  function getTabsFromSelectedGroup() {
+    if (!currentTabGroup) return tabsFromSelectedGroup = [];
+    tabsFromSelectedGroup = tabs.slice(currentTabGroup.startIndex, currentTabGroup.endIndex)
+  }
+  $: {tabs; currentTabGroup; getTabsFromSelectedGroup()}
 
   requestAnimationFrame(() => {
     trafficLightsWidth = trafficLightsElement.getBoundingClientRect().width
@@ -309,6 +352,13 @@
   }
   function toggleHideGroupF(group) {
     return () => {
+      if (onlyShowCurrentTabGroup) {
+        // select the tab group
+        animateTabGroupFromX = groupIDToElementMap[group.id].getBoundingClientRect().x
+        ipcRenderer.send('selectTab', group.startIndex);
+        return;
+      }
+
       if (hiddenGroups.includes(group.id)) {
         hiddenGroups.splice(hiddenGroups.indexOf(group.id), 1);
 
@@ -317,11 +367,11 @@
         if (currentTabIndex >= group.startIndex && currentTabIndex < group.endIndex) {
           // The group has a selected tab
           if (tabs.length > group.endIndex) {
-            // Select the tab to the left
+            // Select the tab to the right
             ipcRenderer.send('selectTab', group.endIndex)
 
           } else {
-            // No tab on the left, create one
+            // No tab on the right, create one
             ipcRenderer.send('newTab', { position: group.endIndex })
           }
         }
@@ -329,17 +379,93 @@
       hiddenGroups = hiddenGroups;
     }
   }
+  function editTabGroup(group, overrideElement) {
+    let x, y;
+    overrideElement ||= groupIDToElementMap[group.id];
+
+    if (overrideElement) {
+      const rect = overrideElement.getBoundingClientRect();
+      x = rect.x; y = rect.y
+
+    } else {
+      x = y = 0;
+    }
+
+    editingTabGroup = { group, position: { x, y } }
+  }
   function editTabGroupF(group) {
     return (e) => {
       if (e.button != 2) return;
-      const rect = groupIDToElementMap[group.id].getBoundingClientRect()
+      editTabGroup(group)
+    }
+  }
+  function unselectTabGroup() {
+    if (!currentTabGroup) return console.warn('No selected tab group')
 
-      editingTabGroup = { group, position: { x: rect.x, y: rect.y } }
+    if (currentTabGroup.startIndex != 0) {
+      // Select the tab to the left
+      ipcRenderer.send('selectTab', currentTabGroup.startIndex - 1)
+
+    } else if (tabs.length > currentTabGroup.endIndex) {
+      // No tab on the left, select one on the right
+      ipcRenderer.send('selectTab', currentTabGroup.endIndex)
+
+    } else {
+      // No tab on the right, create one
+      ipcRenderer.send('newTab', { position: currentTabGroup.endIndex })
     }
   }
 
   function newTab() {
     ipcRenderer.send('newTab')
+  }
+  function newGroupTab() {
+    ipcRenderer.send('newTab', { position: currentTabGroup.endIndex, groupID: currentTabGroup.id })
+  }
+  
+  function unhideSelectedTabGroup() {
+    // wait until the toggleHideGroupF has selected the tab on the right
+    requestIdleCallback(() => {
+      if (currentTabGroup && hiddenGroups.includes(currentTabGroup.id)) {
+        hiddenGroups.splice(hiddenGroups.indexOf(currentTabGroup.id), 1);
+        hiddenGroups = hiddenGroups;
+      }
+    })
+  }
+  
+  function resetDragRegions() {
+    // After an animation on the tablist is performed,
+    // the drag regions of the window (on Windows) are broken.
+    ipcRenderer.send('window.resetDragRegions')
+  }
+
+  function handleTabGroupDropF(group) {
+    return function (e) {
+      if (!onlyShowCurrentTabGroup && !hiddenGroups.includes(group.id)) return;
+
+      const targetRect = e.currentTarget.getBoundingClientRect();
+      const droppedX = e.x - targetRect.x;
+      const droppedRatio = droppedX / targetRect.width;
+      console.log('[group %o] dropped, uid: %o', group, e.dataTransfer.getData('text/tabUID'));
+
+      let movedUID = Number(e.dataTransfer.getData('text/tabUID') || NaN);
+      let moveToIndex = group.startIndex;
+
+      if (isNaN(movedUID)) return;
+
+      if (droppedRatio >= 0.5) {
+        // If dropped to the right side, move at the end of the group
+        moveToIndex = group.endIndex;
+      }
+      if (currentTabIndex < group.startIndex) {
+        // If the current tab is to the left of the group,
+        // then all the indexes decrease.
+        moveToIndex--;
+      }
+
+      ipcRenderer.send('chrome.moveTab', movedUID, moveToIndex)
+      ipcRenderer.send('chrome.addTabToGroup', movedUID, group.id)
+    }
   }
 
   function winActionF(msg) {
@@ -355,13 +481,6 @@
     ipcRenderer.send('chrome.headHeight', internalHeadHeight)
   }
 
-  function unhideSelectedTabGroup() {
-    const selectedTabGroup = tabGroups.find(g => currentTabIndex >= g.startIndex && currentTabIndex < g.endIndex)
-    if (selectedTabGroup && hiddenGroups.includes(selectedTabGroup.id)) {
-      hiddenGroups.splice(hiddenGroups.indexOf(selectedTabGroup.id), 1);
-      hiddenGroups = hiddenGroups;
-    }
-  }
 
   requestAnimationFrame(() => {
     setHeadHeight();
@@ -379,7 +498,7 @@
   
   ipcRenderer.on('addTabGroup', (_e, { id }) => {
     requestAnimationFrame(() => {
-      editTabGroupF(tabGroups.find(g => g.id == id))({ button: 2 });
+      editTabGroup(tabGroups.find(g => g.id == id));
     })
   })
 </script>
@@ -396,7 +515,59 @@
   <img
     alt="" src="n-res://{$colorTheme}/nereid.svg" id="nereid-icn"
   >
-  <div class="tabhead">
+  {#if onlyShowCurrentTabGroup && currentTabGroup}
+    <div
+      class="tabhead"
+      style:z-index={11}
+      bind:this={tabGroupListElement}
+      in:fly={{ opacity: 0.5, duration: 200, x: animateTabGroupFromX }}
+      out:fly={{ opacity: 0, duration: 200, x: animateTabGroupFromX }}
+      on:outrostart={() => tabGroupListElement.style.marginLeft = "-2rem"}
+      on:outroend={() => tabGroupListElement.style.marginLeft = ''}
+      on:introend={() => {resetDragRegions(); tabGroupListElement.style.marginLeft = ''}}
+    >
+      <button class="tablist-button" on:click={unselectTabGroup}>
+        <img alt="" src="n-res://{$colorTheme}/arrow.svg" style:rotate="180deg">
+      </button>
+      <div
+        class="tablist"
+        on:mousedown={e => (e.button == 1) /* middle mb */ ? e.preventDefault() : null}
+        on:wheel={e => e.deltaX == 0 ? smoothlyScroll(e.currentTarget, e.deltaY) : null}
+        style="--tab-width: {Math.max(15 - Math.sqrt(tabsFromSelectedGroup.length), 9)}rem;"
+      >
+        <button
+          on:click={e => editTabGroup(currentTabGroup, e.target)}
+          on:auxclick={e => editTabGroup(currentTabGroup, e.target)}
+          class="tabgroup begin {currentTabGroup.color}"
+          class:nobottomborder={!shouldBeColored}
+        >
+          <span class:noname={currentTabGroup.name == ''}>
+            {currentTabGroup.name}
+          </span>
+        </button>
+        {#each tabsFromSelectedGroup as tab, index (tab)}
+          <Tab
+            {tab}
+            index={currentTabGroup.startIndex + index}
+            currentTab={tabs[currentTabIndex]}
+            {currentTabIndex}
+            group={currentTabGroup}
+          />
+        {/each}
+      </div>
+      <div class="tabgroup end {currentTabGroup.color}" class:nobottomborder={!shouldBeColored}>
+        <button
+          class="tablist-button"
+          on:click={newGroupTab}
+          on:auxclick={() => ipcRenderer.send('chrome.menuGroupNewTab')}
+        >
+          <img alt="" src="n-res://{$colorTheme}/plus.svg">
+        </button>
+      </div>
+    </div>
+  {/if}
+
+  <div class="tabhead" style:display={onlyShowCurrentTabGroup && currentTabGroup ? 'none' : ''}>
     <div
       class="tablist"
       on:mousedown={e => (e.button == 1) /* middle mb */ ? e.preventDefault() : null}
@@ -405,29 +576,32 @@
     >
       {#each tabs as tab, index (tab)}
         {@const group = getGroupAtIndex(index, tabGroups)}
-        {#if group}
-          {#if group.startIndex == index}
-            <button
-              on:click={toggleHideGroupF(group)}
-              on:auxclick={editTabGroupF(group)}
-              class="tabgroup begin {group.color}"
-              class:hidden={hiddenGroups.includes(group.id)}
-              bind:this={groupIDToElementMap[group.id]}
-            >
-              <span class:noname={group.name == ''}>
-                {group.name}
-              </span>
-            </button>
-          {/if}
+        {#if group?.startIndex == index}
+          <button
+            class="tabgroup begin {group.color}"
+            class:hidden={onlyShowCurrentTabGroup || hiddenGroups.includes(group.id)}
+            class:nobottomborder={onlyShowCurrentTabGroup}
+            on:click={toggleHideGroupF(group)}
+            on:auxclick={editTabGroupF(group)}
+            on:dragover={e =>
+              e.dataTransfer.types[0] == 'text/tabuid' ? e.preventDefault() : null
+            }
+            on:drop|capture={handleTabGroupDropF(group)}
+            bind:this={groupIDToElementMap[group.id]}
+          >
+            <span class:noname={group.name == ''}>
+              {group.name}
+            </span>
+          </button>
         {/if}
-        {#if !group || !hiddenGroups.includes(group.id)}
+        {#if !group || !(onlyShowCurrentTabGroup || hiddenGroups.includes(group.id))}
           <Tab {tab} {index} currentTab={tabs[currentTabIndex]} {currentTabIndex} {group} />
         {/if}
         {#if group?.endIndex == index + 1}
           <button
             on:click={toggleHideGroupF(group)}
             class="tabgroup end {group.color}"
-            class:hidden={hiddenGroups.includes(group.id)}
+            class:hidden={onlyShowCurrentTabGroup || hiddenGroups.includes(group.id)}
           >
             <span style="background: var(--group-{group.color})"></span>
           </button>
@@ -435,7 +609,7 @@
       {/each}
     </div>
     <button
-      id="addtab"
+      class="tablist-button"
       on:click={newTab}
       on:auxclick={() => ipcRenderer.send('chrome.menuNewTab')}
       draggable="true"

@@ -163,6 +163,9 @@
 
   const colorTheme = getContext('colorTheme')
   const URLParse = getContext('URLParse')
+  const config = getContext('config')
+
+  $: shouldBeColored = !$config?.ui.onlyShowCurrentTabGroup || $config?.ui.showTabGroupColor
 
   function tab_anim(node, { delay = 0, duration = 400, easing = quintOut, opacity = 0 }) {
     const style = getComputedStyle(node);
@@ -271,7 +274,8 @@
 </script>
 
 <div
-  class="tab {group ? `group ${group.color}` : ''}"
+  class="tab {group ? group.color : ''}"
+  class:group={group && shouldBeColored}
   draggable="true"
   on:dragstart={e => e.dataTransfer.setData('text/tabUID', tab.uid)}
   on:dragover={
