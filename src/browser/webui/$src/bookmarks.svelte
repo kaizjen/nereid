@@ -19,10 +19,15 @@
     display: flex;
     justify-content: center;
     height: 100%;
+    padding-inline: 30px;
   }
   .content {
     max-width: 20cm;
     flex-grow: 1;
+    height: 100%;
+    box-sizing: border-box;
+    overflow: auto;
+    padding-bottom: 40px;
   }
   .addFolder {
     margin: 5px;
