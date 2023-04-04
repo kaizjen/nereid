@@ -34,6 +34,7 @@ export interface TabWindow extends BrowserWindow {
     UID: number
     lastURL: string
     lastTitle: string
+    lastTabGroupID: number
   }[]
 }
 

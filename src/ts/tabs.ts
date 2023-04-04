@@ -1000,6 +1000,10 @@ export function closeTab(win: TabWindow, desc: { tab?: Tab, index?: number }, ke
   function close() {
     beingClosed.splice(beingClosed.indexOf(desc.tab), 1);
 
+    let lastTabGroup = getTabGroupByTab(desc.tab);
+    let lastTabGroupID: number;
+    if (lastTabGroup) lastTabGroupID = lastTabGroup.id;
+
     let remResult = removeTab(desc.tab.owner, desc, keepAlive);
     if (!remResult) return false;
 
@@ -1027,7 +1031,8 @@ export function closeTab(win: TabWindow, desc: { tab?: Tab, index?: number }, ke
         tab,
         index: desc.index,
         UID: tab.uniqueID,
-        lastURL, lastTitle
+        lastURL, lastTitle,
+        lastTabGroupID
       });
       if (win.recentlyClosed.length > userData.config.get().behaviour.maxRecentTabs) {
         delete tabUniqueIDs[win.recentlyClosed[0].UID];
@@ -1068,6 +1073,15 @@ export function openClosedTab(win: TabWindow, index?: number, background: boolea
 
   addTab(win, tabInfo.tab, options)
   attach(win, tabInfo.tab)
+
+  if (tabInfo.lastTabGroupID != undefined) {
+    try {
+      addTabToGroup(win, getTabGroupByID(tabInfo.lastTabGroupID).group, tabInfo.tab)
+
+    } catch (e) {
+      console.log("openClosedTab: Failed to add this tab to its group (non-critical).", e + '');
+    }
+  }
 
   return true;
 }
