@@ -345,6 +345,8 @@ export function addTab(win: TabWindow, tab: Tab, opts: TabOptions) {
   } else {
     win.tabs.push(tab);
   }
+  win.chrome.webContents.send('addTab', opts)
+
   win.tabGroups.forEach(g => {
     if (win.tabs.indexOf(tab) <= g.startIndex) {
       g.startIndex++;
@@ -354,7 +356,6 @@ export function addTab(win: TabWindow, tab: Tab, opts: TabOptions) {
     }
     win.chrome.webContents.send('tabGroupUpdate', g)
   })
-  win.chrome.webContents.send('addTab', opts)
 
   if (opts.groupID != undefined) {
     addTabToGroup(win, getTabGroupByID(opts.groupID).group, tab)
