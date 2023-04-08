@@ -172,11 +172,13 @@
     const target_opacity = +style.opacity;
     const od = target_opacity * (1 - opacity);
     const w = parseInt(style.width)
+    const pdi = parseInt(style.paddingInline)
     return {
       delay,
       duration,
       easing,
       css: (t, u) => `
+        padding-inline: ${Math.round(pdi * t)}px;
         width: ${Math.round(w * t)}px;
         opacity: ${target_opacity - (od * u)}
       `
