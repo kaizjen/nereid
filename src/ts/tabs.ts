@@ -404,6 +404,7 @@ export function removeTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: n
   }
   
   win.tabs.splice(index, 1)
+  win.chrome.webContents.send('removeTab', index)
 
   win.tabGroups.forEach(g => {
     if (index < g.startIndex) {
@@ -416,8 +417,6 @@ export function removeTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: n
   })
 
   destroyEmptyGroups(win)
-
-  win.chrome.webContents.send('removeTab', index)
 
   updateSavedTabs()
   return true;
