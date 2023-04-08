@@ -33,7 +33,7 @@
     background: var(--t-white-3);
   }
   button:hover:active {
-    background: var(--t-white-5);
+    background: var(--t-white-6);
     transition: 0s;
   }
   button > img {
