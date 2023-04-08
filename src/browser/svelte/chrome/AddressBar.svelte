@@ -2,7 +2,7 @@
   #addressbar {
     width: -webkit-fill-available;
     transition: box-shadow 0.1s;
-    border-radius: 0.25rem;
+    border-radius: 0.2rem;
     display: flex;
     align-items: center;
     cursor: text;
@@ -29,7 +29,7 @@
     display: flex;
     align-items: center;
     padding-inline: 0.7rem;
-    border-radius: 0.25rem;
+    border-radius: 0.2rem;
     transition: 0.25s;
     cursor: default;
     height: 100%;

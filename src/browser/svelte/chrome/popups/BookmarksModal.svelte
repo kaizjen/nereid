@@ -10,7 +10,7 @@
     justify-content: center;
     align-items: center;
     margin-bottom: 1.25rem;
-    border-radius: 0.375rem;
+    border-radius: 0.25rem;
     overflow: hidden;
   }
   input {
@@ -44,6 +44,9 @@
   }
   .folder.create {
     margin-top: 1rem;
+  }
+  .folder > img {
+    margin-right: 0.1rem;
   }
   .footer {
     margin-top: 1.25rem;
