@@ -925,14 +925,16 @@ export function selectTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: n
   setTitleOfWindow(win, asRealTab(tab))
 }
 
-export function dividePanes(win: TabWindow, panes: { right: Tab, left: Tab }) {
+export function dividePanes(win: TabWindow, panes: { right: Tab, left: Tab, separatorPosition?: number }) {
   const right = toRealTab(panes.right);
   const left = toRealTab(panes.left);
 
   if (right.paneView) undividePanes(win, right.paneView)
   if (left.paneView) undividePanes(win, left.paneView)
 
-  const paneView = { rightTab: right, leftTab: left, separatorPosition: 0.5 };
+  const separatorPosition = panes.separatorPosition ?? 0.5;
+
+  const paneView = { rightTab: right, leftTab: left, separatorPosition };
 
   win.paneViews.push(paneView);
 

@@ -475,7 +475,8 @@ export const appMenu = Menu.buildFromTemplate([
 
           dividePanes(win, {
             left: win.currentPaneView.rightTab,
-            right: win.currentPaneView.leftTab
+            right: win.currentPaneView.leftTab,
+            separatorPosition: win.currentPaneView.separatorPosition
           })
         }
       }
@@ -1293,7 +1294,8 @@ export function menuOfPaneDivider(win: TabWindow) {
   addItem({ label: $t('switch'), accelerator: 'CmdOrCtrl+Alt+S', async click() {
     dividePanes(win, {
       left: win.currentPaneView.rightTab,
-      right: win.currentPaneView.leftTab
+      right: win.currentPaneView.leftTab,
+      separatorPosition: win.currentPaneView.separatorPosition
     })
   }})
 
