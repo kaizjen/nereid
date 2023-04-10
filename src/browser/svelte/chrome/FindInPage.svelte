@@ -17,7 +17,7 @@
     justify-content: center;
     border-radius: 0.2rem;
     border: 1px solid var(--t-white-3);
-    transition: .15s;
+    transition: .2s;
   }
   .case-toggle:hover {
     background: var(--t-white-5);
