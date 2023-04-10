@@ -442,10 +442,10 @@ export function registerSession(ses: Session) {
           return obj.idleDetection
         }
         case 'clipboard-sanitized-write': {
-          return !control.options.disallow_clipboard_read.value
+          return !control.options.disallow_clipboard_write?.value
         }
-          
-      
+
+
         default: return false // unknown permission
       }
     }
@@ -471,7 +471,10 @@ export function registerSession(ses: Session) {
     let { sitePermissions, defaultPermissions, denyCrossOriginPermissions } = privacy;
     let { origin, hostname } = URLParse(details.requestingUrl);
     
-    if (permission == 'clipboard-read') return callback(!control.options.disallow_clipboard_read.value)
+    if (permission == 'clipboard-read') return callback(!control.options.disallow_clipboard_read?.value)
+    if (permission as any == 'clipboard-sanitized-write') {
+      return callback(!control.options.disallow_clipboard_write?.value)
+    }
 
     if (denyCrossOriginPermissions && !details.isMainFrame && (origin != URLParse(details.requestingUrl).origin)){
       callback(false); return;
@@ -482,9 +485,9 @@ export function registerSession(ses: Session) {
         case 'fullscreen': {
           let win = BrowserWindow.fromWebContents(wc);
           if (!isTabWindow(win)) return false
-    
+
           if (win.currentTab.webContents != wc) return false
-    
+
           return obj.fullscreen
         }
         case 'notifications': {

@@ -26,6 +26,12 @@
       "type": "bool",
       "description": "Don't allow sites to read your clipboard, even if the tab is focused."
     },
+    "disallow_clipboard_write": {
+      "default": false,
+      "value": false,
+      "type": "bool",
+      "description": "Don't allow sites to write to your clipboard, even after an interaction."
+    },
     "experimental_beforeunload": {
       "default": false,
       "value": false,
