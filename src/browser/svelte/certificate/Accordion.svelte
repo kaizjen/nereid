@@ -3,7 +3,7 @@
     filter: brightness(0.5);
     width: 18px;
     height: 18px;
-    transition: .15s;
+    transition: cubic-bezier(0, 0.6, 0.23, 1.03) .15s;
   }
   .rotated {
     transform: rotate(90deg);
