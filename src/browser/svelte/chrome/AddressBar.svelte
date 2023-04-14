@@ -216,7 +216,7 @@
     // don't want to update the url when the user is typing something, because this can be frustrating during redirects
     if (isActive || !tab) return
     
-    inputValue = tab.url;
+    inputValue = decodeURI(tab.url);
     inputRef?.setSelectionRange(0, 0); // the domain should stay in front
 
     if (isANewTabURL()) {
@@ -230,7 +230,7 @@
       
     } else if (tab.url) {
       url = URLParse(tab.url);
-      url.path = (url.pathname ?? '') + (url.search ?? '') + (url.hash ?? '');
+      url.path = decodeURI((url.pathname ?? '') + (url.search ?? '') + (url.hash ?? ''));
       url.port = url.port ? ':' + url.port : null;
     }
   }

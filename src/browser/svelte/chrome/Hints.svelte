@@ -91,18 +91,8 @@
     }
   }
   function getFullPath(url) {
-    return (url.pathname ?? '') + (url.search ?? '') + (url.hash ?? '')
+    return decodeURI((url.pathname ?? '') + (url.search ?? '') + (url.hash ?? ''))
   }
-  function isValidURL(url) {
-    try {
-      new URL(url)
-      return true;
-
-    } catch (e) {
-      return false;
-    }
-  }
-  //$: console.log(hints, selected)
 </script>
 
 <div class="hints" in:fade={{ duration: 80 }} class:isprivate>
