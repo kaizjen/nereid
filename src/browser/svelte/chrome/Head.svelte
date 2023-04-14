@@ -547,7 +547,7 @@
         </button>
         {#each tabsFromSelectedGroup as tab, index (tab)}
           <Tab
-            {tab}
+            {tab} {tabs}
             index={currentTabGroup.startIndex + index}
             currentTab={tabs[currentTabIndex]}
             {currentTabIndex}
@@ -595,7 +595,7 @@
           </button>
         {/if}
         {#if !group || !(onlyShowCurrentTabGroup || hiddenGroups.includes(group.id))}
-          <Tab {tab} {index} currentTab={tabs[currentTabIndex]} {currentTabIndex} {group} />
+          <Tab {tab} {tabs} {index} currentTab={tabs[currentTabIndex]} {currentTabIndex} {group} />
         {/if}
         {#if group?.endIndex == index + 1}
           <button

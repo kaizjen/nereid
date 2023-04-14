@@ -142,6 +142,7 @@
 <script>
   export let tab;
   export let index;
+  export let tabs;
   export let currentTab;
   export let currentTabIndex;
   export let group;
@@ -219,19 +220,25 @@
     if (isNaN(movedUID)) return;
     if (movedUID == tab.uid) return;
 
-    if (droppedRatio >= 0.5) {
-      if (currentTabIndex >= moveToIndex) {
-        // If the tab is dropped on the right side
-        // AND the selected tab is to the right of the dropzone tab,
-        // drop the tab to the right of the dropzone
-        moveToIndex++;
+    if (tabs.map(t => t.uid).includes(movedUID)) {
+      // The dropped tab is in this window
+      if (droppedRatio >= 0.5) {
+        if (currentTabIndex >= moveToIndex) {
+          // If the tab is dropped on the right side
+          // AND the selected tab is to the right of the dropzone tab,
+          // drop the tab to the right of the dropzone
+          moveToIndex++;
+        }
+        // Otherwise, once the selected tab disappears, all
+        // tab indexes are decreased, that's why we don't increase the index here.
+      } else if (currentTabIndex < moveToIndex) {
+        // The tab is dropped on the left side, and the
+        // currentTab is to the left of the dropzone
+        moveToIndex--;
       }
-      // Otherwise, once the selected tab disappears, all
-      // tab indexes are decreased, that's why we don't increase the index here.
-    } else if (currentTabIndex < moveToIndex) {
-      // The tab is dropped on the left side, and the
-      // currentTab is to the left of the dropzone
-      moveToIndex--;
+
+    } else if (droppedRatio >= 0.5) {
+      moveToIndex++;
     }
 
     ipcRenderer.send('chrome.moveTab', movedUID, moveToIndex)
