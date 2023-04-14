@@ -260,7 +260,7 @@
   })
   ipcRenderer.on('tabGroupUpdate', (_e, group) => {
     console.log('tab group updated', group);
-    tabGroups[tabGroups.findIndex(g => g.id == group.id)] = group;
+    Object.assign(tabGroups[tabGroups.findIndex(g => g.id == group.id)], group)
     tabGroups = tabGroups;
     tabs = tabs;
   })
