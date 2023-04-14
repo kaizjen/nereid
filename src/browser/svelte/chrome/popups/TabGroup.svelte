@@ -63,6 +63,7 @@
 
 <script>
   export let editingTabGroup = { group: {}, position: {} };
+  export let isTheOnlyTabGroup = false;
   const { ipcRenderer } = window.nereid
   import { getContext } from 'svelte/internal';
   import { fly } from 'svelte/transition';
@@ -75,6 +76,7 @@
     NEWTAB: t('ui.groups.newTab'),
     UNGROUP: t('ui.groups.ungroup'),
     CLOSEALL: t('ui.groups.closeAll'),
+    MOVETONEWWINDOW: t('ui.groups.moveToNewWindow'),
     DONE: t('common.done'),
   }
 
@@ -108,6 +110,10 @@
     }
     editingTabGroup = null;
   }
+  function moveToNewWindow() {
+    ipcRenderer.send('chrome.moveGroupToNewWindow', editingTabGroup.group.id)
+    editingTabGroup = null
+  }
 
   const colors = ['gray', 'blue', 'red', 'yellow', 'green', 'magenta', 'purple', 'cyan', 'orange']
 
@@ -121,7 +127,7 @@
 {#if editingTabGroup}
   <div
     class="dialog"
-    in:appear={window.flyoutProperties}
+    in:appear={{...window.flyoutProperties, isStatic: true}}
     out:fly={window.flyoutProperties}
     on:outroend={() => setTop(false)}
     style="
@@ -170,6 +176,14 @@
         >
           <img src="n-res://{$colorTheme}/circledcross.svg" alt="">
           {_.CLOSEALL}
+        </button>
+        <button
+          class="widebutton"
+          on:click={moveToNewWindow}
+          style:display={isTheOnlyTabGroup ? 'none' : ''}
+        >
+          <img src="n-res://{$colorTheme}/movetowindow.svg" alt="">
+          {_.MOVETONEWWINDOW}
         </button>
       </div>
       <div class="done">

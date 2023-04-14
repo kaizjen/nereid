@@ -9,13 +9,13 @@ import $ from "./common";
 import * as tabManager from './tabs'
 import * as _url from "url";
 import { appMenu, displayOptions, menuNewTab, menuOfAddressBar, menuOfBookmark, menuOfPaneDivider, menuOfProcess, menuOfTab } from "./menu";
-import { getTabWindowByID, setHeadHeight, isTabWindow, newDialogWindow, setCurrentTabBounds, getAllTabWindows, getIDOfTabWindow, PANE_SEP_WIDTH } from "./windows";
+import { getTabWindowByID, setHeadHeight, isTabWindow, newDialogWindow, setCurrentTabBounds, getAllTabWindows, getIDOfTabWindow, PANE_SEP_WIDTH, newWindow } from "./windows";
 import type TypeFuse from "fuse.js";
 import { certificateCache, DEFAULT_PARTITION, NO_CACHE_PARTITION, PRIVATE_PARTITION } from "./sessions";
 import { getSupportedLanguage, t, availableTranslations } from "./i18n";
 import { adBlockerError, isAdBlockerReady, webContentsABMap } from "./adblocker";
 import { kill } from "./process";
-import { addTabToGroup, getTabGroupByID, ungroup } from "./tabgroups";
+import { addTabToGroup, createTabGroup, getTabGroupByID, getTabsFromTabGroup, ungroup } from "./tabgroups";
 // must use require here because these libraries, when require()d, don't have a .default property.
 const Fuse = require('fuse.js') as typeof TypeFuse;
 
@@ -287,6 +287,29 @@ export function init() {
     const desc = getTabGroupByID(gid);
 
     ungroup(desc.window, desc.group);
+  })
+  ipcMain.on('chrome.moveGroupToNewWindow', async(_e, gid) => {
+    const desc = getTabGroupByID(gid);
+    const tabs = getTabsFromTabGroup(desc.window, desc.group)
+
+    const oldStartIndex = desc.group.startIndex;
+    const oldEndIndex = desc.group.endIndex;
+
+    if (tabs.length == desc.window.tabs.length) {
+      return console.warn("The only tab group in a window can't be moved to another window")
+    }
+
+    const newWin = await newWindow([]);
+
+    tabs.forEach((tab, index) => {
+      tabManager.moveTab(tab, { window: newWin, index })
+    })
+    createTabGroup(newWin, {
+      name: desc.group.name,
+      color: desc.group.color,
+      startIndex: 0,
+      endIndex: oldEndIndex - oldStartIndex
+    })
   })
 
 

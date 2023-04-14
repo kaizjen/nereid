@@ -635,6 +635,6 @@
     </button>
   </div>
   {#if editingTabGroup}
-    <TabGroup bind:editingTabGroup />
+    <TabGroup bind:editingTabGroup isTheOnlyTabGroup={tabs.length == tabsFromSelectedGroup.length} />
   {/if}
 </div>

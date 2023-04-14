@@ -125,6 +125,7 @@ ui:
     newTab: Новая вкладка в группе
     ungroup: Разгруппировать
     closeAll: Закрыть все вкладки в группе
+    moveToNewWindow: Переместить группу в новое окно
   addressBar-placeholder: Введите поисковый запрос или URL
   security:
     title: Безопасность

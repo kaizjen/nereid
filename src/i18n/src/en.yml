@@ -125,6 +125,7 @@ ui:
     newTab: New tab in this group
     ungroup: Ungroup
     closeAll: Close all in this group
+    moveToNewWindow: Move this group to a new window
   addressBar-placeholder: Type a search query or a URL
   security:
     title: Security

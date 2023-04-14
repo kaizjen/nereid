@@ -15,7 +15,7 @@ export function createTabGroup(win: TabWindow, group: TabGroup) {
     group.startIndex >= win.tabs.length || group.endIndex >= win.tabs.length + 1 ||
     group.startIndex >= group.endIndex
   ) {
-    throw new Error("Tab group could not be created - the tab indexes are incorrect");
+    throw new Error(`Tab group could not be created - the tab indexes are incorrect (${group.startIndex}; ${group.endIndex})`);
   }
   win.tabGroups.push(group)
   if (group.id == undefined) {
