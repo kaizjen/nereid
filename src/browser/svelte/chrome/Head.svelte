@@ -316,7 +316,7 @@
 
   /** The animation of the tab group will be played from this position */
   let animateTabGroupFromX = 0;
-  let tabGroupListElement;
+  let tabGroupHeadElement;
 
   let tabsFromSelectedGroup = [];
   function getTabsFromSelectedGroup() {
@@ -330,9 +330,12 @@
   })
 
   let headElement;
+  let tabListElement;
+  let tabGroupListElement;
 
   function smoothlyScroll(element, left, frames = 6) {
     let framesLeft = frames;
+    element.style.scrollBehavior = '';
     function scroll() {
       console.log("scrolling!", { framesLeft, scLeft: Math.ceil(left / frames) });
       element.scrollLeft += Math.ceil(left / frames)
@@ -341,6 +344,58 @@
       requestAnimationFrame(scroll)
     }
     scroll()
+  }
+  function moveSelectedTabIntoView() {
+    // If a new tab is added, we should scroll the tab strip so that the new tab will be visible
+    const currentListElement = currentTabGroup ? tabGroupListElement : tabListElement;
+    if (!currentListElement) return;
+
+    const tabElements = [...currentListElement.children].filter(element => element.classList.contains('tab'));
+
+    const listRect = currentListElement.getBoundingClientRect()
+    const selectedTabRect = tabElements[currentTabIndex].getBoundingClientRect()
+    const normalTabRect = tabElements[0].getBoundingClientRect()
+
+    if (selectedTabRect.width == normalTabRect.width) {
+      currentListElement.style.scrollBehavior = 'smooth';
+    } else {
+      // If we don't do this, then when the function is called again,
+      // the scrollLeft property won't have updated yet
+      currentListElement.style.scrollBehavior = '';
+    }
+
+    const leftDiff = (selectedTabRect.x + normalTabRect.width) - (listRect.x + listRect.width);
+    if (leftDiff > 0) {
+      requestAnimationFrame(() => {
+        currentListElement.scrollLeft +=
+          Math.ceil(((selectedTabRect.x + selectedTabRect.width) - listRect.width) +
+          (selectedTabRect.width * 0.66)) // this component just scrolls far enough for comfort
+        ;
+
+        if (selectedTabRect.width != normalTabRect.width) {
+          // call this function again in case the tab animation is still playing
+          moveSelectedTabIntoView()
+        }
+      })
+    }
+
+    const rightDiff = listRect.x - selectedTabRect.x;
+    if (leftDiff <= 0 && rightDiff > 0) {
+      currentListElement.style.scrollBehavior = 'smooth';
+      requestAnimationFrame(() => {
+        let finalScrollLeftDecrement = Math.ceil(listRect.x - selectedTabRect.x);
+        if (currentTabIndex > 0) {
+          finalScrollLeftDecrement += Math.ceil(selectedTabRect.width * 0.66);
+        }
+
+        currentListElement.scrollLeft -= finalScrollLeftDecrement;
+
+        if (selectedTabRect.width != normalTabRect.width) {
+          // call this function again in case the tab animation is still playing
+          moveSelectedTabIntoView()
+        }
+      })
+    }
   }
 
   function getGroupAtIndex(index) {
@@ -505,6 +560,11 @@
       editTabGroup(tabGroups.find(g => g.id == id));
     })
   })
+
+  $: {
+    currentTabIndex;
+    moveSelectedTabIntoView()
+  }
 </script>
 
 
@@ -523,18 +583,19 @@
     <div
       class="tabhead"
       style:z-index={11}
-      bind:this={tabGroupListElement}
+      bind:this={tabGroupHeadElement}
       in:fly={{ opacity: 0.5, duration: 200, x: animateTabGroupFromX }}
       out:fly={{ opacity: 0, duration: 200, x: animateTabGroupFromX }}
-      on:outrostart={() => tabGroupListElement.style.marginLeft = "-2rem"}
-      on:outroend={() => tabGroupListElement.style.marginLeft = ''}
-      on:introend={() => {resetDragRegions(); tabGroupListElement.style.marginLeft = ''}}
+      on:outrostart={() => tabGroupHeadElement.style.marginLeft = "-2rem"}
+      on:outroend={() => tabGroupHeadElement.style.marginLeft = ''}
+      on:introend={() => {resetDragRegions(); tabGroupHeadElement.style.marginLeft = ''}}
     >
       <button class="tablist-button" on:click={unselectTabGroup}>
         <img alt="" src="n-res://{$colorTheme}/arrow.svg" style:rotate="180deg">
       </button>
       <div
         class="tablist"
+        bind:this={tabGroupListElement}
         on:mousedown={e => (e.button == 1) /* middle mb */ ? e.preventDefault() : null}
         on:wheel={e => e.deltaX == 0 ? smoothlyScroll(e.currentTarget, e.deltaY) : null}
         style="--tab-width: {Math.max(15 - Math.sqrt(tabsFromSelectedGroup.length), 9)}rem;"
@@ -574,6 +635,7 @@
   <div class="tabhead" style:display={onlyShowCurrentTabGroup && currentTabGroup ? 'none' : ''}>
     <div
       class="tablist"
+      bind:this={tabListElement}
       on:mousedown={e => (e.button == 1) /* middle mb */ ? e.preventDefault() : null}
       on:wheel={e => e.deltaX == 0 ? smoothlyScroll(e.currentTarget, e.deltaY) : null}
       style="--tab-width: {Math.max(15 - Math.sqrt(tabs.length), 9)}rem;"
