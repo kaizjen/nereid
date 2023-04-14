@@ -372,11 +372,41 @@ const defaultOptions: BrowserWindowConstructorOptions = {
 }
 export async function newDialogWindow(
   { type, init = '', options = defaultOptions }:
-  { type: 'cookieviewer' | 'certificate' | 'taskmanager', init?: string, options?: BrowserWindowConstructorOptions }
+    { type: 'cookieviewer' | 'certificate', init?: string, options?: BrowserWindowConstructorOptions }
 ) {
   options = Object.assign({}, defaultOptions, options)
   const w = new BrowserWindow(options);
   w.removeMenu();
+  await w.loadURL(`n-internal://${type}/index.html#${init}`);
+
+  w.webContents.on('render-process-gone', () => w.close())
+
+  if (control.options.open_devtools_for_window?.value || !app.isPackaged) {
+    w.webContents.openDevTools({ mode: 'detach' })
+  }
+  return w;
+}
+
+type UtilityWindowTypes = 'taskmanager'
+const utitlyWindows: Record<UtilityWindowTypes, BrowserWindow> = {
+  taskmanager: null,
+}
+export async function openUtilityWindow(
+  { type, init = '', options = defaultOptions }:
+    { type: UtilityWindowTypes, init?: string, options?: BrowserWindowConstructorOptions }
+) {
+  options = Object.assign({}, defaultOptions, options)
+
+  const oldWindow = utitlyWindows[type];
+  if (oldWindow) {
+    oldWindow.focus();
+    return oldWindow;
+  }
+
+  const w = new BrowserWindow(options);
+  w.removeMenu();
+  utitlyWindows[type] = w;
+
   await w.loadURL(`n-internal://${type}/index.html#${init}`);
 
   w.webContents.on('render-process-gone', () => w.close())

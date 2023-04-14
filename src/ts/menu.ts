@@ -2,7 +2,7 @@
 
 import { app, clipboard, dialog, ipcMain, Menu, MenuItem, session } from "electron";
 import { Bookmark, RealTab, Tab, TabGroup, TabOptions, TabWindow } from "./types";
-import { isTabWindow, newWindow, setCurrentTabBounds, newDialogWindow } from './windows'
+import { isTabWindow, newWindow, setCurrentTabBounds, openUtilityWindow } from './windows'
 import { bookmarks, config, control, downloads } from './userdata'
 import * as pathModule from "path";
 import * as fs from "fs"
@@ -547,7 +547,7 @@ export const appMenu = Menu.buildFromTemplate([
         label: t('menu.taskManager'),
         accelerator: 'Shift+Escape',
         click() {
-          newDialogWindow({ type: 'taskmanager', options: { width: 650, resizable: true, minimizable: true } })
+          openUtilityWindow({ type: 'taskmanager', options: { width: 650, resizable: true, minimizable: true } })
         }
       },
 
