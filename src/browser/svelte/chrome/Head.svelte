@@ -261,13 +261,6 @@
 
   export let changeToSetHeadHeight = {};
 
-  const { t } = window;
-  const _ = {
-    PRIVATE_TAB: t('ui.tabs.private'),
-    AUDIBLE: t('ui.tabs.playingAudio'),
-    MUTED: t('ui.tabs.muted'),
-  }
-
   const colorTheme = getContext('colorTheme')
   const config = getContext('config')
   let keypressesLocked = getContext('keypressesLocked')
