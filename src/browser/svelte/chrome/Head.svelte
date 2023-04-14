@@ -453,14 +453,18 @@
 
       if (isNaN(movedUID)) return;
 
-      if (droppedRatio >= 0.5) {
-        // If dropped to the right side, move at the end of the group
-        moveToIndex = group.endIndex;
-      }
-      if (currentTabIndex < group.startIndex) {
-        // If the current tab is to the left of the group,
-        // then all the indexes decrease.
-        moveToIndex--;
+      if (tabs.map(t => t.uid).includes(movedUID)) {
+        if (droppedRatio >= 0.5) {
+          // If dropped to the right side, move at the end of the group
+          moveToIndex = group.endIndex;
+        }
+        if (currentTabIndex < group.startIndex) {
+          // If the current tab is to the left of the group,
+          // then all the indexes decrease.
+          moveToIndex--;
+        }
+      } else if (droppedRatio >= 0.5) {
+        moveToIndex++;
       }
 
       ipcRenderer.send('chrome.moveTab', movedUID, moveToIndex)
@@ -495,7 +499,7 @@
     currentTabIndex;
     unhideSelectedTabGroup()
   }
-  
+
   ipcRenderer.on('addTabGroup', (_e, { id }) => {
     requestAnimationFrame(() => {
       editTabGroup(tabGroups.find(g => g.id == id));
