@@ -427,6 +427,8 @@ menu:
     print: Print
     viewSourceCode: View source code
     openDevTools: Inspect
+    undo: Undo
+    redo: Redo
     copy: Copy
     cut: Cut
     delete: Delete
@@ -434,6 +436,11 @@ menu:
     pasteAndMatchStyle: Paste and match style
     pasteAndSearch: Paste and search for "${query}"
     pasteAndGo: Paste and go to "${query}"
+    macOS:
+      hide: Hide
+      hideOthers: Hide others
+      unhide: Unhide
+      services: Services
     image:
       viewInNewTab: View image in new tab
       copy: Copy image

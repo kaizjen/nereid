@@ -366,16 +366,20 @@ export const appMenu = Menu.buildFromTemplate([
       ...(process.platform == 'darwin' ? [
         SEPARATOR,
         {
+          label: t('menu.hide'),
           role: 'hide' as const
         },
         {
+          label: t('menu.hideOthers'),
           role: 'hideOthers' as const
         },
         {
+          label: t('menu.unhide'),
           role: 'unhide' as const
         },
         SEPARATOR,
         {
+          label: t('menu.services'),
           role: 'services' as const
         },
         SEPARATOR
@@ -476,15 +480,15 @@ export const appMenu = Menu.buildFromTemplate([
   {
     label: t('menu.appMenu.edit'),
     submenu: [
-      { role: 'undo', accelerator: 'CmdOrCtrl+Z' },
-      { role: 'redo', accelerator: 'CmdOrCtrl+Y' },
+      { label: t('menu.undo'), role: 'undo', accelerator: 'CmdOrCtrl+Z' },
+      { label: t('menu.redo'), role: 'redo', accelerator: 'CmdOrCtrl+Y' },
       SEPARATOR,
-      { role: 'cut', accelerator: 'CmdOrCtrl+X' },
-      { role: 'copy', accelerator: 'CmdOrCtrl+C' },
-      { role: 'paste', accelerator: 'CmdOrCtrl+V' },
-      { role: 'pasteAndMatchStyle', accelerator: 'CmdOrCtrl+Shift+V' },
-      { role: 'delete', accelerator: 'Delete' },
-      { role: 'selectAll', accelerator: 'CmdOrCtrl+A' },
+      { label: t('menu.cut'), role: 'cut', accelerator: 'CmdOrCtrl+X' },
+      { label: t('menu.copy'), role: 'copy', accelerator: 'CmdOrCtrl+C' },
+      { label: t('menu.paste'), role: 'paste', accelerator: 'CmdOrCtrl+V' },
+      { label: t('menu.pasteAndMatchStyle'), role: 'pasteAndMatchStyle', accelerator: 'CmdOrCtrl+Shift+V' },
+      { label: t('menu.delete'), role: 'delete', accelerator: 'Delete' },
+      { label: t('menu.selectAll'), role: 'selectAll', accelerator: 'CmdOrCtrl+A' },
       SEPARATOR,
       findInPage,
       ...(app.isEmojiPanelSupported() ? [
