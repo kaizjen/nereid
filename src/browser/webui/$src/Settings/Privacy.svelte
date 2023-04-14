@@ -15,6 +15,10 @@
   let clearDialog = false;
   let siteSettingsDialog = location.hash.startsWith('#siteSettings');
 
+  window.addEventListener('hashchange', () => {
+    siteSettingsDialog = location.hash.startsWith('#siteSettings');
+  })
+
   let noCOPermissions = $config.privacy.denyCrossOriginPermissions;
   const updateCOPs = noFirstTime(() => {
     $config.privacy.denyCrossOriginPermissions = noCOPermissions;

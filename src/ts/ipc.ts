@@ -373,6 +373,10 @@ export function init() {
     tabManager.setMutedTab(win, win.tabs[tabIndex], isMuted)
   })
 
+  onWindow('openUniqueNereidTab', (win, _e, page, nextToCurrentTab, path) => {
+    tabManager.openUniqueNereidTab(win, page, nextToCurrentTab, path)
+  })
+
   ipcMain.handle('getPageImageURL', async(e, imageType: 'preview' | 'thumbnail' | 'favicon', tabUID: number) => {
     const tab = tabManager.getTabByUID(tabUID);
     if (!tab || tab.isGhost) return;

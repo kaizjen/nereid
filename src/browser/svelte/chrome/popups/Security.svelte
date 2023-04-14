@@ -126,7 +126,7 @@
     isOpen = false;
   }
   function siteSettings() {
-    ipcRenderer.send('newTab', { url: `nereid://settings#siteSettings/site:${hostname}` })
+    ipcRenderer.send('openUniqueNereidTab', 'settings', true, `#siteSettings/site:${hostname}`)
     isOpen = false;
   }
 </script>

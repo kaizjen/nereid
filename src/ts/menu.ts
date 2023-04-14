@@ -6,7 +6,7 @@ import { isTabWindow, newWindow, setCurrentTabBounds, openUtilityWindow } from '
 import { bookmarks, config, control, downloads } from './userdata'
 import * as pathModule from "path";
 import * as fs from "fs"
-import { asRealTab, closeTab, createTab, dividePanes, moveTab, openClosedTab, selectTab, setMutedTab, toRealTab, undividePanes } from './tabs'
+import { asRealTab, closeTab, createTab, dividePanes, moveTab, openClosedTab, openUniqueNereidTab, selectTab, setMutedTab, toRealTab, undividePanes } from './tabs'
 import $ from './common'
 import fetch from "electron-fetch";
 import type { Response } from "electron-fetch"
@@ -266,10 +266,7 @@ const tools: Electron.MenuItemConstructorOptions[] = [
     click(_, win) {
       if (!isTabWindow(win)) return;
 
-      if (win.currentTab.webContents.getURL().startsWith('nereid://downloads')) return;
-      createTab(win, {
-        url: 'nereid://downloads'
-      })
+      openUniqueNereidTab(win, 'downloads', true)
     },
     id: 'dls'
   },
@@ -278,10 +275,7 @@ const tools: Electron.MenuItemConstructorOptions[] = [
     click(_, win) {
       if (!isTabWindow(win)) return;
 
-      if (win.currentTab.webContents.getURL().startsWith('nereid://extensions')) return;
-      createTab(win, {
-        url: 'nereid://extensions'
-      })
+      openUniqueNereidTab(win, 'downloads', true)
     },
     id: 'exts'
   }, */
@@ -290,10 +284,7 @@ const tools: Electron.MenuItemConstructorOptions[] = [
     click(_, win) {
       if (!isTabWindow(win)) return;
 
-      if (win.currentTab.webContents.getURL().startsWith('nereid://bookmarks')) return;
-      createTab(win, {
-        url: 'nereid://bookmarks'
-      })
+      openUniqueNereidTab(win, 'bookmarks', true)
     },
     id: 'bookms'
   },
@@ -302,23 +293,17 @@ const tools: Electron.MenuItemConstructorOptions[] = [
     click(_, win) {
       if (!isTabWindow(win)) return;
 
-      if (win.currentTab.webContents.getURL().startsWith('nereid://settings')) return;
-      createTab(win, {
-        url: 'nereid://settings'
-      })
+      openUniqueNereidTab(win, 'settings', true)
     },
     id: 'settings'
   }
 ]
 const about: Electron.MenuItemConstructorOptions = {
   label: t('menu.about'),
-  click(_, w) {
-    if (!isTabWindow(w)) return;
+  click(_, win) {
+    if (!isTabWindow(win)) return;
 
-    const win = w as TabWindow;
-    createTab(win, {
-      url: 'nereid://about'
-    })
+    openUniqueNereidTab(win, 'about', true)
   }
 }
 const view: Electron.MenuItemConstructorOptions[] = [
@@ -527,10 +512,7 @@ export const appMenu = Menu.buildFromTemplate([
         click(_, win) {
           if (!isTabWindow(win)) return;
 
-          if (win.currentTab.webContents.getURL().startsWith('nereid://history')) return;
-          createTab(win, {
-            url: 'nereid://history'
-          })
+          openUniqueNereidTab(win, 'history', true)
         }
       },
       ...tools,
@@ -641,10 +623,7 @@ export async function displayOptions(win: TabWindow, { x, y }) {
           click(_, win) {
             if (!isTabWindow(win)) return;
 
-            if (win.currentTab.webContents.getURL().startsWith('nereid://history')) return;
-            createTab(win, {
-              url: 'nereid://history'
-            })
+            openUniqueNereidTab(win, 'history', true)
           }
         },
         SEPARATOR,
@@ -1218,7 +1197,7 @@ export function menuOfBookmark(win: TabWindow, bookmark: Bookmark, index: number
   addItem({
     label: t_bar('edit'),
     click() {
-      createTab(win, { url: `nereid://bookmarks/#@bookmarkBar/edit:${index}` })
+      openUniqueNereidTab(win, 'bookmarks', true, `#@bookmarkBar/edit:${index}`)
     }
   })
   addItem({
@@ -1235,7 +1214,7 @@ export function menuOfBookmark(win: TabWindow, bookmark: Bookmark, index: number
   addItem({
     label: t('common.bookmarks'),
     click() {
-      createTab(win, { url: `nereid://bookmarks/` })
+      openUniqueNereidTab(win, 'bookmarks', true)
     }
   })
 

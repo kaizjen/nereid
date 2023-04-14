@@ -339,7 +339,7 @@ export function destroyWebContents(bv: RealTab) {
  * @param tab<`BrowserView`> the tab to be added
  */
 export function addTab(win: TabWindow, tab: Tab, opts: TabOptions) {
-  if ('position' in opts) {
+  if (opts.position != undefined) {
     win.tabs.splice(opts.position, 0, tab)
 
   } else {
@@ -923,6 +923,7 @@ export function selectTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: n
   asRealTab(tab).webContents.focus();
 
   setTitleOfWindow(win, asRealTab(tab))
+  return tab;
 }
 
 export function dividePanes(win: TabWindow, panes: { right: Tab, left: Tab, separatorPosition?: number }) {
@@ -1087,12 +1088,12 @@ export function openClosedTab(win: TabWindow, index?: number, background: boolea
     }
   }
 
-  return true;
+  return tabInfo.tab;
 }
 
 export function moveTab(tab: Tab, destination: { window: TabWindow, index: number }) {
   const { window, index } = destination;
-  if (!tab.owner) return false;
+  if (!tab.owner) throw new Error(`Tab ##${tab.uniqueID} doesn't have an owner and cannot be moved.`);
 
   if (tab.isGhost) tab = toRealTab(tab);
 
@@ -1113,7 +1114,40 @@ export function moveTab(tab: Tab, destination: { window: TabWindow, index: numbe
   updateTabState(window, { tab })
 
   selectTab(window, { index })
-  return true;
+  return tab;
+}
+
+export function openUniqueNereidTab(win: TabWindow, page: string, nextToCurrentTab?: boolean, path?: string) {
+  if (page.endsWith('/')) {
+    page = page.slice(0, -1)
+  }
+
+  let oldTab = win.tabs.find(tab =>
+    (tab.isGhost ? tab.url : asRealTab(tab).webContents.getURL()).startsWith('nereid://' + page)
+  );
+  const currentTabIndex = win.tabs.indexOf(win.currentTab);
+
+  if (oldTab) {
+    if (nextToCurrentTab && win.tabs.indexOf(oldTab) != currentTabIndex + 1) {
+      oldTab = moveTab(oldTab, { window: win, index: currentTabIndex + 1 });
+
+    } else {
+      oldTab = selectTab(win, { tab: oldTab })
+    }
+
+    if (
+      path != undefined &&
+      'nereid://' + page + '/' + path != asRealTab(oldTab).webContents.getURL()
+    ) {
+      asRealTab(oldTab).webContents.loadURL('nereid://' + page + '/' + path)
+    }
+
+  } else {
+    createTab(win, {
+      url: 'nereid://' + page + '/' + (path ?? ''),
+      position: nextToCurrentTab ? currentTabIndex + 1 : null
+    })
+  }
 }
 
 
