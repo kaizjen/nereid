@@ -1,6 +1,6 @@
 // Handles net errors. It's just so large i needed to put it in another file
 
-import { ipcMain, net, WebContents, WebFrameMain, webFrameMain } from "electron";
+import { ipcMain, WebContents, WebFrameMain, webFrameMain } from "electron";
 import * as fs from 'fs'
 import { t } from "./i18n";
 import $ from "./common";

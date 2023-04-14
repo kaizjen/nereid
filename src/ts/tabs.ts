@@ -1,6 +1,6 @@
 // Tabs' creation, removal and whatever else
 
-import type { TabWindow, TabOptions, Tab, RealTab, PaneView, TabGroup } from "./types";
+import type { TabWindow, TabOptions, Tab, RealTab, PaneView } from "./types";
 import { BrowserView, BrowserWindow, dialog, nativeTheme, session, WebContents } from "electron";
 import fetch from "electron-fetch";
 import * as userData from './userdata'
@@ -10,7 +10,7 @@ import $ from './common'
 import { showContextMenu } from "./menu";
 import { getAllTabWindows, newWindow, setCurrentTabBounds } from "./windows";
 import { t } from "./i18n";
-import { addTabToGroup, destroyEmptyGroups, getTabGroupByID, getTabGroupByTab, removeTabFromGroup } from "./tabgroups";
+import { addTabToGroup, destroyEmptyGroups, getTabGroupByID, getTabGroupByTab } from "./tabgroups";
 
 const { URLParse } = $
 
