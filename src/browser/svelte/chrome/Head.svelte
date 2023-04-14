@@ -352,8 +352,16 @@
 
     const tabElements = [...currentListElement.children].filter(element => element.classList.contains('tab'));
 
+    let index = currentTabIndex;
+    if (currentTabGroup) {
+      index = currentTabIndex - currentTabGroup.startIndex
+    }
+
     const listRect = currentListElement.getBoundingClientRect()
-    const selectedTabRect = tabElements[currentTabIndex].getBoundingClientRect()
+    const selectedTabElement = tabElements[index];
+    if (!selectedTabElement) return;
+
+    const selectedTabRect = selectedTabElement.getBoundingClientRect()
     const normalTabRect = tabElements[0].getBoundingClientRect()
 
     if (selectedTabRect.width == normalTabRect.width) {
