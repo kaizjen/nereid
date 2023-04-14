@@ -660,7 +660,7 @@ export function attach(win: TabWindow, tab: RealTab) {
       const thisPage = history.find(entry => 
         entry.sessionUUID == global.SESSION_UUID &&
         entry.tabUID == tab.uniqueID &&
-        entry.url == tab.webContents.getURL()
+        encodeURI(entry.url) == tab.webContents.getURL()
       );
       if (!thisPage) return;
       if (thisPage.faviconURL == tab.faviconURL) return; // needed to not cause a useless write
@@ -676,7 +676,7 @@ export function attach(win: TabWindow, tab: RealTab) {
       for (const folder in bookmarks) {
         const bms = bookmarks[folder];
         const thisPage = bms.find(entry =>
-          entry.url == tab.webContents.getURL()
+          encodeURI(entry.url) == tab.webContents.getURL()
         )
         if (!thisPage) continue;
         if (thisPage.iconURL == tab.faviconURL) continue;
@@ -760,7 +760,7 @@ export function attach(win: TabWindow, tab: RealTab) {
     }
   })
   tab.webContents.on('dom-ready', async() => {
-      // Update the thumbnail in bookmarks
+    // Update the thumbnail in bookmarks
     const code = `document.querySelector('meta[property="og:image"]')?.getAttribute('content')`;
     const ogImage = await tab.webContents.mainFrame.executeJavaScript(code)
       .catch(e => console.log('ogImage failed:', e)) as string
@@ -771,7 +771,7 @@ export function attach(win: TabWindow, tab: RealTab) {
     for (const folder in bookmarks) {
       const bms = bookmarks[folder];
       const thisPage = bms.find(entry =>
-        entry.url == tab.webContents.getURL()
+        encodeURI(entry.url) == tab.webContents.getURL()
       )
       if (!thisPage) continue;
       if (thisPage.thumbnailURL == ogImage) continue;
