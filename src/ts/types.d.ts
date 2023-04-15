@@ -6,28 +6,25 @@ declare global {
 
 /** 
  * The main window of the browser with tabs
- * 
- * `currentTab` The currently displayed tab of the window
- * 
- * `tabs` All tabs of the window. The index corresponds to the index of each tab in the chrome.
- * 
- * `chrome` The chrome (https://developer.mozilla.org/en-US/docs/Glossary/Chrome) of the window. 
- * 
- * `chromeHeight` The height of the chrome (from the top of the window) in pixels.
- * 
- * `winID` Unique ID of the window (session-wide)
- * 
- * `recentlyClosed` Array of tabs that were recently closed (wow)
 */
 export interface TabWindow extends BrowserWindow {
+  /** The currently displayed tab of the window */
   currentTab: RealTab
+  /** All tabs of the window. The index corresponds to the index of each tab in the chrome. */
   tabs: Tab[]
+  /** All tab groups of the window. No code should ever be dependent on the index, use tab group id instead */
   tabGroups: TabGroup[]
+  /** The currently displayed pane view of the window. Is the same as `.currentTab.paneView` */
   currentPaneView: PaneView | null
+  /** All pane views in that window. No code should ever be dependent on the index */
   paneViews: PaneView[]
+  /** The chrome (https://developer.mozilla.org/en-US/docs/Glossary/Chrome) of the window. */
   chrome: BrowserView
+  /** The height of the chrome (from the top of the window) in pixels. */
   chromeHeight: number
+  /** Unique ID of the window. These ID are be reused in the same session. */
   winID: number
+  /** Array of tab descriptors for tabs that were recently closed */
   recentlyClosed: {
     tab: Tab
     index: number
@@ -57,16 +54,26 @@ export type PaneView = {
 }
 
 export interface TabOptions {
+  /** The initial URL of the newly created tab */
   url: string
+  /** Whether the tab should be a private tab */
   private?: boolean
+  /** If this is `false`, the tab will be automatically selected */
   background?: boolean
+  /** The position of the tab in its window */
   position?: number
+  /** The tab UID for identifying it across the session. **Avoid using this property at all costs!** */
   uid?: number
+  /** The URL or the data URL of the initial favicon for that tab. */
   initialFavicon?: string
   isOpenedAtStart?: boolean
+  /** Whether the tab should be created as a Ghost Tab */
   isGhost?: boolean
+  /** The initial title of the tab */
   initialTitle?: string
+  /** The frame name used by `<a target="framename">` links */
   targetFrameName?: string
+  /** The id of the group that this tab is in */
   groupID?: number
 }
 
@@ -76,22 +83,32 @@ export interface CertficateCache {
 
 type NavigationReason = 'redirect' | 'input-url' | 'other' | 'created' | `searched:${string}`
 type TabProperties = {
+  /** A window that was opened with `window.open()` */
   childWindow?: BrowserWindow
   private?: boolean
+  /** The URL of the favicon */
   faviconURL?: string
+  /** The data URL of the fetched favicon */
   faviconDataURL?: string
+  /** A session-wide unique ID of the tab */
   uniqueID?: number
+  /** The reason for the last navigation of the tab */
   lastNavigationReason?: NavigationReason
   isFullScreen?: boolean
+  /** The window that this tab is in. */
   owner?: TabWindow
   isOpenedAtStart?: boolean
+  /** The frame name, if the tab was opened using a `<a target="framename">` link */
   targetFrameName?: string
+  /** The tab history, every entry corresponds to the Chromium's history index. */
   history?: {
     title: string
     url: string
     faviconURL: string
   }[]
+  /** The current index of the `Tab.history` array */
   currentHistoryIndex?: number
+  /** The pane view that this tab is in */
   paneView?: PaneView
 }
 /**
