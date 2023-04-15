@@ -110,7 +110,7 @@
 
     } else {
       bookmarks.push({
-        name: currentName, url: currentURL
+        name: currentName, url: currentURL, iconURL: null, thumbnailURL: ''
       })
     }
 
