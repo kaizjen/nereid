@@ -204,11 +204,6 @@
    * @param {DragEvent} e
    */
   function handleDrop(e) {
-    if (e.dataTransfer.getData('text/newTab')) {
-      console.log('dropped, new tab', e.dataTransfer.getData('text/tabUID'));
-      ipcRenderer.send('newTab', { position: index })
-      return;
-    }
     const targetRect = e.currentTarget.getBoundingClientRect();
     const droppedX = e.x - targetRect.x;
     const droppedRatio = droppedX / targetRect.width;

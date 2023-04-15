@@ -679,8 +679,6 @@
       class="tablist-button"
       on:click={newTab}
       on:auxclick={() => ipcRenderer.send('chrome.menuNewTab')}
-      draggable="true"
-      on:dragstart={e => e.dataTransfer.setData('text/newTab', true)}
     >
       <img alt="" src="n-res://{$colorTheme}/plus.svg">
     </button>
