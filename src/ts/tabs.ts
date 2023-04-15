@@ -340,6 +340,13 @@ export function destroyWebContents(bv: RealTab) {
  */
 export function addTab(win: TabWindow, tab: Tab, opts: TabOptions) {
   if (opts.position != undefined) {
+    if (opts.position < win.pinnedTabsEndIndex) {
+      console.log(
+        `The TabOptions.position property was changed from ${opts.position} to ${win.pinnedTabsEndIndex} because`,
+        'a tab can only be added after all the pinned tabs.'
+      );
+      opts.position = win.pinnedTabsEndIndex
+    }
     win.tabs.splice(opts.position, 0, tab)
 
   } else {
@@ -403,7 +410,12 @@ export function removeTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: n
       selectOtherPane(() => selectTab(win, { index: index - 1 }))
     }
   }
-  
+
+  if (win.pinnedTabsEndIndex > index) {
+    win.pinnedTabsEndIndex--;
+    win.chrome.webContents.send('pinnedTabsEndIndexUpdate', win.pinnedTabsEndIndex)
+  }
+
   win.tabs.splice(index, 1)
   win.chrome.webContents.send('removeTab', index)
 
@@ -1113,7 +1125,7 @@ export function moveTab(tab: Tab, destination: { window: TabWindow, index: numbe
 
   updateTabState(window, { tab })
 
-  selectTab(window, { index })
+  selectTab(window, { tab })
   return tab;
 }
 

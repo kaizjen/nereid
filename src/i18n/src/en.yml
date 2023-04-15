@@ -470,6 +470,8 @@ menu:
     reloadAll: Reload all tabs
     copyURL: Copy URL
     duplicate: Duplicate tab
+    pin: Pin tab
+    unpin: Unpin tab
     sound-mute: Mute tab
     sound-unmute: Unmute tab
     openInNewWindow: Open this tab in a new window

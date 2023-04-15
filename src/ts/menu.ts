@@ -13,7 +13,7 @@ import type { Response } from "electron-fetch"
 import { DEFAULT_PARTITION, PRIVATE_PARTITION } from "./sessions";
 import { t } from "./i18n";
 import { kill } from "./process";
-import { createTabGroup, getTabGroupByTab, removeTabFromGroup } from "./tabgroups";
+import { createTabGroup, getTabGroupByTab, pinTab, removeTabFromGroup, unpinTab } from "./tabgroups";
 
 function obtainWebContents(win: Electron.BrowserWindow | TabWindow) {
   return isTabWindow(win) ? win.currentTab.webContents : win.webContents
@@ -1045,6 +1045,12 @@ export function menuOfTab(win: TabWindow, tab: Tab) {
       url: tab.isGhost ? tab.url : asRealTab(tab).webContents.getURL()
     })
   } })
+  if (win.tabs.indexOf(tab) < win.pinnedTabsEndIndex) {
+    addItem({ label: $t('unpin'), click() { unpinTab(win, tab) } })
+
+  } else {
+    addItem({ label: $t('pin'), click() { pinTab(win, tab) } })
+  }
   if (!tab.isGhost && asRealTab(tab).webContents.audioMuted) {
     addItem({ label: $t('sound-unmute'), click() { setMutedTab(win, tab, false) } })
 

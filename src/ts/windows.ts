@@ -102,6 +102,7 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
   w.tabs = []; // BrowserViews will be here
   w.paneViews = [];
   w.tabGroups = [];
+  w.pinnedTabsEndIndex = 0;
   w.recentlyClosed = [];
 
   w.chromeHeight = 74; // initial value for chromeHeight if the chrome takes a long time to load

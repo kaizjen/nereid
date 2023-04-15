@@ -18,6 +18,8 @@ export interface TabWindow extends BrowserWindow {
   currentPaneView: PaneView | null
   /** All pane views in that window. No code should ever be dependent on the index */
   paneViews: PaneView[]
+  /** The first few tabs of each window are pinned tabs. This specifies the first non-pinned tab. */
+  pinnedTabsEndIndex: number
   /** The chrome (https://developer.mozilla.org/en-US/docs/Glossary/Chrome) of the window. */
   chrome: BrowserView
   /** The height of the chrome (from the top of the window) in pixels. */
@@ -60,7 +62,11 @@ export interface TabOptions {
   private?: boolean
   /** If this is `false`, the tab will be automatically selected */
   background?: boolean
-  /** The position of the tab in its window */
+  /** 
+   * The position of the tab in its window.
+   * **DO NOT rely on this property to be accurate as the tab cannot be
+   * inserted between pinned tabs, and its position will be changed!** Use `TabWindow.tabs.indexOf()`!
+  */
   position?: number
   /** The tab UID for identifying it across the session. **Avoid using this property at all costs!** */
   uid?: number

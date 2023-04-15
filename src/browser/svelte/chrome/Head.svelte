@@ -89,6 +89,23 @@
   .tabhead > * {
     -webkit-app-region: no-drag;
   }
+  .pinnedtabs {
+    margin-top: 0;
+    display: flex;
+    height: 100%;
+    position: relative;
+    margin-right: 0.15rem;
+    padding-right: 0.2rem;
+  }
+  .pinnedtabs::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    margin-block: 0.4rem;
+    background: gray;
+    width: 1px;
+    height: calc(100% - 0.81rem);
+  }
   .tablist {
     margin-top: 0;
     display: flex;
@@ -258,6 +275,8 @@
   export let currentTabIndex;
 
   export let tabGroups;
+
+  export let pinnedTabsEndIndex;
 
   export let changeToSetHeadHeight = {};
 
@@ -634,6 +653,13 @@
   {/if}
 
   <div class="tabhead" style:display={onlyShowCurrentTabGroup && currentTabGroup ? 'none' : ''}>
+    {#if pinnedTabsEndIndex != 0}
+      <div class="pinnedtabs">
+        {#each tabs.slice(0, pinnedTabsEndIndex) as tab, index (tab)}
+          <Tab {tab} {tabs} {index} currentTab={tabs[currentTabIndex]} {currentTabIndex} group={null} pinned />
+        {/each}
+      </div>
+    {/if}
     <div
       class="tablist"
       bind:this={tabListElement}
@@ -661,7 +687,7 @@
             </span>
           </button>
         {/if}
-        {#if !group || !(onlyShowCurrentTabGroup || hiddenGroups.includes(group.id))}
+        {#if (pinnedTabsEndIndex <= index) && !(group && (onlyShowCurrentTabGroup || hiddenGroups.includes(group.id)))}
           <Tab {tab} {tabs} {index} currentTab={tabs[currentTabIndex]} {currentTabIndex} {group} />
         {/if}
         {#if group?.endIndex == index + 1}

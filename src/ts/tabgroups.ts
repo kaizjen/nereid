@@ -17,6 +17,15 @@ export function createTabGroup(win: TabWindow, group: TabGroup) {
   ) {
     throw new Error(`Tab group could not be created - the tab indexes are incorrect (${group.startIndex}; ${group.endIndex})`);
   }
+  if (group.startIndex <= win.pinnedTabsEndIndex) {
+    let i = 0;
+    while (i < (group.endIndex - group.startIndex)) {
+      // unpin all tabs in the group
+      unpinTab(win, win.tabs[group.startIndex + i])
+      i++;
+    }
+  }
+
   win.tabGroups.push(group)
   if (group.id == undefined) {
     group.id = groupIDsAmount;
@@ -24,13 +33,21 @@ export function createTabGroup(win: TabWindow, group: TabGroup) {
   }
   groupIDs[group.id] = { window: win, group };
   win.chrome.webContents.send('addTabGroup', group)
+
+  return group;
 }
 
 export function addTabToGroup(win: TabWindow, group: TabGroup, tab: Tab) {
-  const index = win.tabs.indexOf(tab);
+  let index = win.tabs.indexOf(tab);
   if (index == -1) throw new Error("Tab is not in the window");
 
   if (getTabGroupByTab(tab)) return;
+
+  if (index < win.pinnedTabsEndIndex) {
+    console.log("Unpinning the tab to add it to a group")
+    unpinTab(win, tab);
+    index = win.tabs.indexOf(tab);
+  }
 
   console.log('adding tab to group', group, index);
 
@@ -104,4 +121,29 @@ export function getTabGroupByTab(tab: Tab): TabGroup | void {
 export function destroyEmptyGroups(win: TabWindow) {
   const emptyGroups = win.tabGroups.filter(group => group.startIndex >= group.endIndex);
   emptyGroups.forEach(g => ungroup(win, g))
+}
+
+
+export function pinTab(win: TabWindow, tab: Tab) {
+  const group = getTabGroupByTab(tab)
+  if (group) {
+    removeTabFromGroup(win, group, tab)
+  }
+
+  const tabIndex = win.tabs.indexOf(tab);
+  if (tabIndex < win.pinnedTabsEndIndex) return;
+  
+  if (tabIndex != win.pinnedTabsEndIndex) {
+    moveTab(tab, { window: win, index: win.pinnedTabsEndIndex })
+  }
+  win.pinnedTabsEndIndex++;
+
+  win.chrome.webContents.send('pinnedTabsEndIndexUpdate', win.pinnedTabsEndIndex)
+}
+
+export function unpinTab(win: TabWindow, tab: Tab) {
+  win.pinnedTabsEndIndex--;
+  moveTab(tab, { window: win, index: win.pinnedTabsEndIndex })
+
+  win.chrome.webContents.send('pinnedTabsEndIndexUpdate', win.pinnedTabsEndIndex)
 }

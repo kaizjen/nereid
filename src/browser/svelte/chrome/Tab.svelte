@@ -1,8 +1,10 @@
 <style>
   .tab {
     --border-width: 1px; /* when the tab isn't selected, the border is replaced by padding */
-    padding: calc(0.5rem + var(--border-width));
-    padding-bottom: 0.5rem;
+    --padding: 0.5rem; /* the padding changes on pinned tabs */
+
+    padding: calc(var(--padding) + var(--border-width));
+    padding-bottom: var(--padding);
     transition: background 0.25s;
     position: relative;
     white-space: nowrap;
@@ -18,6 +20,10 @@
     transform: translateY(-1px);
     box-sizing: border-box;
   }
+  .tab.pinned {
+    --padding: 0.65rem;
+    width: auto; /* can use auto here since no text is displayed */
+  }
   :global(*:active) > .tab {
     transition: 0s;
   }
@@ -25,7 +31,7 @@
     background: var(--t-white-2);
   }
   .tab.selected {
-    padding: 0.5rem;
+    padding: var(--padding);
     background: var(--active-background);
     border: var(--border-width) solid var(--t-white-5);
     box-shadow: 0 1px 0 0 var(--active-background); /* removes the part of the border of <Tools> */
@@ -34,6 +40,7 @@
   }
   .tab img {
     height: 0.85rem;
+    width: 0.85rem;
   }
   .tab img.favicon {
     padding: 0.15rem;
@@ -64,6 +71,9 @@
     border-radius: 0.25rem;
     display: flex;
   }
+  .pinned > .close-tab {
+    display: none;
+  }
   .close-tab:hover {
     background: var(--t-white-5);
   }
@@ -74,6 +84,9 @@
     text-overflow: ellipsis;
     overflow: hidden;
     max-width: calc(100% - 1.12rem);
+  }
+  .pinned > span {
+    display: none;
   }
 
   .tab.group {
@@ -146,6 +159,7 @@
   export let currentTab;
   export let currentTabIndex;
   export let group;
+  export let pinned = false;
 
   const { ipcRenderer } = window.nereid;
   import { getContext } from "svelte/internal";
@@ -279,6 +293,7 @@
 
 <div
   class="tab {group ? group.color : ''}"
+  class:pinned
   class:group={group && shouldBeColored}
   draggable="true"
   on:dragstart={e => e.dataTransfer.setData('text/tabUID', tab.uid)}

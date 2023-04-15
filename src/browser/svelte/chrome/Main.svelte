@@ -76,6 +76,8 @@
 
   let tabGroups = [];
 
+  let pinnedTabsEndIndex = 0;
+
   let config = writable()
   setContext('config', config)
 
@@ -242,7 +244,6 @@
     console.log('got', index);
     currentTabIndex = index;
   })
-
   ipcRenderer.on('tabUpdate', (_e, { index, state }) => {
     console.log('updating tab %o with state %o', index, state);
     Object.assign(tabs[index], state)
@@ -268,6 +269,11 @@
     console.log('tab group removed', groupID);
     tabGroups.splice(tabGroups.findIndex(g => g.id == groupID), 1);
     tabGroups = tabGroups;
+  })
+
+  ipcRenderer.on('pinnedTabsEndIndexUpdate', (_e, ptei) => {
+    console.log('pinnedTabsEndIndex is', ptei);
+    pinnedTabsEndIndex = ptei;
   })
 
 
@@ -323,7 +329,7 @@
   "
 >
 
-<Head {tabs} {currentTabIndex} {tabGroups} bind:changeToSetHeadHeight />
+<Head {tabs} {currentTabIndex} {tabGroups} {pinnedTabsEndIndex} bind:changeToSetHeadHeight />
 <div class="wrapper" style="{
     tabs[currentTabIndex]?.private ? 
     ($colorTheme == 'light' ? "border-bottom-color: var(--purple-8);" : "border-bottom-color: var(--purple-1);")
