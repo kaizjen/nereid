@@ -140,7 +140,7 @@
 
       newFolderName = '';
       newFolder = false;
-      
+
     } catch (e) {
       errorText = e;
     }

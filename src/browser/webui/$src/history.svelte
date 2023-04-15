@@ -38,7 +38,7 @@
 
   const ENTRIES_BY_PAGE = 50;
   let currentPage = 0;
-  
+
   let entries = [];
   let promise;
 

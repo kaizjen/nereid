@@ -27,7 +27,7 @@
   }
 </style>
 <script>
-  import { ListItem, TextBlock, ContentDialog, IconButton, ToggleSwitch, TextBox, AutoSuggestBox, Button, ComboBox, ContextMenu, MenuFlyoutItem } from "fluent-svelte";
+  import { ListItem, TextBlock, IconButton, AutoSuggestBox, Button, ComboBox } from "fluent-svelte";
   import { afterUpdate, getContext } from "svelte/internal";
   import { ArrowBack } from "nereid://js/icons";
   import { fly } from "svelte/transition";
@@ -119,7 +119,7 @@
       let stPerms = $config.privacy.sitePermissions
       if (site in stPerms) {
         $config.privacy.sitePermissions[site][permKey] = detail.value;
-        
+
       } else {
         $config.privacy.sitePermissions[site] = { [permKey]: detail.value };
       }
@@ -134,7 +134,7 @@
   }
 
   $: defaultPermissions = $config.privacy.defaultPermissions;
-  
+
   function handleDefaultChangeF(permKey) {
     return function ({ detail }) {
       console.log(`Default Changed`, permKey, detail);

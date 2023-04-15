@@ -50,7 +50,7 @@
   export let isReal = true;
 
   export let bookmark;
-  
+
   let deleteDialog = false;
 
   const dispatch = createEventDispatcher()
@@ -60,7 +60,7 @@
   function handleClick() {
     if (isReal) {
       nereid.tab.go(bookmark.url)
-      
+
     } else {
       dispatch('click')
     }

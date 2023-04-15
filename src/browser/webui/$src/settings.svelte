@@ -119,7 +119,7 @@
   function scrollToElementF(element) {
     return function () {
       if (!element) return false;
-      
+
       const elemCenter = element.clientHeight / 2;
       const halfWindowSize = window.innerHeight / 2;
 
@@ -134,7 +134,7 @@
   async function update() {
     window.nereid.userdata.config.set($config)
   }
-  
+
   window.nereid.userdata.config.subscribe(c => {
     console.log('sub', c);
     $config = c;

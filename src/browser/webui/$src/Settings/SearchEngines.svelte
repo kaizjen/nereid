@@ -37,7 +37,7 @@
 
   const handleSelect = noFirstTime(() => {
     console.log('selecting', selectedIndex);
-  
+
     $config.search.selectedIndex = selectedIndex;
     update()
   })
@@ -49,7 +49,7 @@
       let { hostname } = new URL(url);
 
       return hostname;
-      
+
     } catch (e) {
       return `[Error: ${e}]`
     }

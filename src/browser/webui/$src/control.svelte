@@ -97,7 +97,7 @@
         option.elements = enumValues.split(',').map(s => s.trim())
         break;
       }
-    
+
       default: return alert(`error: unknown type "${newType}"`)
     }
     option.value = option.default;
