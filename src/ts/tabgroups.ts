@@ -17,7 +17,7 @@ export function createTabGroup(win: TabWindow, group: TabGroup) {
   ) {
     throw new Error(`Tab group could not be created - the tab indexes are incorrect (${group.startIndex}; ${group.endIndex})`);
   }
-  if (group.startIndex <= win.pinnedTabsEndIndex) {
+  if (group.startIndex < win.pinnedTabsEndIndex) {
     let i = 0;
     while (i < (group.endIndex - group.startIndex)) {
       // unpin all tabs in the group
