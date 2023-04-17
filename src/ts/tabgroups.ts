@@ -143,7 +143,9 @@ export function pinTab(win: TabWindow, tab: Tab) {
 
 export function unpinTab(win: TabWindow, tab: Tab) {
   win.pinnedTabsEndIndex--;
-  moveTab(tab, { window: win, index: win.pinnedTabsEndIndex })
+  if (win.tabs.indexOf(tab) != win.pinnedTabsEndIndex) {
+    moveTab(tab, { window: win, index: win.pinnedTabsEndIndex })
+  }
 
   win.chrome.webContents.send('pinnedTabsEndIndexUpdate', win.pinnedTabsEndIndex)
 }
