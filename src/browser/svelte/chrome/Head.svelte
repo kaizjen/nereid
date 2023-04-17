@@ -364,13 +364,8 @@
 
     const tabElements = [...currentListElement.children].filter(element => element.classList.contains('tab'));
 
-    let index = currentTabIndex;
-    if (currentTabGroup) {
-      index = currentTabIndex - currentTabGroup.startIndex
-    }
-
     const listRect = currentListElement.getBoundingClientRect()
-    const selectedTabElement = tabElements[index];
+    const selectedTabElement = tabElements.find(el => el.classList.contains('selected'));
     if (!selectedTabElement) return;
 
     const selectedTabRect = selectedTabElement.getBoundingClientRect()
@@ -583,7 +578,11 @@
 
   $: {
     currentTabIndex;
-    moveSelectedTabIntoView()
+    requestAnimationFrame(() => {
+      // This function detects the class '.selected' on a tab element,
+      // but it won't be applied until the next frame
+      moveSelectedTabIntoView()
+    })
   }
 </script>
 
