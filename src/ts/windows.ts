@@ -277,6 +277,8 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
     })
 
     chromeBV.webContents.send('tabChange', w.tabs.indexOf(w.currentTab))
+
+    chromeBV.webContents.send('pinnedTabsEndIndexUpdate', w.pinnedTabsEndIndex)
   })
 
   chromeBV.webContents.on('focus', () => {
