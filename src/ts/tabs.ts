@@ -1155,7 +1155,11 @@ export function openUniqueNereidTab(win: TabWindow, page: string, nextToCurrentT
   const currentTabIndex = win.tabs.indexOf(win.currentTab);
 
   if (oldTab) {
-    if (nextToCurrentTab && win.tabs.indexOf(oldTab) != currentTabIndex + 1) {
+    if (
+      nextToCurrentTab &&
+      win.tabs.indexOf(oldTab) != currentTabIndex &&
+      win.tabs.indexOf(oldTab) != currentTabIndex + 1
+    ) {
       oldTab = moveTab(oldTab, { window: win, index: currentTabIndex + 1 });
 
     } else {
