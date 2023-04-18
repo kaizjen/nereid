@@ -1110,7 +1110,7 @@ export function openClosedTab(win: TabWindow, index?: number, background: boolea
   return tabInfo.tab;
 }
 
-export function moveTab(tab: Tab, destination: { window: TabWindow, index: number }) {
+export function moveTab(tab: Tab, destination: { window: TabWindow, index: number }, shouldSelect = true) {
   const { window, index } = destination;
   if (!tab.owner) throw new Error(`Tab ##${tab.uniqueID} doesn't have an owner and cannot be moved.`);
 
@@ -1140,7 +1140,9 @@ export function moveTab(tab: Tab, destination: { window: TabWindow, index: numbe
 
   updateTabState(window, { tab })
 
-  selectTab(window, { tab })
+  if (shouldSelect) {
+    selectTab(window, { tab })
+  }
   return tab;
 }
 
@@ -1160,7 +1162,12 @@ export function openUniqueNereidTab(win: TabWindow, page: string, nextToCurrentT
       win.tabs.indexOf(oldTab) != currentTabIndex &&
       win.tabs.indexOf(oldTab) != currentTabIndex + 1
     ) {
-      oldTab = moveTab(oldTab, { window: win, index: currentTabIndex + 1 });
+      let moveToIndex = currentTabIndex + 1;
+      if (win.tabs.indexOf(oldTab) < currentTabIndex) {
+        // when the `oldTab` is moved, it will cause all indexes to decrease
+        moveToIndex--;
+      }
+      oldTab = moveTab(oldTab, { window: win, index: moveToIndex });
 
     } else {
       oldTab = selectTab(win, { tab: oldTab })

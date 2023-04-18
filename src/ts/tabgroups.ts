@@ -58,7 +58,8 @@ export function addTabToGroup(win: TabWindow, group: TabGroup, tab: Tab) {
     group.startIndex--;
 
   } else {
-    moveTab(tab, { window: win, index: group.endIndex });
+    // Moving the tab to the `group.endIndex`, then increasing it
+    moveTab(tab, { window: win, index: group.endIndex }, false);
     group.endIndex++;
   }
   win.chrome.webContents.send('tabGroupUpdate', group)
@@ -77,7 +78,8 @@ export function removeTabFromGroup(win: TabWindow, group: TabGroup, tab: Tab) {
     group.startIndex++;
 
   } else {
-    moveTab(tab, { window: win, index: group.endIndex - 1 });
+    // When the tab is moved from a group, the `group.endIndex` decreases (tabs.ts)
+    moveTab(tab, { window: win, index: group.endIndex - 1 }, false);
   }
   win.chrome.webContents.send('tabGroupUpdate', group)
 
@@ -134,7 +136,7 @@ export function pinTab(win: TabWindow, tab: Tab) {
   if (tabIndex < win.pinnedTabsEndIndex) return;
   
   if (tabIndex != win.pinnedTabsEndIndex) {
-    moveTab(tab, { window: win, index: win.pinnedTabsEndIndex })
+    moveTab(tab, { window: win, index: win.pinnedTabsEndIndex }, false)
   }
   win.pinnedTabsEndIndex++;
 
@@ -143,7 +145,8 @@ export function pinTab(win: TabWindow, tab: Tab) {
 
 export function unpinTab(win: TabWindow, tab: Tab) {
   if (win.tabs.indexOf(tab) != win.pinnedTabsEndIndex - 1) {
-    moveTab(tab, { window: win, index: win.pinnedTabsEndIndex - 1 })
+    // Moving the tab already decreases the `win.pinnedTabsEndIndex` (tabs.ts)
+    moveTab(tab, { window: win, index: win.pinnedTabsEndIndex - 1 }, false)
 
   } else {
     win.pinnedTabsEndIndex--;

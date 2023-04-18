@@ -267,10 +267,10 @@ export function init() {
     menuOfAddressBar(win, options)
   })
 
-  onWindow('chrome.moveTab', (win, _e, tabUID: number, newIndex: number) => {
+  onWindow('chrome.moveTab', (win, _e, tabUID: number, newIndex: number, shouldSelect: boolean) => {
     tabManager.moveTab(tabManager.getTabByUID(tabUID), {
       window: win, index: newIndex
-    })
+    }, shouldSelect)
   })
   onWindow('chrome.addTabToGroup', (win, _e, tabUID: number, gid: number) => {
     addTabToGroup(win, getTabGroupByID(gid).group, tabManager.getTabByUID(tabUID))
