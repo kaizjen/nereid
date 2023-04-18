@@ -201,7 +201,7 @@
   }
 
   function handleClick(e) {
-    if (e.button == 1) {
+    if (e.button == 1 && !pinned) {
       // middle mb
       ipcRenderer.send('closeTab', index)
     } else if (e.button == 2) {
