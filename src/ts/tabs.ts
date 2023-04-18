@@ -336,16 +336,27 @@ export function destroyWebContents(bv: RealTab) {
 
 /**
  * Adds an already existing tab to a window
- * @param tab<`BrowserView`> the tab to be added
+ * @param win The window to which the tab should be added
+ * @param tab The tab to be added
+ * @param addOptions
+ *  * `forcePin` If the tab is added before `win.pinnedTabsEndIndex`,
+ *  don't move it, but let it be pinned as well. **This should never be used when
+ *  moving a non-pinned tab.**
  */
-export function addTab(win: TabWindow, tab: Tab, opts: TabOptions) {
+export function addTab(win: TabWindow, tab: Tab, opts: TabOptions, addOptions = { forcePin: false }) {
   if (opts.position != undefined) {
-    if (opts.position < win.pinnedTabsEndIndex) {
-      console.log(
-        `The TabOptions.position property was changed from ${opts.position} to ${win.pinnedTabsEndIndex} because`,
-        'a tab can only be added after all the pinned tabs.'
-      );
-      opts.position = win.pinnedTabsEndIndex
+    if (opts.position <= win.pinnedTabsEndIndex) {
+      if (addOptions.forcePin) {
+        win.pinnedTabsEndIndex++;
+        win.chrome.webContents.send('pinnedTabsEndIndexUpdate', win.pinnedTabsEndIndex)
+
+      } else if (opts.position != win.pinnedTabsEndIndex) {
+        console.log(
+          `The TabOptions.position property was changed from ${opts.position} to ${win.pinnedTabsEndIndex} because`,
+          'a tab can only be added after all the pinned tabs.'
+        );
+        opts.position = win.pinnedTabsEndIndex
+      }
     }
     win.tabs.splice(opts.position, 0, tab)
 
@@ -1109,6 +1120,14 @@ export function moveTab(tab: Tab, destination: { window: TabWindow, index: numbe
 
   if (tab.isGhost) tab = toRealTab(tab);
 
+  let forcePin = false;
+  if (
+    tab.owner.tabs.indexOf(tab) < tab.owner.pinnedTabsEndIndex &&
+    index < window.pinnedTabsEndIndex
+  ) {
+    forcePin = true;
+  }
+
   let { owner } = tab
   removeTab(owner, { tab })
   if (owner != window) {
@@ -1121,7 +1140,7 @@ export function moveTab(tab: Tab, destination: { window: TabWindow, index: numbe
     private: tab.private,
     position: index,
     uid: tab.uniqueID
-  })
+  }, { forcePin })
 
   updateTabState(window, { tab })
 
