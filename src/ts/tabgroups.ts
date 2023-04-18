@@ -24,6 +24,9 @@ export function createTabGroup(win: TabWindow, group: TabGroup) {
       unpinTab(win, win.tabs[group.startIndex + i])
       i++;
     }
+    // unpinning tabs will move them and shift the `win.pinnedTabsEndIndex`
+    group.endIndex += win.pinnedTabsEndIndex - group.startIndex;
+    group.startIndex = win.pinnedTabsEndIndex;
   }
 
   win.tabGroups.push(group)
@@ -59,7 +62,7 @@ export function addTabToGroup(win: TabWindow, group: TabGroup, tab: Tab) {
 
   } else {
     // Moving the tab to the `group.endIndex`, then increasing it
-    moveTab(tab, { window: win, index: group.endIndex }, false);
+    moveTab(tab, { window: win, index: group.endIndex }, { shouldSelect: false });
     group.endIndex++;
   }
   win.chrome.webContents.send('tabGroupUpdate', group)
@@ -79,7 +82,7 @@ export function removeTabFromGroup(win: TabWindow, group: TabGroup, tab: Tab) {
 
   } else {
     // When the tab is moved from a group, the `group.endIndex` decreases (tabs.ts)
-    moveTab(tab, { window: win, index: group.endIndex - 1 }, false);
+    moveTab(tab, { window: win, index: group.endIndex - 1 }, { shouldSelect: false });
   }
   win.chrome.webContents.send('tabGroupUpdate', group)
 
@@ -136,7 +139,7 @@ export function pinTab(win: TabWindow, tab: Tab) {
   if (tabIndex < win.pinnedTabsEndIndex) return;
   
   if (tabIndex != win.pinnedTabsEndIndex) {
-    moveTab(tab, { window: win, index: win.pinnedTabsEndIndex }, false)
+    moveTab(tab, { window: win, index: win.pinnedTabsEndIndex }, { shouldSelect: false })
   }
   win.pinnedTabsEndIndex++;
 
@@ -144,9 +147,11 @@ export function pinTab(win: TabWindow, tab: Tab) {
 }
 
 export function unpinTab(win: TabWindow, tab: Tab) {
+  if (win.tabs.indexOf(tab) >= win.pinnedTabsEndIndex) return;
+
   if (win.tabs.indexOf(tab) != win.pinnedTabsEndIndex - 1) {
     // Moving the tab already decreases the `win.pinnedTabsEndIndex` (tabs.ts)
-    moveTab(tab, { window: win, index: win.pinnedTabsEndIndex - 1 }, false)
+    moveTab(tab, { window: win, index: win.pinnedTabsEndIndex - 1 }, { shouldSelect: false, preventPinning: true })
 
   } else {
     win.pinnedTabsEndIndex--;

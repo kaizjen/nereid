@@ -1110,7 +1110,17 @@ export function openClosedTab(win: TabWindow, index?: number, background: boolea
   return tabInfo.tab;
 }
 
-export function moveTab(tab: Tab, destination: { window: TabWindow, index: number }, shouldSelect = true) {
+/** 
+ * @param options 
+ * * `shouldSelect` (default: `true`) Whether the newly moved tab should be selected
+ * * `preventPinning` (default: `false`) If the tab is already pinned and is moved before the
+ * `pinnedTabsEndIndex`, whether to prevent its pinning again
+ */
+export function moveTab(
+  tab: Tab,
+  destination: { window: TabWindow, index: number },
+  { shouldSelect = true, preventPinning = false }: { shouldSelect?: boolean, preventPinning?: boolean } = {}
+) {
   const { window, index } = destination;
   if (!tab.owner) throw new Error(`Tab ##${tab.uniqueID} doesn't have an owner and cannot be moved.`);
 
@@ -1119,7 +1129,8 @@ export function moveTab(tab: Tab, destination: { window: TabWindow, index: numbe
   let forcePin = false;
   if (
     tab.owner.tabs.indexOf(tab) < tab.owner.pinnedTabsEndIndex &&
-    index < window.pinnedTabsEndIndex
+    index <= window.pinnedTabsEndIndex &&
+    !preventPinning
   ) {
     forcePin = true;
   }
