@@ -637,10 +637,6 @@ export function attach(win: TabWindow, tab: RealTab) {
 
     setImmediate(async() => {
       const history = await userData.history.get();
-      if (history.length > 100) {
-        // so we won't have to work with huge values
-        history.length = 100;
-      }
       let entry = history.find(item =>
         item.sessionUUID == global.SESSION_UUID &&
         item.tabUID == tab.uniqueID &&
