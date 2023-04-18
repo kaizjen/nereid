@@ -63,6 +63,7 @@
   }
 
   let promise;
+  // This variable becomes false in Bookmarks/Bookmark.svelte
   window.isFirstTime = true;
   function update() {
     promise = new Promise(async y => {
@@ -78,6 +79,16 @@
     })
   }
   update();
+
+  window.addEventListener('hashchange', () => {
+    if (location.hash == '') return;
+
+    console.log('hch', location.hash);
+    window.isFirstTime = true;
+    window.action = decodeURIComponent(location.hash.slice(1));
+    location.hash = '';
+    update();
+  })
 
   let folders = [];
 
