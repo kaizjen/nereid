@@ -171,11 +171,12 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
     tabManager.updateSavedTabsImmediately();
 
     // i don't think browserviews (especially unattached ones) are destroyed when BrowserWindow closes
-    w.tabs.forEach((item) => {
+    w.tabs.forEach(item => {
       if (item.isGhost) return;
-      (tabManager.asRealTab(item).webContents as any).destroy();
+      tabManager.detach(tabManager.asRealTab(item));
+      tabManager.asRealTab(item).webContents.close();
     });
-    (w.chrome.webContents as any).destroy();
+    w.chrome.webContents.close();
 
     let index = windows.indexOf(w);
     if (index == -1) throw(new Error("This should NOT happen! Window is not in windows[] array!"))
