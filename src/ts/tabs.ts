@@ -546,7 +546,7 @@ export function attach(win: TabWindow, tab: RealTab) {
 
         tab.webContents.once('did-create-window', async(w) => {
           tab.childWindow = w;
-          w.on('close', () => {
+          w.on('closed', () => {
             delete tab.childWindow
           })
 
@@ -804,12 +804,6 @@ export function attach(win: TabWindow, tab: RealTab) {
       await userData.bookmarks.set(bookmarks);
     }
   })
-  tab.webContents.on('render-process-gone', (_e, crashDetails) => {
-    sendUpdate({ crashDetails })
-    tab.webContents.once('did-start-loading', () => {
-      sendUpdate({ crashDetails: null })
-    })
-  })
   tab.webContents.on('zoom-changed', (_e, direction) => {
     if (direction == 'in') {
       tab.webContents.zoomFactor += 0.1
@@ -840,6 +834,31 @@ export function attach(win: TabWindow, tab: RealTab) {
   tab.webContents.on('context-menu', (_e, opts) => {
     showContextMenu(win, tab, opts)
   })
+
+  tab.webContents.on('render-process-gone', (_e, crashDetails) => {
+    sendUpdate({ crashDetails })
+    tab.webContents.once('did-start-loading', () => {
+      sendUpdate({ crashDetails: null })
+    })
+  })
+  tab.webContents.on('destroyed', () => {
+    console.log(`Web contents #${tab.webContents.id} was destroyed, closing the corresponding tab`);
+    // Close it manually without using `closeTab()` so that no references to the WC would be made.
+    // (also we can't get the tab's URL at all)
+    // This has a side effect of the tab not appearing in the recently closed menu.
+    try {
+      // Temporarily make this a Ghost Tab so the WC wouldn't be referenced.
+      tab.isGhost = true as any;
+      detach(tab);
+      setImmediate(() => {
+        // If not for the `setImmediate()`, it just crashes
+        removeTab(win, { tab });
+      })
+
+    } catch (error) {
+      console.log(`Couldn't close the tab: ${error + ''}`);
+    }
+  })
 }
 
 export function detach(tab: RealTab) {
@@ -859,13 +878,14 @@ export function detach(tab: RealTab) {
     'did-navigate-in-page',
     'did-fail-load',
     'dom-ready',
-    'render-process-gone',
     'zoom-changed',
     'cursor-changed',
     'found-in-page',
     'enter-html-full-screen',
     'leave-html-full-screen',
-    'context-menu'
+    'context-menu',
+    'render-process-gone',
+    'destroyed',
   ];
   listenersArray.forEach(event => {
     tab.webContents.removeAllListeners(event)

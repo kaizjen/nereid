@@ -142,6 +142,17 @@ expose('[NEREID]', {
   extendNavigator: {
   },
   extendWindow: {
+    close() {
+      // This call can still be avoided with `window.open('/', '', 'popup').close.call(window)`,
+      // which would close the tab.
+      // TODO: find a way to patch every .call function somehow (possibly by modifying electron's code?)
+      if (window.opener instanceof Window) {
+        window.close();
+
+      } else {
+        console.warn("Scripts may close only the windows that were opened by them.")
+      }
+    },
     prompt(t, defaultValue) {
       return requestMainSync('prompt', t, defaultValue)
     },
@@ -157,12 +168,13 @@ expose('[NEREID]', {
 try {
   webFrame.executeJavaScript(`(function() {
     let { extendNavigator, extendWindow } = window['[NEREID]'];
-    
+
     for (let prop in extendNavigator) {
       Object.defineProperty(navigator, prop, Object.getOwnPropertyDescriptor(extendNavigator, prop))
     }
     
     for (let prop in extendWindow) {
+      Object.defineProperty(Window.prototype, prop, Object.getOwnPropertyDescriptor(extendWindow, prop))
       Object.defineProperty(window, prop, Object.getOwnPropertyDescriptor(extendWindow, prop))
     }
   }());`)
