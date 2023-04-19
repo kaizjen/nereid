@@ -64,13 +64,10 @@ export function handleNetError(
       "<button id='reload-nocache' class='btn'>" + $t('common.cache.2') + "</button>"
     if (isMainFrame) {
       errInfo.moreJS = `document.getElementById('reload-nocache').onclick = () => { PostMainMessage('reloadIgnoringCache') }`
-      function onMessagePosted(e) {
-        if (e.senderFrame == frame) {
-          webc.reloadIgnoringCache();
-          ipcMain.off('chrome-error:reloadIgnoringCache', onMessagePosted)
-        }
+      function onMessagePosted() {
+        webc.reloadIgnoringCache();
       }
-      ipcMain.on('chrome-error:reloadIgnoringCache', onMessagePosted)
+      frame.ipc.once('chrome-error:reloadIgnoringCache', onMessagePosted)
     }
 
   } else {
