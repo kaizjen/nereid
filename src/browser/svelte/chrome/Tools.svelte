@@ -11,11 +11,11 @@
   }
   .tool {
     padding: 0.4rem;
-    padding-inline: 0.66rem;
+    padding-inline: 0.76rem;
   }
   .tool.wide {
     /* Some icons have their natural padding, this class accounts for it (TODO: remove this?) */
-    padding-inline: 0.76rem;
+    padding-inline: 0.86rem;
   }
   .tool img {
     height: 1.35rem;

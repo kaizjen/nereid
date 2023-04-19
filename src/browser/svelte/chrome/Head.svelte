@@ -223,7 +223,7 @@
     padding-inline: 0.4rem;
     margin-left: 0.125rem;
     border-radius: 0.25rem;
-    transition: 0.25s;
+    transition: cubic-bezier(0.57, 0.2, 1, 1) 0.2s;
     display: flex;
   }
   .tablist-button img {
