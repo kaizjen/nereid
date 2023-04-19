@@ -582,6 +582,7 @@ export function attach(win: TabWindow, tab: RealTab) {
             minimizable: true,
             maximizable: true,
             closable: true,
+            autoHideMenuBar: true,
             webPreferences: {
               sandbox: true,
               partition: tab.private ? PRIVATE_PARTITION : DEFAULT_PARTITION
