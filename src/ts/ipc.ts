@@ -198,7 +198,7 @@ export function init() {
   onWindow('chrome.setHeight', (win, _e, value: number) => {
     win.chromeHeight = Math.round(value * win.chrome.webContents.zoomFactor);
     console.log('height being set to', win.chromeHeight);
-    
+
     win.setSheetOffset(win.chromeHeight);
 
     setCurrentTabBounds(win)
@@ -317,9 +317,9 @@ export function init() {
     if (process.platform == 'darwin' || process.platform == 'win32') {
       try {
         let { icon, name } = await app.getApplicationInfoForProtocol(url);
-  
+
         return { name, icon: `data:image/png;base64,${icon.toPNG().toString('base64')}` }
-        
+
       } catch (_) {
         return { name: "(unknown)", icon: null }
       }
@@ -395,7 +395,7 @@ export function init() {
       case 'thumbnail': {
         return null;
       }
-    
+
       default: return null
     }
   })
@@ -515,7 +515,7 @@ export function init() {
     }
     const PIDMap: Record<number, string> = {};
     const chromeProcesses: number[] = [];
-    
+
     getAllTabWindows().forEach(tWin => {
       PIDMap[tWin.chrome.webContents.getOSProcessId()] = $t('windowUI', { id: getIDOfTabWindow(tWin) });
       chromeProcesses.push(tWin.chrome.webContents.getOSProcessId());
@@ -570,7 +570,7 @@ export function init() {
           process.name = $t('unknownTab');
           break;
         }
-      
+
         default: {
           process.name = process.type;
         }
@@ -678,7 +678,7 @@ export function init() {
       }
     })
   }
-  
+
   onInternalSync('clipboard', (e, action, arg) => {
     try {
       e.returnValue = clipboard[action](arg)

@@ -28,7 +28,7 @@ function URLParse(str: string): ParsedURL {
   }
   try {
     let urlObj = getAllProps(new URL(str));
-    
+
     let slashes = slashesRegex.test(str);
     let origin = urlObj.origin == null ? '' : urlObj.origin
     let protocol = urlObj.protocol == 'null:' ? null : urlObj.protocol;
@@ -40,7 +40,7 @@ function URLParse(str: string): ParsedURL {
 
   } catch (e) {
     console.log('invalid url %o because %s', str, e);
-    
+
     return setToValue([
       'hash', 'slashes', 'host', 'hostname', 'href',
       'origin', 'protocol', 'username', 'password', 'port',
@@ -56,7 +56,7 @@ export default {
     // TODO: move this to a new file, 'omnibox.ts'
     async googleLike(res: Response): Promise<string[]> {
       const json: string[][] = await res.json();
-  
+
       return json[1]
     },
     async startpageLike(res: Response): Promise<string[]> {
@@ -157,12 +157,12 @@ export default {
       try {
         new URL(url);
         return true;
-  
+
       } catch (_) {
         try {
           new URL('http://' + url);
           return true;
-  
+
         } catch (_) {
           return false;
         }

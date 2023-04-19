@@ -189,7 +189,7 @@ async function getProtocol(req: Electron.ProtocolRequest, respond: (response: El
     respond({ data: response.body, headers: {
       "Content-Type": response.headers.get("Content-Type") ?? "text/plain"
     } })
-    
+
   } catch (err) {
     respond({ data: err + '', error: -2 })
   }
@@ -212,7 +212,7 @@ export function registerSession(ses: Session) {
         return callback({
           cancel: true
         })
-  
+
       } else {
         return callback({
           redirectURL: details.url.replace('http:', 'https:')
@@ -267,7 +267,7 @@ export function registerSession(ses: Session) {
         })
       })
     })
-    
+
     next(-3) // continue with the result
   })
 
@@ -398,8 +398,6 @@ export function registerSession(ses: Session) {
   })
 
   ses.setPermissionCheckHandler((_wc, permission, originalOrigin, details) => {
-    //console.log('checking permission %o for %o with details %o', permission, originalOrigin, details);
-    
     const { privacy } = config.get();
     let { defaultPermissions, sitePermissions, denyCrossOriginPermissions } = privacy;
     let { origin, hostname } = URLParse(originalOrigin)
@@ -470,7 +468,7 @@ export function registerSession(ses: Session) {
     const { privacy } = config.get();
     let { sitePermissions, defaultPermissions, denyCrossOriginPermissions } = privacy;
     let { origin, hostname } = URLParse(details.requestingUrl);
-    
+
     if (permission == 'clipboard-read') return callback(!control.options.disallow_clipboard_read?.value)
     if (permission as any == 'clipboard-sanitized-write') {
       return callback(!control.options.disallow_clipboard_write?.value)
@@ -627,7 +625,7 @@ export function validateDomainByURL(url: string) {
   let { hostname } = URLParse(url);
   let certificate = certificateCache[hostname]
 
-  if (certificate) {    
+  if (certificate) {
     if (certificate.errorCode == 0) return true;
     else return false
   }

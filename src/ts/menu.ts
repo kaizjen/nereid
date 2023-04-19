@@ -723,10 +723,10 @@ export async function showContextMenu(win: TabWindow, tab: RealTab, opts: Electr
       const y = ${y};
       function findElement(root) {
         const element = root.elementFromPoint(x, y);
-  
+
         if (element.shadowRoot) {
           findElement(element.shadowRoot)
-  
+
         } else {
           return ${code}
         }
@@ -811,7 +811,7 @@ export async function showContextMenu(win: TabWindow, tab: RealTab, opts: Electr
         });
         // Unfortunately, the image will be fetched again, and if the server retrns another image, then oops.
         // There's probably a way to do this with clipboard, but it's too messy even for me.
-        
+
       } catch (e) {
         console.error(`Fetching image failed:`, e);
         dialog.showErrorBox($t('image.saving.error-title'), `Error: ${e}.`)
@@ -848,7 +848,7 @@ export async function showContextMenu(win: TabWindow, tab: RealTab, opts: Electr
         console.error(`Saving image failed: File with that name already exists`);
         dialog.showErrorBox($t('image.saving.error-title'), $t('image.saving.error-alreadyExists'))
         return;
-        
+
       } else {
         await fs.promises.writeFile(result.filePath, buf);
         let dlData = await downloads.get();
@@ -1249,7 +1249,7 @@ export function menuOfProcess(process: Electron.ProcessMetric) {
   addItem({ label: $t('button-finish'), async click() {
     try {
       await kill(process.pid)
-      
+
     } catch (error) {
       dialog.showErrorBox('Failed to terminate the process', `Error: ${error}`)
     }

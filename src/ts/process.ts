@@ -140,7 +140,7 @@ export function init() {
   if (argv['second-instance'] || app.requestSingleInstanceLock({ argv: JSON.stringify(argv) })) {
     app.on('second-instance', (_e, rawArgv, workDir, data) => {
       console.log('got second instance', rawArgv, 'data:', data);
-      
+
       if (!data || !(data as any).argv || rawArgv.length == 0) return; // rawArgv.length == 0 if started by another user
 
       let argv = JSON.parse((data as any).argv);

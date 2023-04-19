@@ -18,7 +18,7 @@ export function handleNetError(
   let frame: WebFrameMain;
   try {
     frame = webFrameMain.fromId(framePID, frameRID);
-    
+
   } catch (e) {
     // sometimes throws an error, ignore
     return;
@@ -36,7 +36,7 @@ export function handleNetError(
     let translation = t(`net-error.${key}`, { ...parsed, path: parsed.pathname ?? url, url, ...data });
     if (translation == `net-error.${key}`) {
       return '';
-      
+
     } else {
       return translation.replaceAll('\n', '\\n')
     }

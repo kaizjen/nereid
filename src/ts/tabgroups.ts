@@ -137,7 +137,7 @@ export function pinTab(win: TabWindow, tab: Tab) {
 
   const tabIndex = win.tabs.indexOf(tab);
   if (tabIndex < win.pinnedTabsEndIndex) return;
-  
+
   if (tabIndex != win.pinnedTabsEndIndex) {
     moveTab(tab, { window: win, index: win.pinnedTabsEndIndex }, { shouldSelect: false })
   }

@@ -172,7 +172,7 @@ try {
     for (let prop in extendNavigator) {
       Object.defineProperty(navigator, prop, Object.getOwnPropertyDescriptor(extendNavigator, prop))
     }
-    
+
     for (let prop in extendWindow) {
       Object.defineProperty(Window.prototype, prop, Object.getOwnPropertyDescriptor(extendWindow, prop))
       Object.defineProperty(window, prop, Object.getOwnPropertyDescriptor(extendWindow, prop))

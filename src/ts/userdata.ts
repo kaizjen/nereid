@@ -171,7 +171,7 @@ try {
       { recursive: true }
     )
   }
-  
+
 } catch (e) {
   dialog.showErrorBox("Unable to initialize user settings", e.toString())
 
@@ -204,7 +204,7 @@ try {
 
 } catch (e) {
   console.log("Couldn't read user settings:", e, ". Trying to re-write...")
-  
+
   try {
     writeDefaults()
   } catch (e) {
@@ -320,7 +320,7 @@ try {
       a11yEnabled: [ 'boolean', null ]
     }
   });
-  
+
   if (validation == true) return;
 
   console.error(
@@ -424,7 +424,7 @@ export let history = {
   },
   /**
    * Returns `false` if the operation was rejected by a more recent history write.
-   * 
+   *
    * Returns `true` if the opertation was successful
    */
   async set(obj: History) {
@@ -520,7 +520,7 @@ export let control = {
     })
 
     dialog.showErrorBox(
-      "There was a problem.", 
+      "There was a problem.",
       "The options (nereid://control) are corrupted or invalid." +
       "They have been replaced with a working version, but Nereid has to restart."
     );

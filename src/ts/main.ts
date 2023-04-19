@@ -85,13 +85,13 @@ app.on('window-all-closed', (e: Event) => {
 
   } else {
     let img = nativeImage.createFromPath(
-      pathModule.join(__dirname, 
+      pathModule.join(__dirname,
         process.platform == 'win32' ? '../../icon.ico' : '../../icon.png'
       )
     );
 
     tray = new Tray(img);
-    
+
     tray.setToolTip(t('menu.tray.state-ready'))
     tray.setContextMenu(Menu.buildFromTemplate([
       {
@@ -131,4 +131,3 @@ app.on('window-all-closed', (e: Event) => {
     })
   }
 })
-

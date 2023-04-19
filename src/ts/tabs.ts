@@ -74,7 +74,7 @@ export function updateSavedTabs() {
     _firstTime = false;
     return;
   }
-  
+
   setImmediate(updateSavedTabsImmediately)
 }
 export function updateSavedTabsImmediately() {
@@ -124,7 +124,7 @@ function handleBeforeUnload<T>(wc: WebContents, proceed: () => T): Promise<false
       enumerable: true
     })
     window.dispatchEvent(bUnloadEvent)
-    
+
     console.log("RETURN: ", bUnloadEvent.defaultPrevented, isReturnValueSet)
     return [bUnloadEvent.defaultPrevented, isReturnValueSet]
     })()
@@ -151,7 +151,7 @@ function handleBeforeUnload<T>(wc: WebContents, proceed: () => T): Promise<false
         // https://developer.mozilla.org/en-US/docs/Web/API/BeforeUnloadEvent
         isPrevented = isReturnValueSet;
       }
-      
+
       if (isPrevented) {
         let response = await displayPreventUnloadDialog(BrowserWindow.fromWebContents(wc), wc.getURL())
 
@@ -596,7 +596,7 @@ export function attach(win: TabWindow, tab: RealTab) {
 
         return { action: 'deny' }
       }
-    
+
       default:
         return { action: 'deny' }
     }
@@ -609,11 +609,11 @@ export function attach(win: TabWindow, tab: RealTab) {
       // Preload script doesn't run in iframes without src, so we gotta run this ourselves using window.parent
 
       let { extendNavigator, extendWindow } = window.parent['[NEREID]'];
-    
+
       for (let prop in extendNavigator) {
         window.navigator[prop] = extendNavigator[prop]
       }
-      
+
       for (let prop in extendWindow) {
         window[prop] = extendWindow[prop]
       }
@@ -662,14 +662,14 @@ export function attach(win: TabWindow, tab: RealTab) {
       sendUpdate({ favicon: `n-res://${nativeTheme.shouldUseDarkColors ? 'dark' : 'light'}/private.svg` });
       return;
     }
-    
+
     let previousDataURL = tab.faviconDataURL;
     if (['http:', 'https:'].includes(fUrl.protocol)) {
       let { dataURL, url } = await fetchFavicon(fUrl.href);
 
       tab.faviconURL = url;
       tab.faviconDataURL = dataURL;
-      
+
     } else {
       tab.faviconURL = null
     }
@@ -681,7 +681,7 @@ export function attach(win: TabWindow, tab: RealTab) {
       let history = await userData.history.get();
       if (!tab.webContents) return; // sometimes the tab is already closed at this point
 
-      const thisPage = history.find(entry => 
+      const thisPage = history.find(entry =>
         entry.sessionUUID == global.SESSION_UUID &&
         entry.tabUID == tab.uniqueID &&
         encodeURI(entry.url) == tab.webContents.getURL()
@@ -718,7 +718,7 @@ export function attach(win: TabWindow, tab: RealTab) {
       BrowserWindow.fromWebContents(tab.webContents), tab.webContents.getURL(),
       true // syncronous
     );
-    
+
     if (leave) {
       e.preventDefault();
     }
@@ -727,7 +727,7 @@ export function attach(win: TabWindow, tab: RealTab) {
     const url = tab.webContents.getURL(); // not using the url argument because it doesnt show `view-source:` urls
 
     sendUpdate({ url });
-    sendUpdate({ title: tab.webContents.getTitle() }); 
+    sendUpdate({ title: tab.webContents.getTitle() });
     sendUpdate({
       nav: {
         canGoBack: tab.webContents.canGoBack(),
@@ -946,7 +946,7 @@ export function selectTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: n
   if (tab.paneView) {
     if (tab == tab.paneView.leftTab) {
       win.addBrowserView(asRealTab(tab.paneView.rightTab))
-      
+
     } else {
       win.addBrowserView(asRealTab(tab.paneView.leftTab))
     }
@@ -1096,7 +1096,7 @@ export function closeTab(win: TabWindow, desc: { tab?: Tab, index?: number }, ke
     return;
   }
   beingClosed.push(desc.tab);
-  
+
   return desc.tab.isGhost ? close() : handleBeforeUnload(asRealTab(desc.tab).webContents, close);
 }
 
@@ -1135,8 +1135,8 @@ export function openClosedTab(win: TabWindow, index?: number, background: boolea
   return tabInfo.tab;
 }
 
-/** 
- * @param options 
+/**
+ * @param options
  * * `shouldSelect` (default: `true`) Whether the newly moved tab should be selected
  * * `preventPinning` (default: `false`) If the tab is already pinned and is moved before the
  * `pinnedTabsEndIndex`, whether to prevent its pinning again

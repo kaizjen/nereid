@@ -4,7 +4,7 @@ declare global {
   var SESSION_UUID: string
 }
 
-/** 
+/**
  * The main window of the browser with tabs
 */
 export interface TabWindow extends BrowserWindow {
@@ -62,7 +62,7 @@ export interface TabOptions {
   private?: boolean
   /** If this is `false`, the tab will be automatically selected */
   background?: boolean
-  /** 
+  /**
    * The position of the tab in its window.
    * **DO NOT rely on this property to be accurate as the tab cannot be
    * inserted between pinned tabs, and its position will be changed!** Use `TabWindow.tabs.indexOf()`!
@@ -120,7 +120,7 @@ type TabProperties = {
 /**
  * Upon starting Nereid, instead of loading all tabs at once,
  * only one tab is loaded, the others are all loaded as ghost tabs.
- * 
+ *
  * Ghost Tabs don't have a `BrowserView`, they exist as a skeleton
  * to load one upon selecting.
  */

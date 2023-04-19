@@ -97,7 +97,7 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
       partition: INTERNAL_PARTITION,
     }
   }) as TabWindow;
-  
+
   w.winID = windows.push(w) - 1;
   w.tabs = []; // BrowserViews will be here
   w.paneViews = [];
@@ -114,15 +114,15 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
     w.setEnabled(false);
     w.setEnabled(true);
     // voodoo magic to prevent default menu from showing
-    
+
     showAppMenu();
   })
-  
+
   w.on('resize', () => {
     // setImmediate is needed so that the contents resize correctly on Linux
     setImmediate(() => {
       let { width, height } = w.getContentBounds()
-  
+
       // The BrowserView resizes incorrectly when window is resized or maximized/restored (on Windows).
       // That's because w.getBounds() has weird additional 16px of width
       setCurrentTabBounds(w)
@@ -138,6 +138,7 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
         color: colors.bg.dark,
         symbolColor: colors.fg.dark
       })
+
     } else {
       w.setTitleBarOverlay({
         color: colors.bg.light,
@@ -196,7 +197,7 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
       const thisChange = currentChange;
 
       let vars: { left: number, right: number } = JSON.parse(arg);
-  
+
       function proceed() {
         // Sometimes, the first call to proceed() will be executed after the second on('ipc-message')
         // call, which is more reliable. (The second call to on() is done because of the 'geometrychange' event)
@@ -208,16 +209,16 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
         };
         chromeBV.webContents.send('wco', WCO_BOUNDS)
         console.log('setting WCO bounds:', WCO_BOUNDS, vars, currentChange);
-        
+
         // immediately crash the original renderer of the window, so it doesnt take any memory.
         w.webContents.forcefullyCrashRenderer();
       }
-  
+
       if (chromeBV.webContents.isLoading()) {
         chromeBV.webContents.once('did-finish-load', proceed)
       } else proceed()
     })
-  
+
     await w.webContents.mainFrame.executeJavaScript(`
       function send() {
         nereid.ipcRenderer.send('geometrybegin', JSON.stringify(navigator.windowControlsOverlay.getTitlebarAreaRect()))
@@ -358,7 +359,7 @@ export function setCurrentTabBounds(win: TabWindow, tab?: Tab) {
   }
   if (tab && !tab.isGhost) {
     setBoundsOfTab(tabManager.asRealTab(tab))
-    
+
   } else if (win.currentTab) {
     setBoundsOfTab(win.currentTab)
   }
