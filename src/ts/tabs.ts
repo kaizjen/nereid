@@ -471,6 +471,10 @@ export function updateTabState(win: TabWindow, { tab, index }: { tab?: Tab, inde
       state: {
         title: asRealTab(tab).webContents.getTitle() || asRealTab(tab).webContents.getURL(),
         url: asRealTab(tab).webContents.getURL(),
+        nav: {
+          canGoBack: asRealTab(tab).webContents.canGoBack(),
+          canGoFwd: asRealTab(tab).webContents.canGoForward()
+        },
         security: checkSecurity(asRealTab(tab).webContents.getURL()),
         isPlaying: asRealTab(tab).webContents.isCurrentlyAudible(),
         isMuted: asRealTab(tab).webContents.isAudioMuted(),
