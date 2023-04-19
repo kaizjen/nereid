@@ -414,6 +414,10 @@ export async function openUtilityWindow(
 
   w.webContents.on('render-process-gone', () => w.close())
 
+  w.on('closed', () => {
+    utitlyWindows[type] = null;
+  })
+
   if (control.options.open_devtools_for_window?.value || !app.isPackaged) {
     w.webContents.openDevTools({ mode: 'detach' })
   }
