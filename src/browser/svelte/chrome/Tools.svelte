@@ -104,8 +104,13 @@
   function navFwd() {
     ipcRenderer.send('currentTab.forward')
   }
-  function refresh(e) {
-    ipcRenderer.send((e.shiftKey || e.ctrlKey) ? 'currentTab.hardRefresh' : 'currentTab.refresh')
+  function refreshOrStop(e) {
+    if (tab.isLoading) {
+      ipcRenderer.send('currentTab.stop')
+
+    } else {
+      ipcRenderer.send((e.shiftKey || e.ctrlKey) ? 'currentTab.hardRefresh' : 'currentTab.refresh')
+    }
   }
 </script>
 
@@ -116,7 +121,7 @@
 <div class="tools" class:private={tab.private}>
   <button class="tool nav arrow-img" class:disabled={!tab.nav?.canGoBack} on:click={navBack}><img alt={_.BACK} src="n-res://{$colorTheme}/arrow.svg" class="rotated"></button>
   <button class="tool nav arrow-img" class:disabled={!tab.nav?.canGoFwd} on:click={navFwd}><img alt={_.FWD} src="n-res://{$colorTheme}/arrow.svg"></button>
-  <button class="tool nav wide" on:click={refresh}><img alt={tab.isLoading ? _.STOPLOAD : _.REFRESHLOAD} src={tab.isLoading ? `n-res://${$colorTheme}/cross.svg` : `n-res://${$colorTheme}/redo.svg`}></button>
+  <button class="tool nav wide" on:click={refreshOrStop}><img alt={tab.isLoading ? _.STOPLOAD : _.REFRESHLOAD} src={tab.isLoading ? `n-res://${$colorTheme}/cross.svg` : `n-res://${$colorTheme}/redo.svg`}></button>
   <AddressBar {tab} />
   <button
     class="tool wide progressbar-container"
