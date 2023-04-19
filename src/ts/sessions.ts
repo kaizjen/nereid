@@ -551,6 +551,8 @@ export function registerSession(ses: Session) {
     }
 
     function writePermission(isAllowed: boolean | null) {
+      if (getValidName(permission) == '-unknown-') return;
+
       if (hostname in sitePermissions) {
         sitePermissions[hostname][getValidName(permission)] = isAllowed;
       } else {
