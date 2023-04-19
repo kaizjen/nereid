@@ -119,7 +119,7 @@ export function init() {
       wc.loadURL('http://' + q)
     }
 
-    if ($.isValidURL(q) && !q.includes(' ')) {
+    if ($.isValidURL(q)) {
       win.currentTab.lastNavigationReason = 'input-url'
       const parsed = URLParse(q);
 
