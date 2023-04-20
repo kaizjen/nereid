@@ -145,7 +145,7 @@ expose('[NEREID]', {
     close() {
       // This call can still be avoided with `window.open('/', '', 'popup').close.call(window)`,
       // which would close the tab.
-      // TODO: find a way to patch every .call function somehow (possibly by modifying electron's code?)
+      // TODO: find a way to patch every .close function somehow (possibly by modifying electron's code?)
       if (window.opener) {
         window.close();
 
