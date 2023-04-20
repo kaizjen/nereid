@@ -339,8 +339,6 @@ export async function newTabWindow(tabOptionsArray: TabOptions[]): Promise<TabWi
 export async function newSingleTabWindow(tab: RealTab, windowOptions: Partial<BrowserWindowConstructorOptions> = {}, owner: RealTab) {
   const { bounds: displayBounds } = screen.getPrimaryDisplay();
 
-  console.log(windowOptions.x, windowOptions.width);
-
   if (
     windowOptions.x < 0 || windowOptions.y < 0 ||
     displayBounds.width < ((windowOptions.x || 0) + (windowOptions.width || 0)) ||
@@ -355,6 +353,14 @@ export async function newSingleTabWindow(tab: RealTab, windowOptions: Partial<Br
   }
 
   let w = await newChromeWindow('n-internal://chrome/singletab.html', windowOptions) as SingleTabWindow;
+
+  if (!owner.webContents || owner.webContents.isDestroyed() || !owner.owner || owner.owner.isDestroyed()) {
+    // This could happen during a race condition when a window opens a pop-up
+    // and then immediately closes, before this window could register the listeners.
+    // In this case, forcefully close the window.
+    w.destroy();
+    return w;
+  }
 
   w.winID = windows.push(w) - 1;
   w.tabs = [] as any;
