@@ -22,12 +22,17 @@
     --group-cyan-text: black;
     --group-orange: #c37909;
   }
-  #nereid-icn {
+  .nereid-icn {
     width: 1.35rem;
     height: 1.35rem;
     margin: 0.325rem;
     position: absolute;
     left: 0;
+  }
+  .nereid-icn.favicon {
+    width: 1rem;
+    height: 1rem;
+    margin: 0.5rem;
   }
   .traffic-lights {
     white-space: nowrap;
@@ -85,6 +90,9 @@
     z-index: 10;
     max-width: calc(100% - 2rem - 1.25rem - 20px - var(--titlebar-right)); /* - margin-right - the logo */
     left: 0;
+  }
+  .title.tabhead {
+    padding-left: 0.5rem;
   }
   .tabhead > * {
     -webkit-app-region: no-drag;
@@ -595,9 +603,16 @@
     {isOnLinux ? `--titlebar-left: 0; --titlebar-right: ${trafficLightsWidth}px;` : ''}
   "
 >
-  <img
-    alt="" src="n-res://{$colorTheme}/nereid.svg" id="nereid-icn"
-  >
+  {#if window.isSingleTab}
+    <img
+      alt="" src="{tabs[currentTabIndex]?.favicon ?? `n-res://${$colorTheme}/nereid.svg`}" class="nereid-icn favicon"
+    >
+  {:else}
+    <img
+      alt="" src="n-res://{$colorTheme}/nereid.svg" class="nereid-icn"
+    >
+  {/if}
+
   {#if onlyShowCurrentTabGroup && currentTabGroup}
     <div
       class="tabhead"
@@ -651,7 +666,7 @@
     </div>
   {/if}
 
-  <div class="tabhead" style:display={onlyShowCurrentTabGroup && currentTabGroup ? 'none' : ''}>
+  <div class="tabhead" style:display={(onlyShowCurrentTabGroup && currentTabGroup || window.isSingleTab) ? 'none' : ''}>
     {#if pinnedTabsEndIndex != 0}
       <div class="pinnedtabs">
         {#each tabs.slice(0, pinnedTabsEndIndex) as tab, index (tab)}
@@ -708,6 +723,11 @@
       <img alt="" src="n-res://{$colorTheme}/plus.svg">
     </button>
   </div>
+
+  {#if window.isSingleTab}
+    <div class="title tabhead">{tabs[currentTabIndex]?.title}</div>
+  {/if}
+
   <div
     class="traffic-lights"
     style:pointer-events={isOnLinux ? '' : 'none'}

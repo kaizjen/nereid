@@ -2,7 +2,7 @@
 
 import { app, clipboard, dialog, ipcMain, Menu, MenuItem, session } from "electron";
 import { Bookmark, RealTab, Tab, TabGroup, TabOptions, TabWindow } from "./types";
-import { isTabWindow, newWindow, setCurrentTabBounds, openUtilityWindow } from './windows'
+import { isTabWindow, newTabWindow, setCurrentTabBounds, openUtilityWindow } from './windows'
 import { bookmarks, config, control, downloads } from './userdata'
 import * as pathModule from "path";
 import * as fs from "fs"
@@ -226,7 +226,7 @@ const tabs_windows: Electron.MenuItemConstructorOptions[] = [
       } else {
         url = $.newTabUrl
       }
-      newWindow([{ url }]);
+      newTabWindow([{ url }]);
     },
     accelerator: 'CmdOrCtrl+N',
     id: 'new-win'
@@ -779,7 +779,7 @@ export async function showContextMenu(win: TabWindow, tab: RealTab, opts: Electr
   if (opts.linkURL) {
     addItem({ label: $t('open.newTab'), click() { createContextTab({ url: opts.linkURL }) } })
     addItem({ label: $t('open.newPrivateTab'), click() { createContextTab({ url: opts.linkURL, private: true }) } })
-    addItem({ label: $t('open.newWindow'), click() { newWindow([{ url: opts.linkURL, private: tab.private }]) } })
+    addItem({ label: $t('open.newWindow'), click() { newTabWindow([{ url: opts.linkURL, private: tab.private }]) } })
     addItem({ label: $t('open.thisTab'), click() { tab.webContents.loadURL(opts.linkURL) } })
     addItem(SEPARATOR)
     addItem({ label: $t('open.leftPane'), click() {
@@ -1089,7 +1089,7 @@ export function menuOfTab(win: TabWindow, tab: Tab) {
   }
   addItem(SEPARATOR)
   addItem({ label: $t('openInNewWindow'), async click() {
-    const window = await newWindow([]);
+    const window = await newTabWindow([]);
     moveTab(tab, { window, index: 0 })
   } })
   addItem(SEPARATOR)
@@ -1192,7 +1192,7 @@ export function menuOfBookmark(win: TabWindow, bookmark: Bookmark, index: number
   addItem({
     label: t_menu('open.newWindow'),
     click() {
-      newWindow([{ url: bookmark.url }])
+      newTabWindow([{ url: bookmark.url }])
     }
   })
   addItem({

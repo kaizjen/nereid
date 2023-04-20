@@ -1,11 +1,14 @@
 import type { Response } from "electron-fetch";
 import { ParsedURL } from "./types";
 import { parse as legacyParse } from "url"
+import { BrowserWindowConstructorOptions } from "electron";
 
 // here are all the things that don't belong to a specific aspect of the browser and are used by everything
 // except for searchHintAlgorithms
 
 const slashesRegex = /^[A-Za-z][A-Za-z0-9+-.]*:\/\//;
+
+// The URL parser
 function setToValue(array: string[], val: any): { [prop: string]: typeof val } {
   let o = {};
   array.forEach(prop => {
@@ -48,6 +51,58 @@ function URLParse(str: string): ParsedURL {
     ], null) as any
   }
 };
+
+// The window.open features parser
+// Code taken from https://github.com/electron/electron/blob/main/lib/browser/parse-features-string.ts
+const keysOfTypeNumber = [
+  'top', 'left', 'x', 'y', 'width', 'height', 'minWidth', 'maxWidth', 'minHeight', 'maxHeight', 'opacity'
+];
+function coerce(key: string, value: string): string | number | boolean {
+  if (keysOfTypeNumber.includes(key)) {
+    return parseInt(value, 10);
+  }
+
+  switch (value) {
+    case 'true':
+    case '1':
+    case 'yes':
+    case undefined:
+      return true;
+    case 'false':
+    case '0':
+    case 'no':
+      return false;
+    default:
+      return value;
+  }
+}
+const allowedWebPreferences = ['zoomFactor', 'javascript'] as const;
+type AllowedWebPreference = (typeof allowedWebPreferences)[number];
+/**
+ * Parses a feature string that has the format used in window.open().
+ */
+function parseWindowOpenFeatures(features: string) {
+  const parsed = {} as { [key: string]: any };
+  for (const keyValuePair of features.split(',')) {
+    const [key, value] = keyValuePair.split('=').map(str => str.trim());
+    if (key) parsed[key] = coerce(key, value);
+  }
+
+  const webPreferences: { [K in AllowedWebPreference]?: any } = {};
+  allowedWebPreferences.forEach((key) => {
+    if (parsed[key] === undefined) return;
+    webPreferences[key] = parsed[key];
+    delete parsed[key];
+  });
+
+  if (parsed.left !== undefined) parsed.x = parsed.left;
+  if (parsed.top !== undefined) parsed.y = parsed.top;
+
+  return {
+    windowOptions: parsed as Omit<BrowserWindowConstructorOptions, 'webPreferences'>,
+    webPreferences
+  };
+}
 
 export default {
   // TODO: when extensions are implemented, move this to an appropriate file
@@ -170,6 +225,7 @@ export default {
     } else return false
   },
   URLParse,
+  parseWindowOpenFeatures,
   /**
    * Gets unique values from an array by comparing them to each other using `compareFn`.
    */

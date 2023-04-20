@@ -3,7 +3,7 @@
 import * as _argvParse from "argv-parse";
 import * as userData from "./userdata";
 import { app, dialog } from 'electron'
-import { getTabWindowByID, newWindow } from './windows'
+import { getTabWindowByID, newTabWindow } from './windows'
 import { createTab } from './tabs'
 import * as pathModule from 'path'
 import $ from './common'
@@ -89,7 +89,7 @@ export function init() {
 
   if (lastTabs.length < 1) lastTabs = [{ url: $.newTabUrl, isOpenedAtStart: true }];
 
-  function actArgv(argv: ReturnType<ArgvParse>, workingDir: string, isAlreadyLaunched?: boolean) {
+  async function actArgv(argv: ReturnType<ArgvParse>, workingDir: string, isAlreadyLaunched?: boolean) {
     if (argv._?.[0]) {
       // Has an argument
       let urlOrPath = argv._?.[0];
@@ -103,11 +103,11 @@ export function init() {
       }
       if (!isAlreadyLaunched) {
         // First time launching, an argument with a url.
-        newWindow([...lastTabs, { url, private: argv.private, isOpenedAtStart: true }])
+        await newTabWindow([...lastTabs, { url, private: argv.private, isOpenedAtStart: true }])
 
       } else if (argv['new-window']) {
         // Second instance, --new-window
-        newWindow([{ url, private: argv.private, isOpenedAtStart: true }])
+        await newTabWindow([{ url, private: argv.private, isOpenedAtStart: true }])
 
       } else {
         let win = getTabWindowByID(0);
@@ -116,19 +116,19 @@ export function init() {
 
     } else if (!isAlreadyLaunched) {
       if (userData.config.get().welcomePhase <= 4) {
-        newWindow([{ url: 'nereid://welcome' }]);
+        await newTabWindow([{ url: 'nereid://welcome' }]);
         getTabWindowByID(0).focus();
         return;
       }
       // This is the first launch, no arguments.
       if (onStart.type == 'page') {
-        newWindow([ { url: onStart.url, isOpenedAtStart: true } ])
+        await newTabWindow([ { url: onStart.url, isOpenedAtStart: true } ])
 
       } else if (onStart.type == 'new-tab') {
-        newWindow([ { url: $.newTabUrl, isOpenedAtStart: true } ])
+        await newTabWindow([ { url: $.newTabUrl, isOpenedAtStart: true } ])
 
       } else {
-        newWindow(lastTabs);
+        await newTabWindow(lastTabs);
       }
     } else {
       let win = getTabWindowByID(0);
@@ -138,14 +138,14 @@ export function init() {
   }
 
   if (argv['second-instance'] || app.requestSingleInstanceLock({ argv: JSON.stringify(argv) })) {
-    app.on('second-instance', (_e, rawArgv, workDir, data) => {
+    app.on('second-instance', async(_e, rawArgv, workDir, data) => {
       console.log('got second instance', rawArgv, 'data:', data);
 
       if (!data || !(data as any).argv || rawArgv.length == 0) return; // rawArgv.length == 0 if started by another user
 
       let argv = JSON.parse((data as any).argv);
 
-      actArgv(argv, workDir, true)
+      await actArgv(argv, workDir, true)
     })
     app.on('open-url', (e, url) => {
       e.preventDefault()
@@ -165,7 +165,7 @@ export function init() {
     app.exit()
   }
 
-  actArgv(argv, process.cwd())
+  actArgv(argv, process.cwd()).catch(console.error)
 }
 
 export async function kill(pid: number) {

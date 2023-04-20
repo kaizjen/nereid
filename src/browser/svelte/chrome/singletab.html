@@ -12,6 +12,10 @@
   <script type="module">
     import Main from './Main.svelte.js';
 
+    Object.defineProperty(window, 'isSingleTab', {
+      writable: false, enumerable: false, value: true
+    })
+
     const app = new Main({
       target: document.body
     })

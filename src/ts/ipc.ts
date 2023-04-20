@@ -9,7 +9,7 @@ import $ from "./common";
 import * as tabManager from './tabs'
 import * as _url from "url";
 import { appMenu, displayOptions, menuNewTab, menuOfAddressBar, menuOfBookmark, menuOfPaneDivider, menuOfProcess, menuOfTab } from "./menu";
-import { getTabWindowByID, setHeadHeight, isTabWindow, newDialogWindow, setCurrentTabBounds, getAllTabWindows, getIDOfTabWindow, PANE_SEP_WIDTH, newWindow } from "./windows";
+import { getTabWindowByID, setHeadHeight, isTabWindow, newDialogWindow, setCurrentTabBounds, getAllTabWindows, getIDOfTabWindow, PANE_SEP_WIDTH, newTabWindow } from "./windows";
 import type TypeFuse from "fuse.js";
 import { certificateCache, DEFAULT_PARTITION, NO_CACHE_PARTITION, PRIVATE_PARTITION } from "./sessions";
 import { getSupportedLanguage, t, availableTranslations } from "./i18n";
@@ -299,7 +299,7 @@ export function init() {
       return console.warn("The only tab group in a window can't be moved to another window")
     }
 
-    const newWin = await newWindow([]);
+    const newWin = await newTabWindow([]);
 
     tabs.forEach((tab, index) => {
       tabManager.moveTab(tab, { window: newWin, index })

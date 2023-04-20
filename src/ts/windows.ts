@@ -1,6 +1,6 @@
 // This file is for all types of windows
 
-import type { TabWindow, TabOptions, Tab, Configuration, Bookmarks, RealTab } from "./types";
+import type { TabWindow, TabOptions, Tab, Configuration, Bookmarks, RealTab, ChromeWindow, SingleTabWindow } from "./types";
 import { app, BrowserView, BrowserWindow, BrowserWindowConstructorOptions, nativeTheme, screen } from "electron";
 import * as tabManager from "./tabs";
 import * as _url from "url";
@@ -56,24 +56,11 @@ function updateWindowBounds(window: TabWindow) {
     }
   });
 }
-
-export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindow> {
-  let { width, height, x, y, maximized } = lastlaunch.get().bounds;
-
-  const { bounds: displayBounds } = screen.getDisplayMatching({ width, height, x, y });
-
-  if (
-    displayBounds.width < (x + width) ||
-    displayBounds.height < (y + height)
-  ) {
-    width = 1000;
-    height = 700;
-    x = displayBounds.x;
-    y = displayBounds.y;
-
-    console.log("Window is out of bounds, returning it back");
-  }
-
+/** Create a base chrome window. **Notice that this window is created HIDDEN by default** */
+async function newChromeWindow(
+  chromeURL: string,
+  overrideBrowserWindowOptions: Partial<BrowserWindowConstructorOptions>
+): Promise<ChromeWindow> {
   let w = new BrowserWindow({
     frame: !platform.linux_BSD,
     titleBarOverlay: {
@@ -86,7 +73,7 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
     backgroundColor: '#ffffffff',
     icon: pathModule.join(__dirname, `../../icon.${platform.windows ? 'ico' : 'png'}`),
 
-    width, height, x, y,
+    //width, height, x, y,
 
     minHeight: 400,
     minWidth: 600,
@@ -95,15 +82,9 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
       nodeIntegration: true,
       contextIsolation: false,
       partition: INTERNAL_PARTITION,
-    }
-  }) as TabWindow;
-
-  w.winID = windows.push(w) - 1;
-  w.tabs = []; // BrowserViews will be here
-  w.paneViews = [];
-  w.tabGroups = [];
-  w.pinnedTabsEndIndex = 0;
-  w.recentlyClosed = [];
+    },
+    ...overrideBrowserWindowOptions
+  }) as ChromeWindow;
 
   w.chromeHeight = 74; // initial value for chromeHeight if the chrome takes a long time to load
 
@@ -166,28 +147,6 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
   }
   // these functions are called below
 
-  w.on('close', () => updateWindowBounds(w))
-
-  w.on('closed', () => {
-    tabManager.updateSavedTabsImmediately();
-
-    // i don't think browserviews (especially unattached ones) are destroyed when BrowserWindow closes
-    w.tabs.forEach(item => {
-      if (item.isGhost) return;
-      tabManager.detach(tabManager.asRealTab(item));
-      tabManager.asRealTab(item).webContents.close();
-    });
-    w.chrome.webContents.close();
-
-    let index = windows.indexOf(w);
-    if (index == -1) throw(new Error("This should NOT happen! Window is not in windows[] array!"))
-
-    windows.splice(index, 1) // remove from windows array
-    nativeTheme.off('updated', reactToThemeChange)
-    config.unlisten(onConfigChange);
-    bookmarks.unlisten(onBookmarksChange);
-  })
-
   if (!WCO_BOUNDS) {
     await w.webContents.loadURL('data:text/html,')
     let currentChange = -1;
@@ -228,7 +187,6 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
     `);
   }
 
-
   // The chrome of Nereid is a BrowserView called `chromeBV`
   let chromeBV = new BrowserView({
     webPreferences: {
@@ -244,7 +202,7 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
 
   w.chrome = chromeBV;
 
-  await chromeBV.webContents.loadURL('n-internal://chrome/index.html')
+  await chromeBV.webContents.loadURL(chromeURL)
   if (!app.isPackaged || control.options.open_devtools_for_window?.value) {
     chromeBV.webContents.openDevTools({ mode: 'detach' })
   }
@@ -259,28 +217,11 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
   })
 
   chromeBV.webContents.on('did-finish-load', async () => {
-    console.log("Chrome is ready, sending tab info");
+    console.log("Chrome is ready, sending base window info");
 
     chromeBV.webContents.send('wco', WCO_BOUNDS)
     onConfigChange(config.get())
     onBookmarksChange(await bookmarks.get())
-    w.tabs.forEach((tab, i) => {
-      chromeBV.webContents.send('addTab', {
-        position: i,
-        private: tab.private,
-        uid: tab.uniqueID,
-        url: 'nereid://newtab'
-      });
-      tabManager.updateTabState(w, { tab });
-    })
-
-    w.tabGroups.forEach(group => {
-      w.chrome.webContents.send('addTabGroup', group)
-    })
-
-    chromeBV.webContents.send('tabChange', w.tabs.indexOf(w.currentTab))
-
-    chromeBV.webContents.send('pinnedTabsEndIndexUpdate', w.pinnedTabsEndIndex)
   })
 
   chromeBV.webContents.on('focus', () => {
@@ -293,14 +234,192 @@ export async function newWindow(tabOptionsArray: TabOptions[]): Promise<TabWindo
   config.listenCall(onConfigChange);
   bookmarks.listenCall(onBookmarksChange);
 
+  w.show();
+
+  w.on('focus', () => chromeBV.webContents.send('focus'))
+  w.on('blur', () => chromeBV.webContents.send('blur'))
+
+  w.on('closed', () => {
+    // Clean up all the listeners
+    nativeTheme.off('updated', reactToThemeChange)
+    config.unlisten(onConfigChange);
+    bookmarks.unlisten(onBookmarksChange);
+
+    w.chrome.webContents.close();
+  })
+
+  return w;
+}
+
+export async function newTabWindow(tabOptionsArray: TabOptions[]): Promise<TabWindow> {
+  let { width, height, x, y, maximized } = lastlaunch.get().bounds;
+
+  const { bounds: displayBounds } = screen.getDisplayMatching({ width, height, x, y });
+
+  if (
+    displayBounds.width < (x + width) ||
+    displayBounds.height < (y + height)
+  ) {
+    width = 1000;
+    height = 700;
+    x = displayBounds.x;
+    y = displayBounds.y;
+
+    console.log("Window is out of bounds, returning it back");
+  }
+
+  let w = await newChromeWindow('n-internal://chrome/index.html', { width, height, x, y, }) as TabWindow;
+
+  w.winID = windows.push(w) - 1;
+  w.tabs = []; // BrowserViews will be here
+  w.paneViews = [];
+  w.tabGroups = [];
+  w.pinnedTabsEndIndex = 0;
+  w.recentlyClosed = [];
+
+  if (platform.windows) w.hookWindowMessage(WM_INITMENU, (wParam, lParam) => {
+    // On Windows the 'system-context-menu' event never fires, so this is the only working solution
+    // to display custom context menu
+    // thanks, qjl1569 :D (https://github.com/electron/electron/issues/24893#issuecomment-1109262719)
+    w.setEnabled(false);
+    w.setEnabled(true);
+    // voodoo magic to prevent default menu from showing
+
+    showAppMenu();
+  })
+
+  w.on('close', () => updateWindowBounds(w))
+
+  w.on('closed', () => {
+    tabManager.updateSavedTabsImmediately();
+
+    // i don't think browserviews (especially unattached ones) are destroyed when BrowserWindow closes
+    w.tabs.forEach(item => {
+      if (item.isGhost) return;
+      tabManager.detach(tabManager.asRealTab(item));
+      tabManager.asRealTab(item).webContents.close();
+    });
+
+    let index = windows.indexOf(w);
+    if (index == -1) throw(new Error("This should NOT happen! Window is not in windows[] array!"))
+
+    windows.splice(index, 1) // remove from windows array
+  })
+
+  w.chrome.webContents.on('did-finish-load', async () => {
+    console.log("Chrome is ready, sending tab info");
+
+    w.tabs.forEach((tab, i) => {
+      w.chrome.webContents.send('addTab', {
+        position: i,
+        private: tab.private,
+        uid: tab.uniqueID,
+        url: 'nereid://newtab'
+      });
+      tabManager.updateTabState(w, { tab });
+    })
+
+    w.tabGroups.forEach(group => {
+      w.chrome.webContents.send('addTabGroup', group)
+    })
+
+    w.chrome.webContents.send('tabChange', w.tabs.indexOf(w.currentTab))
+
+    w.chrome.webContents.send('pinnedTabsEndIndexUpdate', w.pinnedTabsEndIndex)
+  })
+
   tabOptionsArray.forEach(tabOptions => {
     tabManager.createTab(w, tabOptions)
   })
   if (maximized) w.maximize()
   w.show();
 
-  w.on('focus', () => chromeBV.webContents.send('focus'))
-  w.on('blur', () => chromeBV.webContents.send('blur'))
+  return w;
+}
+export async function newSingleTabWindow(tab: RealTab, windowOptions: Partial<BrowserWindowConstructorOptions> = {}, owner: RealTab) {
+  const { bounds: displayBounds } = screen.getPrimaryDisplay();
+
+  console.log(windowOptions.x, windowOptions.width);
+
+  if (
+    windowOptions.x < 0 || windowOptions.y < 0 ||
+    displayBounds.width < ((windowOptions.x || 0) + (windowOptions.width || 0)) ||
+    displayBounds.height < ((windowOptions.y || 0) + (windowOptions.height || 0))
+  ) {
+    windowOptions.width = 1000;
+    windowOptions.height = 700;
+    windowOptions.x = displayBounds.x;
+    windowOptions.y = displayBounds.y;
+
+    console.log("Opened window is out of bounds, returning it back");
+  }
+
+  let w = await newChromeWindow('n-internal://chrome/singletab.html', windowOptions) as SingleTabWindow;
+
+  w.winID = windows.push(w) - 1;
+  w.tabs = [] as any;
+  w.paneViews = [];
+  w.tabGroups = [];
+  w.pinnedTabsEndIndex = 0;
+  w.recentlyClosed = [];
+
+  w.currentTab = tab;
+
+  w.owner = owner;
+
+  tabManager.attach(w, tab);
+  tabManager.addTab(w, tab, { url: tab.webContents.getURL() });
+  tabManager.updateTabState(w, { tab });
+  tabManager.selectTab(w, { index: 0 });
+
+  function handleCreateTab({ win, options, preventDefault }) {
+    if (win != w) return;
+
+    const ownerWindow = w.owner.owner;
+
+    preventDefault();
+    tabManager.createTab(ownerWindow, { ...options, position: ownerWindow.tabs.indexOf(w.owner) + 1 })
+  }
+  function handleCloseTab({ win, preventDefault }) {
+    if (win != w) return;
+
+    preventDefault();
+    w.close();
+  }
+  function handleMoveTab({ destination, preventDefault }) {
+    if (destination.window != w) return;
+    preventDefault();
+  }
+
+  function handleGrandParentClose() {
+    // I thought it would be funny to name the parent window "grandparent" ngl
+    w.close();
+  }
+
+  tabManager.tabEvents.on('createTab', handleCreateTab)
+  tabManager.tabEvents.on('closeTab', handleCloseTab)
+  tabManager.tabEvents.on('moveTab', handleMoveTab)
+
+  w.owner.owner.once('closed', handleGrandParentClose)
+
+  w.on('closed', () => {
+    windows.splice(windows.indexOf(w), 1);
+
+    if (w.owner) {
+      w.owner.childWindow = null;
+    }
+    
+    tabManager.detach(w.currentTab);
+    if (w.currentTab.childWindow) {
+      w.currentTab.childWindow.close()
+    }
+
+    w.owner?.owner?.off('closed', handleGrandParentClose)
+
+    tabManager.tabEvents.off('createTab', handleCreateTab)
+    tabManager.tabEvents.off('closeTab', handleCloseTab)
+    tabManager.tabEvents.off('moveTab', handleMoveTab)
+  })
 
   return w;
 }
@@ -321,7 +440,10 @@ export function isTabWindow(win: BrowserWindow): win is TabWindow {
   return windows.includes(win as any)
 }
 
-export function setCurrentTabBounds(win: TabWindow, tab?: Tab) {
+export function setCurrentTabBounds(_win: ChromeWindow, tab?: Tab) {
+  // These two are the only examples of ChromeWindows
+  const win = _win as TabWindow | SingleTabWindow;
+
   // The BrowserView resizes incorrectly when window is resized or maximized/restored (on Windows).
   // That's because w.getBounds() has weird additional 16px of width
   const { width, height } = win.getContentBounds()

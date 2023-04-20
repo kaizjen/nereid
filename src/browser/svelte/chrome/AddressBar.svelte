@@ -25,6 +25,10 @@
     box-shadow: 0 0 0 2px var(--accent-5);
     background: var(--dark-1)
   }
+  #addressbar.disabled {
+    background: none !important;
+    box-shadow: none !important;
+  }
   .tab-state {
     display: flex;
     align-items: center;
@@ -63,6 +67,7 @@
     cursor: text;
     direction: ltr;
     height: 100%;
+    user-select: text;
   }
   #ab-input {
     background: transparent;
@@ -125,6 +130,8 @@
   import BookmarksModal from "./popups/BookmarksModal.svelte";
   import AdBlocker from "./popups/AdBlocker.svelte";
 
+  export let disabled = false;
+
   const { t } = window;
   const _ = {
     PLACEHOLDER: t('ui.addressBar-placeholder'),
@@ -141,7 +148,7 @@
   const setTop = getContext('setTop')
 
   const activate = () => {
-    if (isActive) return;
+    if (isActive || disabled) return;
 
     isActive = true;
     setTop(true);
@@ -160,7 +167,7 @@
   let isActive = false;
   let inputValue = '';
   let hints = [];
-  let inputRef; // before it is referenced, initialize as a dummy object
+  let inputRef;
   let noBorder = false;
 
   let config = getContext('config');
@@ -334,7 +341,7 @@
   function handleMouseUp({ button }) {
     if (button != 2) return;
     ipcRenderer.send('chrome.menuOfAddressBar', {
-      selectionText: inputRef.value.slice(inputRef.selectionStart, inputRef.selectionEnd)
+      selectionText: inputRef?.value.slice(inputRef?.selectionStart, inputRef?.selectionEnd)
     })
   }
 </script>
@@ -346,7 +353,7 @@
   bookmarkDialog = false;
   adblockerDialog = false;
 }} />
-<div class:noborder={anyDialog || noBorder} id="addressbar" class:focus={isActive}>
+<div class:noborder={anyDialog || noBorder} id="addressbar" class:disabled class:focus={isActive}>
   <button use:hover on:click={() => securityDialog = !securityDialog} class="tab-state sec" class:open={securityDialog}>
     <img alt={_.SECURITY}
       src={
@@ -367,27 +374,29 @@
     <span class="port">{url.port ?? ''}</span>
     <span class="page">{url.path}</span>
   </button>
-  <input
-    on:blur={() => {
-      window.requestAnimationFrame(() => {
-        if (!document.activeElement.className.includes('h-link')) { isActive = false; setTop(false) }
-        inputRef.setSelectionRange(0, 0);
-      })
-    }}
-    bind:this={inputRef}
-    type="text"
-    style:display={isActive ? '' : 'none'}
-    id="ab-input"
-    on:keydown={handleKeyDown}
-    bind:value={inputValue}
-    placeholder={_.PLACEHOLDER}
-    on:mouseup={() => {
-      if (inputRef.selectionStart != inputRef.selectionEnd || !isFirstTimeSelecting) return;
-      inputRef.select()
-      isFirstTimeSelecting = false;
-    }}
-    on:mouseup={handleMouseUp}
-  >
+  {#if !disabled}
+    <input
+      on:blur={() => {
+        window.requestAnimationFrame(() => {
+          if (!document.activeElement.className.includes('h-link')) { isActive = false; setTop(false) }
+          inputRef.setSelectionRange(0, 0);
+        })
+      }}
+      bind:this={inputRef}
+      type="text"
+      style:display={isActive ? '' : 'none'}
+      id="ab-input"
+      on:keydown={handleKeyDown}
+      bind:value={inputValue}
+      placeholder={_.PLACEHOLDER}
+      on:mouseup={() => {
+        if (inputRef.selectionStart != inputRef.selectionEnd || !isFirstTimeSelecting) return;
+        inputRef.select()
+        isFirstTimeSelecting = false;
+      }}
+      on:mouseup={handleMouseUp}
+    >
+  {/if}
   {#if $globalZoom != $config?.ui.defaultZoomFactor}
     <button
       class="tab-state"

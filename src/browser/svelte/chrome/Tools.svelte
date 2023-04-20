@@ -119,10 +119,12 @@
   downloadsDialog = false;
 }} />
 <div class="tools" class:private={tab.private}>
-  <button class="tool nav arrow-img" class:disabled={!tab.nav?.canGoBack} on:click={navBack}><img alt={_.BACK} src="n-res://{$colorTheme}/arrow.svg" class="rotated"></button>
-  <button class="tool nav arrow-img" class:disabled={!tab.nav?.canGoFwd} on:click={navFwd}><img alt={_.FWD} src="n-res://{$colorTheme}/arrow.svg"></button>
-  <button class="tool nav wide" on:click={refreshOrStop}><img alt={tab.isLoading ? _.STOPLOAD : _.REFRESHLOAD} src={tab.isLoading ? `n-res://${$colorTheme}/cross.svg` : `n-res://${$colorTheme}/redo.svg`}></button>
-  <AddressBar {tab} />
+  {#if !window.isSingleTab}
+    <button class="tool nav arrow-img" class:disabled={!tab.nav?.canGoBack} on:click={navBack}><img alt={_.BACK} src="n-res://{$colorTheme}/arrow.svg" class="rotated"></button>
+    <button class="tool nav arrow-img" class:disabled={!tab.nav?.canGoFwd} on:click={navFwd}><img alt={_.FWD} src="n-res://{$colorTheme}/arrow.svg"></button>
+    <button class="tool nav wide" on:click={refreshOrStop}><img alt={tab.isLoading ? _.STOPLOAD : _.REFRESHLOAD} src={tab.isLoading ? `n-res://${$colorTheme}/cross.svg` : `n-res://${$colorTheme}/redo.svg`}></button>
+  {/if}
+  <AddressBar {tab} disabled={window.isSingleTab} />
   <button
     class="tool wide progressbar-container"
     class:open={downloadsDialog}
@@ -135,12 +137,14 @@
       </div>
     {/if}
   </button>
-  <button class="tool" on:click={(e) => {
-    let { bottom, left } = e.currentTarget.getBoundingClientRect()
-    ipcRenderer.send('chrome.browserMenu', {
-      x: left, y: bottom
-    })
-  }}><img alt={_.MORE} src="n-res://{$colorTheme}/more.svg"></button>
+  {#if !window.isSingleTab}
+    <button class="tool" on:click={(e) => {
+      let { bottom, left } = e.currentTarget.getBoundingClientRect()
+      ipcRenderer.send('chrome.browserMenu', {
+        x: left, y: bottom
+      })
+    }}><img alt={_.MORE} src="n-res://{$colorTheme}/more.svg"></button>
+  {/if}
   {#if downloadsDialog}
     <Downloads bind:open={downloadsDialog} {downloadPercent} {downloadInfo} />
   {/if}

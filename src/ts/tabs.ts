@@ -1,16 +1,18 @@
 // Tabs' creation, removal and whatever else
 
 import type { TabWindow, TabOptions, Tab, RealTab, PaneView } from "./types";
-import { BrowserView, BrowserWindow, dialog, nativeTheme, session, WebContents } from "electron";
+import { BrowserView, BrowserViewConstructorOptions, BrowserWindow, dialog, nativeTheme, session, webContents, WebContents, WebPreferences } from "electron";
 import fetch from "electron-fetch";
 import * as userData from './userdata'
 import { DEFAULT_PARTITION, NO_CACHE_PARTITION, PRIVATE_PARTITION, validateDomainByURL } from './sessions'
 import { handleNetError } from './net-error-analyzer'
 import $ from './common'
 import { showContextMenu } from "./menu";
-import { getAllTabWindows, newWindow, setCurrentTabBounds } from "./windows";
+import { getAllTabWindows, newSingleTabWindow, newTabWindow, setCurrentTabBounds } from "./windows";
 import { t } from "./i18n";
 import { addTabToGroup, destroyEmptyGroups, getTabGroupByID, getTabGroupByTab } from "./tabgroups";
+import { EventEmitter } from "events";
+import type TypedEmitter from "typed-emitter";
 
 const { URLParse } = $
 
@@ -55,6 +57,31 @@ type ChromeTabState = {
   isMuted: boolean
 }
 
+type Preventable = { preventDefault(): void }
+type TabEvents = {
+  browserViewCreated(o: { browserView: RealTab }): any
+  selectTab(o: Preventable & { win: TabWindow, tab: Tab }): any
+  createTab(o: Preventable & { win: TabWindow, options: TabOptions }): any
+  closeTab(o: Preventable & { win: TabWindow, tab: Tab }): any
+  moveTab(o: Preventable & {
+    tab: Tab, destination: { window: TabWindow, index: number }, shouldSelect: boolean, preventPinning: boolean
+  }): any
+}
+
+
+export const tabEvents = new EventEmitter() as TypedEmitter<TabEvents>;
+/** Returns `true` if the event wasn't prevented */
+function emitPreventable<T extends keyof TabEvents>(
+  eventName: T,
+  arg: Omit<Parameters<TabEvents[T]>[0], 'preventDefault'>,
+) {
+  let defaultPrevented = false;
+  (arg as any).preventDefault = () => defaultPrevented = true;
+
+  (tabEvents.emit as any)(eventName, arg);
+
+  return !defaultPrevented;
+}
 
 export function getTabByUID(uid: number) {
   return tabUniqueIDs[uid];
@@ -264,14 +291,23 @@ async function pushToHistory(tab: Tab, responseCode: number = 0) {
 }
 
 
+type CreateBrowserViewOptions = {
+  addWebPreferences?: Partial<WebPreferences>
+  overrideWebPreferences?: Partial<WebPreferences>
+  attachWebContents?: WebContents
+}
 /**
  * Creates a tab-like browserView and loads the URL.
  * @param  opts<`TabOptions`> Options
  * @returns  {BrowserView} The created `BrowserView`
  */
-export function createBrowserView(opts: TabOptions): RealTab {
-  let tab = new BrowserView({
+export function createBrowserView(
+  opts: TabOptions,
+  { addWebPreferences = {}, overrideWebPreferences = {}, attachWebContents = null }: CreateBrowserViewOptions = {}
+): RealTab {
+  const constructorOptions: BrowserViewConstructorOptions = {
     webPreferences: {
+      ...addWebPreferences,
       nodeIntegration: false,
       nodeIntegrationInSubFrames: true,
       nodeIntegrationInWorker: true,
@@ -281,9 +317,15 @@ export function createBrowserView(opts: TabOptions): RealTab {
       preload: `${__dirname}/preloads/tab.js`,
       backgroundThrottling: true,
       autoplayPolicy: autoplayWithDocumentActivation ? 'document-user-activation-required' : 'user-gesture-required',
-      navigateOnDragDrop: true
+      navigateOnDragDrop: true,
+      ...overrideWebPreferences
     }
-  }) as RealTab;
+  }
+  if (attachWebContents) {
+    // Undocumented `webContents` option allows for attaching already existing webContents
+    constructorOptions['webContents'] = attachWebContents;
+  }
+  let tab = new BrowserView(constructorOptions) as RealTab;
 
   if (!opts.uid) {
     let uid = UIDsAmount;
@@ -303,6 +345,8 @@ export function createBrowserView(opts: TabOptions): RealTab {
   tab.isGhost = false;
   tab.history = [];
   tab.currentHistoryIndex = -1;
+
+  tabEvents.emit('browserViewCreated', { browserView: tab });
 
   return tab;
 }
@@ -495,11 +539,20 @@ export function attach(win: TabWindow, tab: RealTab) {
 
   tab.owner = win;
 
-  tab.webContents.setWindowOpenHandler(({ disposition, url, features, frameName }) => {
-    console.log('opening new window:', { disposition, url, features, frameName });
+  // Remove the default Electron listeners
+  tab.webContents.removeAllListeners('-new-window');
+  tab.webContents.removeAllListeners('-add-new-contents');
 
+  // MAY BREAK: Check every time before bumping Electron!
+  // Undocumented listener for when a USER clicks a link
+  tab.webContents.on('-new-window' as any, (
+    _e: Electron.Event, url: string, frameName: string, disposition: Electron.HandlerDetails['disposition'],
+    _feats: any, referrer: Electron.Referrer
+  ) => {
     const tabGroup = getTabGroupByTab(tab);
     const gid = tabGroup ? tabGroup.id : null
+
+    console.log(`-new-window event: `, { referrer, disposition });
 
     switch (disposition) {
       case 'foreground-tab':
@@ -513,94 +566,133 @@ export function attach(win: TabWindow, tab: RealTab) {
           }
           if (targetTab && doesURLMatch()) {
             toRealTab(targetTab).webContents.loadURL(url);
-            selectTab(win, { tab: targetTab })
+            return selectTab(win, { tab: targetTab })
 
           } else {
-            createTab(win, {
+            return createTab(win, {
               url, private: tab.private,
               targetFrameName: frameName,
               position: getTabIndex() + 1,
               groupID: gid
             })
           }
-          return { action: 'deny' }
         }
-        createTab(win, { url, private: tab.private, position: getTabIndex() + 1, groupID: gid })
-        return { action: 'deny' }
+        return createTab(win, { url, private: tab.private, position: getTabIndex() + 1, groupID: gid })
       }
 
       case 'background-tab': {
-        createTab(win, { url, private: tab.private, background: true, position: getTabIndex() + 1, groupID: gid })
-        return { action: 'deny' }
+        return createTab(win, { url, private: tab.private, background: true, position: getTabIndex() + 1, groupID: gid })
       }
 
       case 'new-window':
       case 'other': {
-        if (features == '') {
-          // when you open a window using Shift+Click, the features are an empty string
-          newWindow([{ url, private: tab.private }])
-          return { action: 'deny' }
-        }
-
-        if (tab.childWindow) return { action: 'deny' }
-
-        tab.webContents.once('did-create-window', async(w) => {
-          tab.childWindow = w;
-          w.on('closed', () => {
-            delete tab.childWindow
-          })
-
-          w.webContents.on('did-fail-load', (e, code, desc, url, isMainFrame, ...args) => {
-            handleNetError(w.webContents, e, code, desc, url, isMainFrame, ...args)
-          })
-
-          w.webContents.on('will-prevent-unload', (e) => {
-            // always close child windows
-            e.preventDefault();
-          })
-
-          w.webContents.on('zoom-changed', (_e, direction) => {
-            if (direction == 'in') {
-              w.webContents.zoomFactor += 0.1
-            } else if (w.webContents.zoomFactor > 0.1) {
-              w.webContents.zoomFactor -= 0.1
-            }
-          })
-
-          w.webContents.on('context-menu', async (_e, opts) => {
-            showContextMenu(win, { webContents: w.webContents, private: tab.private } as any, opts)
-            // A terrible hack around the context menu but ok
-          })
-
-          w.webContents.setWindowOpenHandler(() => {
-            return { action: 'deny' }
-          })
-        })
-
-        return {
-          action: 'allow', overrideBrowserWindowOptions: {
-            minimizable: true,
-            maximizable: true,
-            closable: true,
-            autoHideMenuBar: true,
-            webPreferences: {
-              sandbox: true,
-              partition: tab.private ? PRIVATE_PARTITION : DEFAULT_PARTITION
-            }
-          }
-        }
+        // Usually doesn't happen
+        return newTabWindow([{ url, private: tab.private }])
       }
 
       case 'save-to-disk': {
-        tab.webContents.downloadURL(url)
-
+        return tab.webContents.downloadURL(url)
+      }
+    }
+  })
+  tab.webContents.setWindowOpenHandler(({ disposition }) => {
+    // This will now ONLY run on `window.open()` calls because
+    // the default Electron listener for `-new-window` used to call this
+    if (disposition == 'new-window' || disposition == 'other') {
+      if (tab.childWindow) {
+        tab.webContents.executeJavaScript(`console.warn("Scripts may only open one window at a time.")`);
         return { action: 'deny' }
+      };
+    }
+    return { action: 'allow' }
+  })
+  // Undocumented listener for when a new WebContents are created
+  tab.webContents.on('-add-new-contents' as any, async (
+    _e: Electron.Event, newWebContents: Electron.WebContents, disposition: string,
+    userGesture: boolean, _left: number, _top: number, _width: number, _height: number, url: string, frameName: string,
+    _referrer: Electron.Referrer, features: string
+  ) => {
+    console.log('window.open:', { userGesture, disposition, url, features, frameName });
+
+    if (!userGesture) {
+      // We only get the `userGesture` parameter here, so we have to resort
+      // to closing the webContents.
+      // TODO: implement a permission-based system
+      newWebContents.close();
+      return console.log("Refused to open a window without user interaction.");
+    }
+
+    const { windowOptions, webPreferences } = $.parseWindowOpenFeatures(features);
+
+    const tabGroup = getTabGroupByTab(tab);
+    const gid = tabGroup ? tabGroup.id : null;
+
+    switch (disposition) {
+      case 'foreground-tab':
+      case 'default': {
+        if (frameName && URLParse(tab.webContents.getURL()).origin == URLParse(url).origin) {
+          const targetTab = win.tabs.find(t => t.targetFrameName == frameName);
+
+          function doesURLMatch() {
+            const targetURL = toRealTab(targetTab).webContents.getURL();
+            return URLParse(targetURL).origin == URLParse(url).origin;
+          }
+          if (targetTab && doesURLMatch()) {
+            toRealTab(targetTab).webContents.loadURL(url);
+            return selectTab(win, { tab: targetTab })
+
+          } else {
+            return createTab(win, {
+              url, private: tab.private,
+              targetFrameName: frameName,
+              position: getTabIndex() + 1,
+              groupID: gid
+            }, {
+              attachWebContents: newWebContents, addWebPreferences: webPreferences
+            })
+          }
+        }
+        return createTab(
+          win,
+          { url, private: tab.private, position: getTabIndex() + 1, groupID: gid }, 
+          { attachWebContents: newWebContents, addWebPreferences: webPreferences }
+        );
+      }
+
+      case 'background-tab': {
+        return createTab(
+          win,
+          { url, private: tab.private, background: true, position: getTabIndex() + 1, groupID: gid },
+          { attachWebContents: newWebContents, addWebPreferences: webPreferences }
+        );
+      }
+
+      case 'new-window':
+      case 'other': {
+        const newTab = createBrowserView(
+          { url, private: tab.private },
+          { attachWebContents: newWebContents, addWebPreferences: webPreferences }
+        );
+
+        return tab.childWindow = await newSingleTabWindow(newTab, windowOptions, tab);
+      }
+
+      case 'save-to-disk': {
+        // idk when this happens and what to do with it
+        dialog.showMessageBox({ message: t('unimplemented') })
+        return;
       }
 
       default:
-        return { action: 'deny' }
+        return;
     }
   })
+  // About new windows: Although non-standard, Nereid should try to
+  // minimize the amount of windows (not tabs) that websites can open because
+  // having a lot of windows opened by one tab can be confusing and
+  // disruptive to the UX. Also, it's important to close all the windows
+  // opened by sites to prevent pop-unders and make the browser
+  // "idiot-proof" (not die when you visit youareanidiot.cc)
 
   tab.webContents.on('frame-created', (_e, { frame }) => {
     const code = `(function() {
@@ -935,6 +1027,8 @@ export function selectTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: n
   }
   tab = tab || win.tabs[index];
 
+  if (!emitPreventable('selectTab', { win, tab })) return;
+
   if (!win.tabs[index]) throw new Error(`tabManager.selectTab: tab #${index} is not in window`)
 
   if (win.currentTab) win.removeBrowserView(win.currentTab);
@@ -1005,7 +1099,9 @@ export function undividePanes(win: TabWindow, paneView: PaneView) {
  * Creates a new tab on `window`
  * @returns  {BrowserView} The created tab
  */
-export function createTab(window: TabWindow, options: TabOptions): Tab {
+export function createTab(window: TabWindow, options: TabOptions, createBrowserViewOptions?: CreateBrowserViewOptions): Tab {
+  if (!emitPreventable('createTab', { win: window, options })) return;
+
   let tab: Tab;
   if (options.isGhost) {
     if (!options.uid) {
@@ -1028,7 +1124,7 @@ export function createTab(window: TabWindow, options: TabOptions): Tab {
     tabUniqueIDs[options.uid] = tab;
 
   } else {
-    tab = createBrowserView(options);
+    tab = createBrowserView(options, createBrowserViewOptions);
   }
   setCurrentTabBounds(window, tab) // better to resize here or will slow down the tab switching
   tab.targetFrameName = options.targetFrameName;
@@ -1045,6 +1141,8 @@ const beingClosed: Tab[] = [];
 export function closeTab(win: TabWindow, desc: { tab?: Tab, index?: number }, keepAlive?: boolean) {
   if (!desc.tab) desc.tab = win.tabs[desc.index]
   if (!desc.index) desc.index = win.tabs.indexOf(desc.tab)
+
+  if (!emitPreventable('closeTab', { win, tab: desc.tab })) return;
 
   function close() {
     beingClosed.splice(beingClosed.indexOf(desc.tab), 1);
@@ -1147,6 +1245,9 @@ export function moveTab(
   { shouldSelect = true, preventPinning = false }: { shouldSelect?: boolean, preventPinning?: boolean } = {}
 ) {
   const { window, index } = destination;
+
+  if (!emitPreventable('moveTab', { tab, destination, shouldSelect, preventPinning })) return;
+
   if (!tab.owner) throw new Error(`Tab ##${tab.uniqueID} doesn't have an owner and cannot be moved.`);
 
   if (tab.isGhost) tab = toRealTab(tab);

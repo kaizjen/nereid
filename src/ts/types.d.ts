@@ -4,10 +4,15 @@ declare global {
   var SESSION_UUID: string
 }
 
-/**
- * The main window of the browser with tabs
-*/
-export interface TabWindow extends BrowserWindow {
+/** Base window with a chrome */
+export type ChromeWindow = BrowserWindow & {
+  /** The chrome (https://developer.mozilla.org/en-US/docs/Glossary/Chrome) of the window. */
+  chrome: BrowserView
+  /** The height of the chrome (from the top of the window) in pixels. */
+  chromeHeight: number
+}
+/** The main window of the browser with tabs */
+export type TabWindow = ChromeWindow & {
   /** The currently displayed tab of the window */
   currentTab: RealTab
   /** All tabs of the window. The index corresponds to the index of each tab in the chrome. */
@@ -20,10 +25,6 @@ export interface TabWindow extends BrowserWindow {
   paneViews: PaneView[]
   /** The first few tabs of each window are pinned tabs. This specifies the first non-pinned tab. */
   pinnedTabsEndIndex: number
-  /** The chrome (https://developer.mozilla.org/en-US/docs/Glossary/Chrome) of the window. */
-  chrome: BrowserView
-  /** The height of the chrome (from the top of the window) in pixels. */
-  chromeHeight: number
   /** Unique ID of the window. These ID are be reused in the same session. */
   winID: number
   /** Array of tab descriptors for tabs that were recently closed */
@@ -36,6 +37,14 @@ export interface TabWindow extends BrowserWindow {
     lastTabGroupID: number
   }[]
 }
+/** A window with only one tab supported, i.e. the one opened by `window.open()` */
+export type SingleTabWindow = TabWindow & {
+  currentTab: RealTab
+  tabs: [RealTab]
+  /** A tab that opened this window */
+  owner: RealTab
+}
+export type AnyTabWindow = TabWindow | SingleTabWindow
 
 /** A tab group is just an array of consecutive tabs in the window. */
 export type TabGroup = {

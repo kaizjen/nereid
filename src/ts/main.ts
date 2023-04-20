@@ -2,7 +2,7 @@
 // It mostly ties everything together
 
 import { app, dialog, Menu, nativeImage, nativeTheme, session, Tray } from "electron";
-import { getAllTabWindows, newWindow } from "./windows";
+import { getAllTabWindows, newTabWindow } from "./windows";
 import * as ipcManager from "./ipc";
 import * as userData from "./userdata";
 import { DEFAULT_PARTITION } from "./sessions";
@@ -102,7 +102,7 @@ app.on('window-all-closed', (e: Event) => {
       {
         label: t('menu.common.newWindow'),
         click() {
-          newWindow(userData.lastlaunch.get().windows[0].map(data => {
+          newTabWindow(userData.lastlaunch.get().windows[0].map(data => {
             return {
               url: data.url,
               initialFavicon: data.faviconURL
@@ -120,7 +120,7 @@ app.on('window-all-closed', (e: Event) => {
     ]));
 
     tray.on('double-click', () => {
-      newWindow([{ url: $.newTabUrl }]);
+      newTabWindow([{ url: $.newTabUrl }]);
       tray.destroy()
     })
     tray.on('click', () => {

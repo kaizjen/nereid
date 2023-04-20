@@ -1,0 +1,199 @@
+/* These styles only apply to chromes */
+
+:root {
+  font-size: 0.9rem; /* Most values are in REM and this adjusts the general scale */
+}
+
+body {
+  background: transparent;
+  color: var(--text);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  font-family: system-ui;
+  overflow: hidden;
+}
+body.background {
+  background: var(--dark-1);
+}
+
+span.protocol, span.page, span.port {
+  color: var(--t-white-9);
+}
+span.host {
+  color: var(--text);
+}
+
+*::selection {
+  background: var(--accent-5);
+  color: inherit;
+}
+.tool {
+  padding: 0.3rem;
+  padding-inline: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-inline: 1px;
+  border-radius: 0.15rem;
+  transition: cubic-bezier(0.57, 0.2, 1, 1) 0.2s;
+}
+.tool:hover {
+  background: var(--t-white-2);
+}
+.tool:hover:active, .tool.open {
+  background: var(--t-white-4);
+  transition: 0s;
+}
+.dropdown-box {
+  padding-block: 0.5rem;
+  padding-inline: 0.75rem;
+  background: var(--active-background);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  padding-left: 1.375rem;
+}
+.blocker {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: 99;
+  top: 0;
+  left: 0;
+}
+.dialog {
+  z-index: 100;
+  background: var(--dark-2);
+  border: 1px solid var(--t-white-3);
+  display: block;
+  position: absolute;
+  border-radius: 0.25rem;
+  max-width: 21.4rem;
+  cursor: default;
+  top: calc(100% + 0.625rem);
+  overflow: auto;
+  max-height: 31.88rem;
+}
+.dialog-content {
+  padding: 0.68rem;
+}
+
+input.input {
+  display: block;
+  background: transparent;
+  border: 1px solid var(--gray-3);
+  width: -webkit-fill-available;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  color: var(--text);
+  transition: .1s;
+  font-family: inherit;
+}
+input.input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 1px var(--accent-5);
+  border-color: var(--accent-5);
+}
+
+@media (prefers-color-scheme: light) {
+  body.background {
+    background: var(--light-5);
+  }
+  span.protocol, span.page, span.port {
+    color: var(--t-black-9);
+  }
+  *::selection {
+    background: var(--accent-8);
+  }
+  .tool:hover {
+    background: var(--t-black-1);
+  }
+  .tool:hover:active, .tool.open {
+    background: var(--t-black-2);
+  }
+  .dialog {
+    background: var(--light-9);
+    border: 1px solid var(--t-black-3);
+  }
+  input.input {
+    border: 1px solid var(--gray-8);
+    color: var(--text);
+  }
+  input.input:focus-visible {
+    box-shadow: 0 0 0 1px var(--accent-5);
+    border-color: var(--accent-5);
+  }
+}
+
+/* Code used both by Downloads.svelte and Downloads/Item.svelte */
+.dl-buttons {
+  margin-left: 1rem;
+  display: flex;
+}
+.mini-btn {
+  padding: 0.875rem;
+  width: 0.875rem;
+  height: 0.875rem;
+  overflow: hidden;
+  display: inline-flex;
+  border-radius: 0.25rem;
+  align-items: center;
+  justify-content: center;
+  transition: 0.25s;
+}
+.mini-btn:hover {
+  background: var(--t-white-3);
+}
+.mini-btn:hover:active {
+  background: var(--t-white-5);
+  transition: 0s;
+}
+.mini-btn > img {
+  width: inherit;
+  height: inherit;
+}
+.url {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--gray-8);
+}
+.more-info {
+  font-size: small;
+  color: var(--gray-6);
+}
+
+.dl-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.dl-wrapper:not(:last-child) {
+  border-bottom: var(--gray-3) 1px solid;
+}
+.download {
+  padding: 0.25rem;
+  overflow: hidden;
+}
+.download b {
+  white-space: nowrap;
+}
+
+@media (prefers-color-scheme: light) {
+  .mini-btn:hover {
+    background: var(--t-black-1);
+  }
+  .mini-btn:hover:active {
+    background: var(--t-black-2);
+  }
+  .url {
+    color: var(--gray-8);
+  }
+  .more-info {
+    color: var(--gray-6);
+  }
+  .dl-wrapper:not(:last-child) {
+    border-bottom: var(--gray-8) 1px solid;
+  }
+}
