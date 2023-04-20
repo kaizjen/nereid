@@ -408,8 +408,11 @@ export async function newSingleTabWindow(tab: RealTab, windowOptions: Partial<Br
     if (w.owner) {
       w.owner.childWindow = null;
     }
-    
-    tabManager.detach(w.currentTab);
+
+    if (w.currentTab.owner) {
+      // The tab may not have an owner if it was closed using `window.close()`
+      tabManager.detach(w.currentTab);
+    }
     if (w.currentTab.childWindow) {
       w.currentTab.childWindow.close()
     }
