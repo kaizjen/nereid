@@ -65,6 +65,7 @@ const newTabInPanes: Electron.MenuItemConstructorOptions[] = [
         position: win.tabs.indexOf(win.currentTab),
         background: true
       })
+      if (!newTab) return;
       dividePanes(win, { left: newTab, right: win.currentTab })
       selectTab(win, { tab: newTab })
 
@@ -82,6 +83,7 @@ const newTabInPanes: Electron.MenuItemConstructorOptions[] = [
         position: win.tabs.indexOf(win.currentTab) + 1,
         background: true
       })
+      if (!newTab) return;
       dividePanes(win, { left: win.currentTab, right: newTab })
       selectTab(win, { tab: newTab })
 
@@ -784,11 +786,11 @@ export async function showContextMenu(win: TabWindow, tab: RealTab, opts: Electr
     addItem(SEPARATOR)
     addItem({ label: $t('open.leftPane'), click() {
       const newTab = createContextTab({ url: opts.linkURL, background: true })
-      dividePanes(win, { left: newTab, right: tab })
+      if (newTab) dividePanes(win, { left: newTab, right: tab })
     } })
     addItem({ label: $t('open.rightPane'), click() {
       const newTab = createContextTab({ url: opts.linkURL, background: true })
-      dividePanes(win, { left: tab, right: newTab })
+      if (newTab) dividePanes(win, { left: tab, right: newTab })
     } })
     addItem(SEPARATOR)
     addItem({ label: $t('copyLink'), click() { clipboard.writeText(opts.linkURL) } })

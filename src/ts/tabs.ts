@@ -1019,15 +1019,17 @@ export function toRealTab(tab: Tab) {
 /**
  * Selects an existing tab of the window `win`
  * @param  {object} description { `tab`: the tab to select, (or) `index`: the index of the tab to select from all the tabs on window }
+ * 
+ * Returns `false` if the tab selection was prevented by the `selectTab` event handler
  */
-export function selectTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: number }) {
+export function selectTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: number }): Tab | false {
   if (tab) {
     index = win.tabs.indexOf(tab);
     if (index == -1) throw(new Error(`tabManager.selectTab: no tab found in window`))
   }
   tab = tab || win.tabs[index];
 
-  if (!emitPreventable('selectTab', { win, tab })) return;
+  if (!emitPreventable('selectTab', { win, tab })) return false;
 
   if (!win.tabs[index]) throw new Error(`tabManager.selectTab: tab #${index} is not in window`)
 
@@ -1097,10 +1099,11 @@ export function undividePanes(win: TabWindow, paneView: PaneView) {
 
 /**
  * Creates a new tab on `window`
- * @returns  {BrowserView} The created tab
+ * 
+ * Returns `false` if the tab creation was cancelled by the `createTab` event handler
  */
-export function createTab(window: TabWindow, options: TabOptions, createBrowserViewOptions?: CreateBrowserViewOptions): Tab {
-  if (!emitPreventable('createTab', { win: window, options })) return;
+export function createTab(window: TabWindow, options: TabOptions, createBrowserViewOptions?: CreateBrowserViewOptions): Tab | false {
+  if (!emitPreventable('createTab', { win: window, options })) return false;
 
   let tab: Tab;
   if (options.isGhost) {
@@ -1138,11 +1141,18 @@ export function createTab(window: TabWindow, options: TabOptions, createBrowserV
 }
 
 const beingClosed: Tab[] = [];
+/**
+ * Attempts to close the tab. Will return `false` *(or `Promise<false>`)*
+ * if the tab wasn't closed either because it's already being closed or it was cancelled by the event handler
+ * or because the `beforeunload` event handler prevented the closing of the tab (the user chose to stay)
+ * @param keepAlive Whether to prevent the tab from closing and keep the window open if this is the only tab in it.
+ * This will cause the function to return `false` *(or `Promise<false>`)* if the tab is the only tab in the window.
+ * */
 export function closeTab(win: TabWindow, desc: { tab?: Tab, index?: number }, keepAlive?: boolean) {
   if (!desc.tab) desc.tab = win.tabs[desc.index]
   if (!desc.index) desc.index = win.tabs.indexOf(desc.tab)
 
-  if (!emitPreventable('closeTab', { win, tab: desc.tab })) return;
+  if (!emitPreventable('closeTab', { win, tab: desc.tab })) return false;
 
   function close() {
     beingClosed.splice(beingClosed.indexOf(desc.tab), 1);
@@ -1191,7 +1201,7 @@ export function closeTab(win: TabWindow, desc: { tab?: Tab, index?: number }, ke
 
   if (beingClosed.includes(desc.tab)) {
     console.log(`The tab ${desc.tab?.uniqueID} (#${desc.index}) is already being closed`);
-    return;
+    return false;
   }
   beingClosed.push(desc.tab);
 
@@ -1238,15 +1248,17 @@ export function openClosedTab(win: TabWindow, index?: number, background: boolea
  * * `shouldSelect` (default: `true`) Whether the newly moved tab should be selected
  * * `preventPinning` (default: `false`) If the tab is already pinned and is moved before the
  * `pinnedTabsEndIndex`, whether to prevent its pinning again
+ * 
+ * Will return `false` if the moving was prevented by the `moveTab` event handler
  */
 export function moveTab(
   tab: Tab,
   destination: { window: TabWindow, index: number },
   { shouldSelect = true, preventPinning = false }: { shouldSelect?: boolean, preventPinning?: boolean } = {}
-) {
+): Tab | false {
   const { window, index } = destination;
 
-  if (!emitPreventable('moveTab', { tab, destination, shouldSelect, preventPinning })) return;
+  if (!emitPreventable('moveTab', { tab, destination, shouldSelect, preventPinning })) return false;
 
   if (!tab.owner) throw new Error(`Tab ##${tab.uniqueID} doesn't have an owner and cannot be moved.`);
 
@@ -1304,10 +1316,11 @@ export function openUniqueNereidTab(win: TabWindow, page: string, nextToCurrentT
         // when the `oldTab` is moved, it will cause all indexes to decrease
         moveToIndex--;
       }
-      oldTab = moveTab(oldTab, { window: win, index: moveToIndex });
+      // We're assigning to `oldTab` here because it might've been a ghost tab
+      oldTab = moveTab(oldTab, { window: win, index: moveToIndex }) || toRealTab(oldTab);
 
     } else {
-      oldTab = selectTab(win, { tab: oldTab })
+      oldTab = selectTab(win, { tab: oldTab }) || toRealTab(oldTab)
     }
 
     if (
