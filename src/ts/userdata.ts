@@ -270,7 +270,14 @@ try {
           suggestAlgorithm: ['"google-like"', '"startpage-like"', '"find"'],
         }
       ]],
-      selectedIndex: 'number'
+      selectedIndex: (value, betterTypeOf) => {
+        if (betterTypeOf(value) != 'number') return "Value must be a number.";
+
+        if (!configContent.search.available[value]) {
+          return "Value outside of the `search.available` array range.";
+        }
+        return true;
+      }
     },
     privacy: {
       httpsOnly: 'boolean',
