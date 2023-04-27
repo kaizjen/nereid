@@ -179,4 +179,5 @@
     Powered by <a tabindex="0" on:keypress={openCliqzRepoF(true)} on:click={openCliqzRepoF(false)}>Cliqz</a>
   </footer>
 </div>
-<div class="blocker" on:mousedown={() => open = false}></div>
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<div class="blocker" on:click={() => open = false}></div>
