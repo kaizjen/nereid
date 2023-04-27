@@ -28,7 +28,7 @@
 </style>
 <script>
   import { ListItem, TextBlock, IconButton, AutoSuggestBox, Button, ComboBox } from "fluent-svelte";
-  import { afterUpdate, getContext } from "svelte/internal";
+  import { afterUpdate, getContext, onDestroy } from "svelte/internal";
   import { ArrowBack } from "nereid://js/icons";
   import { fly } from "svelte/transition";
 
@@ -47,7 +47,38 @@
     afterUpdateHooks.splice(0, afterUpdateHooks.length)
   })
 
-  const hash = location.hash.toLowerCase().trim();
+  let hash = location.hash.toLowerCase().trim();
+  let _nonUserHashChange = false;
+
+  function onHashChange() {
+    if (_nonUserHashChange) return _nonUserHashChange = false;
+
+    // HACK: Reset all pages so that the 'select' event of
+    // <ComboBox> won't be triggered
+    pages = {
+      sitesOverview: false,
+      site: false,
+      defaultPermissions: false,
+      cookies: false
+    }
+
+    afterUpdateHooks.push(() => {
+      hash = location.hash.toLowerCase().trim();
+      pages = {
+        sitesOverview: hash.endsWith('/sites'),
+        site: hash.includes('/site:'),
+        defaultPermissions: hash.endsWith('/permissions'),
+        cookies: hash.endsWith('/cookies')
+      }
+      currentSite = pages.site ? hash.slice('#siteSettings/site:'.length) : '';
+    })
+  }
+
+  window.addEventListener('hashchange', onHashChange)
+
+  onDestroy(() => {
+    window.removeEventListener('hashchange', onHashChange)
+  })
 
   let pages = {
     sitesOverview: hash.endsWith('/sites'),
@@ -60,12 +91,18 @@
   $: mainPage = !pages.sitesOverview && !pages.site && !pages.defaultPermissions && !pages.cookies
 
 
-  let sites = Object.keys($config.privacy.sitePermissions)
+  $: sites = Object.keys($config.privacy.sitePermissions)
   let currentSite = pages.site ? hash.slice('#siteSettings/site:'.length) : '';
 
   $: if (currentSite != '') {
+    if (location.hash != '#siteSettings/site:'+currentSite)
+      // The 'hashchange' event won't be emitted unless the hash is something different
+      _nonUserHashChange = true
+    ;
     location.hash = '#siteSettings/site:'+currentSite
-  } else {
+
+  } else if (location.hash != '#siteSettings') {
+    _nonUserHashChange = true
     location.hash = '#siteSettings'
   }
 
@@ -189,7 +226,7 @@
       </TextBlock>
     </div>
   {/if}
-  
+
   {#if pages.sitesOverview}
     <div class="page" in:fly={{ x: _animation_comingFromSite ? -20 : 20, duration: 200 }} on:introend={() => _animation_comingFromSite = false}>
       <IconButton on:click={() => { pages.sitesOverview = false }}>
@@ -201,7 +238,7 @@
       <div class="space"></div>
 
       <div class="flex col">
-        <Button on:click={() => {pages.sitesOverview = false; pages.site = true; }}>{t('dialog.sites.more')}</Button>
+        <Button on:click={() => { pages.sitesOverview = false; pages.site = true; }}>{t('dialog.sites.more')}</Button>
       </div>
       <div class="space"></div>
 
