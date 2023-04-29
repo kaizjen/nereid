@@ -597,26 +597,6 @@ export function init() {
     } })
   })
 
-  ipcMain.handle('userData/downloads', async(_e, action, index) => {
-    switch (action) {
-      case 'get': {
-        return await userData.downloads.get()
-      }
-      case 'del': {
-        let dl = await userData.downloads.get();
-        dl.splice(index, 1);
-        await userData.downloads.set(dl)
-        return true;
-      }
-      case 'start': {
-        let dl = await userData.downloads.get();
-        let { urlChain } = dl[index];
-        getTabWindowByID(0).currentTab.webContents.downloadURL(urlChain.at(-1))
-        return true;
-      }
-    }
-  })
-
   function onTab(msg: string, fn: (e: Electron.IpcMainInvokeEvent, ...args: any[]) => any) {
     ipcMain.handle(`tab:${msg}`, async(...args) => {
       try {
