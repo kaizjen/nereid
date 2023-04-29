@@ -168,7 +168,7 @@
     {:then _}
       {#each settingsSections as section}
         <TextBlock variant="titleLarge" style="margin-bottom: 15px;">{section.name}</TextBlock>
-  
+
         <section bind:this={section.element}>
           <svelte:component this={section.component} {update} />
         </section>

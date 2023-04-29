@@ -98,7 +98,6 @@
   <div class="note">
     {t('pages.welcome.language.note')}
   </div>
-
 </div>
 <footer>
   <div class="info">

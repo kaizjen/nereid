@@ -1,5 +1,5 @@
 <script>
-  import { AutoSuggestBox, RadioButton, TextBlock } from "fluent-svelte";
+  import { AutoSuggestBox, TextBlock } from "fluent-svelte";
   import Codes from "iso-639-1";
 
   export let selected;
@@ -17,6 +17,7 @@
   $: {
     if (!Codes.getCode(value_proxy)) {
       error = true
+
     } else {
       selected = Codes.getCode(value_proxy);
       error = false;
