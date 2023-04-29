@@ -2,11 +2,10 @@
 
 import type { CertficateCache, Permissions, RealTab, TabWindow } from "./types";
 import { app, BrowserWindow, ipcMain, protocol, session, Session, screen, nativeTheme } from "electron";
-import * as pathModule from "path"
+import * as pathModule from "path";
 import $ from "./common";
-import { randomUUID } from 'crypto'
-import * as fs from "fs-extra"
-import { getAllTabWindows, isTabWindow } from './windows'
+import * as fs from "fs-extra";
+import { getAllTabWindows, isTabWindow } from './windows';
 import { config, downloads, userdataDirectory, control } from "./userdata";
 import fetch from "electron-fetch";
 import { matchRequest } from "./adblocker";
@@ -15,8 +14,8 @@ const URLParse = $.URLParse;
 
 export let certificateCache: CertficateCache = {}
 
-global.SESSION_UUID = randomUUID();
-console.log('Starting session with UUID ', global.SESSION_UUID);
+global.SESSION_UUID = (Date.now() - 1577836800000).toString() + Math.round(Math.random() * 100).toString();
+console.log('Starting session with UUID', global.SESSION_UUID);
 
 protocol.registerSchemesAsPrivileged([
   { scheme: 'nereid', privileges: { standard: true } },
