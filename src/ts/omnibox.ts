@@ -334,12 +334,12 @@ export function init() {
 
             let prevIndex = 0;
             allOccs.forEach(occ => {
-              contents.push({ text: text.slice(prevIndex, occ) });
-              contents.push({ text: text.slice(occ, occ + query.length), bold: true });
+              contents.push({ text: text.slice(prevIndex, occ), bold: true });
+              contents.push({ text: text.slice(occ, occ + query.length) });
 
               prevIndex = occ + query.length;
             });
-            contents.push({ text: text.slice(prevIndex) });
+            contents.push({ text: text.slice(prevIndex), bold: true });
 
             return {
               contents,
