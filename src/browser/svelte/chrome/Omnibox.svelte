@@ -1,31 +1,41 @@
 <style>
-  #addressbar {
+  .omnibox {
+    display: flex;
+    flex-direction: column;
     width: -webkit-fill-available;
     transition: box-shadow 0.1s;
     border-radius: 0.2rem;
-    display: flex;
-    align-items: center;
-    cursor: text;
-    overflow: hidden;
     -webkit-app-region: no-drag;
     margin-inline: 0.375rem;
-    height: 2rem;
+    overflow: hidden;
     background: var(--t-black-8);
-    padding: 0.08rem;
   }
-  #addressbar:hover {
+  #addressbar {
+    cursor: text;
+    overflow: hidden;
+    padding: 0.08rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+  }
+  .omnibox:hover {
     transition: 0s;
   }
-  #addressbar:not(:has(.tab-state:hover)):not(.focus):hover {
+  .omnibox:not(:has(.tab-state:hover)):not(.hashints):not(.focus):hover {
     box-shadow: 0 0 0 1px var(--t-white-3);
     background: var(--t-black-9);
   }
-  #addressbar.focus {
-    outline: none;
-    box-shadow: 0 0 0 2px var(--accent-5);
+  .omnibox.focus, .omnibox.hashints {
     background: var(--dark-1)
   }
-  #addressbar.disabled {
+  .omnibox.focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--accent-5);
+  }
+  .omnibox.hashints {
+    box-shadow: 0px 2px 7px 0px var(--t-black-9);
+  }
+  .omnibox.disabled {
     background: none !important;
     box-shadow: none !important;
   }
@@ -54,6 +64,10 @@
   }
   .sec img {
     width: 0.88rem;
+    height: 0.88rem;
+  }
+  .hint-icon:hover {
+    background: transparent;
   }
   #ab-txt {
     margin-left: 0.284rem;
@@ -97,17 +111,19 @@
   }
 
   @media (prefers-color-scheme: light) {
-    #addressbar {
+    .omnibox {
       background: var(--t-white-8);
     }
-    #addressbar:not(:has(.tab-state:hover)):not(.focus):hover {
+    .omnibox:not(:has(.tab-state:hover)):not(.hashints):not(.focus):hover {
       box-shadow: 0 0 0 1px var(--t-black-3);
       background: var(--t-white-9);
     }
-    #addressbar.focus {
+    .omnibox.focus, .omnibox.hashints {
+      background: var(--t-white-9)
+    }
+    .omnibox.focus {
       outline: none;
       box-shadow: 0 0 0 2px var(--accent-5);
-      background: var(--t-white-9)
     }
     .tab-state:hover {
       background: var(--t-black-2);
@@ -156,8 +172,6 @@
     window.requestAnimationFrame(() => inputRef?.focus());
   }
 
-  let clickHintF;
-
   let url = {
     protocol: '<unknown>:',
     host: '<none>',
@@ -192,7 +206,7 @@
     if (!['nereid://private/', 'nereid://newtab/'].includes(tab?.url)) return;
     if (ctrlKey && code == 'KeyV') {
       key = nereid.sendInternalSync('clipboard', 'readText');
-  
+
     } else if (ctrlKey) return;
   
     inputValue += key;
@@ -213,7 +227,7 @@
   function updateInput() {
     // don't want to update the url when the user is typing something, because this can be frustrating during redirects
     if (isActive || !tab) return
-    
+
     inputValue = decodeURI(tab.url);
     inputRef?.setSelectionRange(0, 0); // the domain should stay in front
 
@@ -225,7 +239,7 @@
         path: _.PLACEHOLDER
       }
       inputValue = '';
-      
+
     } else if (tab.url) {
       url = URLParse(tab.url);
       url.path = decodeURI((url.pathname ?? '') + (url.search ?? '') + (url.hash ?? ''));
@@ -233,17 +247,44 @@
     }
   }
 
+  function clickHint(hint) {
+    inputRef?.blur();
+    isActive = false;
+    setTop(false)
+    hints = [];
+    ipcRenderer.send('currentTab.navigate', hint.url);
+  }
+
+  let hintImageURL = false;
+
+  function getRealImageURL(hint) {
+    if (!hint || !hint.icon) {
+      return `n-res://${$colorTheme}/webpage.svg`
+    };
+
+    if (hint.icon.startsWith('::')) {
+      return `n-res://${$colorTheme}/${hint.icon.slice(2)}.svg`;
+    }
+    return `get:` + hint.icon;
+  }
+  function _updateHIURL() {
+    hintImageURL = getRealImageURL(hints[selectedHint])
+  }
+
+  $: {
+    hints, selectedHint, _updateHIURL()
+  }
+
   function hintToInputValue() {
-    if (selectedHint == -1) return;
+    if (hints[selectedHint] == undefined) return;
 
     const hint = hints[selectedHint];
-    if (hint.internal == 'search') {
-      inputValue = hint.text
-
-    } else {
-      inputValue = hint.url
-    }
+    inputValue = hint.contents.map(rt => rt.text).join('');
+    requestAnimationFrame(() => {
+      inputRef.setSelectionRange(inputValue.length, inputValue.length)
+    })
   }
+
   /**
    * @param {KeyboardEvent} e
    */
@@ -252,19 +293,20 @@
       case 'Enter': {
         if (!hints[selectedHint]) {
           setTop(false);
+          inputRef?.blur();
+          isActive = false;
           ipcRenderer.send('currentTab.go', inputValue)
-          
+
         } else {
           let hint = hints[selectedHint];
-          clickHintF(hint)();
+          clickHint(hint);
         }
-        inputRef?.blur();
-        hints = [];
         break;
       }
       case 'ArrowUp': {
-        if (selectedHint == -1) {
+        if (selectedHint == 0) {
           selectedHint = hints.length - 1
+
         } else {
           selectedHint--;
         }
@@ -272,7 +314,7 @@
       }
       case 'ArrowDown': {
         if (selectedHint >= (hints.length - 1)) {
-          selectedHint = -1;
+          selectedHint = 0;
 
         } else {
           selectedHint++;
@@ -280,19 +322,23 @@
         break;
       }
       default: {
-        if (e.key.length > 1 && e.key != 'Backspace') break;
-        if (e.shiftKey || e.ctrlKey) break;
+        if (e.key.length > 1 && e.key != 'Backspace') return;
+        if (e.shiftKey || e.ctrlKey) return;
         // key.length > 1 if the key is a special one (like 'Space', but not 'e')
 
-        selectedHint = -1
+        selectedHint = 0
 
-        ipcRenderer.send('getHints', inputValue);
-        ipcRenderer.once('gotHints', (_e, hintArray) => {
-          console.log('gotHints', hintArray);
-          hints = hintArray;
+        requestIdleCallback(() => {
+          // Update the `inputValue` binding
+          ipcRenderer.send('getHints', inputValue);
+          ipcRenderer.once('updateHints', (_e, hintArray) => {
+            console.log('updateHints', hintArray);
+            hints = hintArray;
+          })
         })
 
-        break;
+        // We return because we don't want to trigger hintToInputValue()
+        return;
       }
     }
     hintToInputValue();
@@ -337,95 +383,118 @@
   }
 </script>
 <svelte:window on:keydown={e => {
-  if (e.key != "Escape" || !anyDialog) return;
+  if (e.key != "Escape") return;
+
+  isActive = false;
+
   // ALL DIALOGS
   securityDialog = false;
   zoomDialog = false;
   bookmarkDialog = false;
   adblockerDialog = false;
 }} />
-<div id="addressbar" class:disabled class:focus={isActive}>
-  <button on:click={() => securityDialog = !securityDialog} class="tab-state sec" class:open={securityDialog}>
-    <img alt={_.SECURITY}
-      src={
-        tab.security === true ? `n-res://${$colorTheme}/secure.svg` : 
-        tab.security == 'internal' ? `n-res://${$colorTheme}/nereid-monochrome.svg` : 
-        tab.security == 'local' ? `n-res://${$colorTheme}/file.svg` :
-        `n-res://${$colorTheme}/insecure.svg`
-      }
+<div class="omnibox"
+  class:disabled
+  class:focus={isActive && hints.length == 0}
+  class:hashints={isActive && hints.length > 0}
+>
+  <div id="addressbar">
+    {#if isActive && hints.length > 0}
+      <button class="tab-state sec hint-icon">
+        <img
+          alt=""
+          src={hintImageURL}
+          on:error={() => { hintImageURL = `n-res://${$colorTheme}/webpage.svg` }}
+        >
+      </button>
+    {:else}
+      <button on:click={() => securityDialog = !securityDialog} class="tab-state sec" class:open={securityDialog}>
+        <img alt={_.SECURITY}
+          src={
+            tab.security === true ? `n-res://${$colorTheme}/secure.svg` : 
+            tab.security == 'internal' ? `n-res://${$colorTheme}/nereid-monochrome.svg` : 
+            tab.security == 'local' ? `n-res://${$colorTheme}/file.svg` :
+            `n-res://${$colorTheme}/insecure.svg`
+          }
+        >
+      </button>
+    {/if}
+    <button id="ab-txt"
+      on:mousedown={activate}
+      on:keyup={e => e.key == 'Enter' ? activate() : null}
+      style:display={isActive ? 'none' : ''}
     >
-  </button>
-  <button id="ab-txt"
-    on:mousedown={activate}
-    on:keyup={e => e.key == 'Enter' ? activate() : null}
-    style:display={isActive ? 'none' : ''}
-  >
-    <span class="protocol">{url.protocol ?? ''}{url.slashes ? '//' : ''}</span>
-    <span class="host">{url.hostname ?? ''}</span>
-    <span class="port">{url.port ?? ''}</span>
-    <span class="page">{url.path}</span>
-  </button>
-  {#if !disabled}
-    <input
-      on:blur={() => {
-        window.requestAnimationFrame(() => {
-          if (!document.activeElement.className.includes('h-link')) { isActive = false; setTop(false) }
-          inputRef.setSelectionRange(0, 0);
-        })
-      }}
-      bind:this={inputRef}
-      type="text"
-      style:display={isActive ? '' : 'none'}
-      id="ab-input"
-      on:keydown={handleKeyDown}
-      bind:value={inputValue}
-      placeholder={_.PLACEHOLDER}
-      on:mouseup={() => {
-        if (inputRef.selectionStart != inputRef.selectionEnd || !isFirstTimeSelecting) return;
-        inputRef.select()
-        isFirstTimeSelecting = false;
-      }}
-      on:mouseup={handleMouseUp}
-    >
-  {/if}
-  {#if $globalZoom != $config?.ui.defaultZoomFactor}
-    <button
-      class="tab-state"
-      on:click={() => zoomDialog = true}
-      class:open={zoomDialog}
-    >
-      <img
-        src="n-res://{$colorTheme}/zoom{$globalZoom - $config?.ui.defaultZoomFactor > 0 ? 'in' : 'out'}.svg"
-        alt={_.ALT_ZOOM({ zoom: Math.round($globalZoom * 100) })}
-        title={_.ALT_ZOOM({ zoom: Math.round($globalZoom * 100) })}
-      >
+      <span class="protocol">{url.protocol ?? ''}{url.slashes ? '//' : ''}</span>
+      <span class="host">{url.hostname ?? ''}</span>
+      <span class="port">{url.port ?? ''}</span>
+      <span class="page">{url.path}</span>
     </button>
-  {/if}
-  {#if url.protocol.startsWith('http')}
-    <button
-      class="tab-state"
-      on:click={() => adblockerDialog = true}
-      class:open={adblockerDialog}
-    >
-      <img
-        src="n-res://{$colorTheme}/shield{(abEnabled && !abError) ? '-good' : '-bad'}.svg"
-        alt={(abEnabled && !abError) ? _.ADBLOCK_GOOD : _.ADBLOCK_BAD}
-        title={(abEnabled && !abError) ? _.ADBLOCK_GOOD : _.ADBLOCK_BAD}
+    {#if !disabled}
+      <input
+        on:blur={() => {
+          window.requestAnimationFrame(() => {
+            if (!document.activeElement.className.includes('hint')) { isActive = false; setTop(false) }
+            inputRef.setSelectionRange(0, 0);
+          })
+        }}
+        bind:this={inputRef}
+        type="text"
+        style:display={isActive ? '' : 'none'}
+        id="ab-input"
+        on:keydown={handleKeyDown}
+        bind:value={inputValue}
+        placeholder={_.PLACEHOLDER}
+        on:mouseup={() => {
+          if (inputRef.selectionStart != inputRef.selectionEnd || !isFirstTimeSelecting) return;
+          inputRef.select()
+          isFirstTimeSelecting = false;
+        }}
+        on:mouseup={handleMouseUp}
       >
-    </button>
-  {/if}
-  {#if url.protocol != 'nereid:' && !isANewTabURL()}
-    <button
-      class="tab-state"
-      on:click={() => bookmarkDialog = true}
-      class:open={bookmarkDialog}
-    >
-      <img
-        src="n-res://{$colorTheme}/bookmark{isInBookmarks ? '-selected' : ''}.svg"
-        alt={isInBookmarks ? _.BOOKMARK_ADD_OR_RM : _.BOOKMARK_ADD}
-        title={isInBookmarks ? _.BOOKMARK_ADD_OR_RM : _.BOOKMARK_ADD}
+    {/if}
+    {#if $globalZoom != $config?.ui.defaultZoomFactor}
+      <button
+        class="tab-state"
+        on:click={() => zoomDialog = true}
+        class:open={zoomDialog}
       >
-    </button>
+        <img
+          src="n-res://{$colorTheme}/zoom{$globalZoom - $config?.ui.defaultZoomFactor > 0 ? 'in' : 'out'}.svg"
+          alt={_.ALT_ZOOM({ zoom: Math.round($globalZoom * 100) })}
+          title={_.ALT_ZOOM({ zoom: Math.round($globalZoom * 100) })}
+        >
+      </button>
+    {/if}
+    {#if url.protocol.startsWith('http')}
+      <button
+        class="tab-state"
+        on:click={() => adblockerDialog = true}
+        class:open={adblockerDialog}
+      >
+        <img
+          src="n-res://{$colorTheme}/shield{(abEnabled && !abError) ? '-good' : '-bad'}.svg"
+          alt={(abEnabled && !abError) ? _.ADBLOCK_GOOD : _.ADBLOCK_BAD}
+          title={(abEnabled && !abError) ? _.ADBLOCK_GOOD : _.ADBLOCK_BAD}
+        >
+      </button>
+    {/if}
+    {#if url.protocol != 'nereid:' && !isANewTabURL()}
+      <button
+        class="tab-state"
+        on:click={() => bookmarkDialog = true}
+        class:open={bookmarkDialog}
+      >
+        <img
+          src="n-res://{$colorTheme}/bookmark{isInBookmarks ? '-selected' : ''}.svg"
+          alt={isInBookmarks ? _.BOOKMARK_ADD_OR_RM : _.BOOKMARK_ADD}
+          title={isInBookmarks ? _.BOOKMARK_ADD_OR_RM : _.BOOKMARK_ADD}
+        >
+      </button>
+    {/if}
+  </div>
+
+  {#if isActive && hints.length > 0}
+    <Hints {hints} selected={selectedHint} {clickHint} {getRealImageURL} />
   {/if}
 </div>
 <div class="wrapper" style="z-index: {anyDialog ? '99' : '-1'};">
@@ -442,7 +511,3 @@
     <AdBlocker bind:open={adblockerDialog} hostname={url.hostname} protocol={url.protocol} />
   {/if}
 </div>
-
-{#if isActive}
-  <Hints bind:isActive {hints} isprivate={tab.private} selected={selectedHint} bind:clickHintF />
-{/if}

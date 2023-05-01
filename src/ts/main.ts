@@ -7,6 +7,7 @@ import * as ipcManager from "./ipc";
 import * as userData from "./userdata";
 import { DEFAULT_PARTITION } from "./sessions";
 import * as thisProcess from "./process";
+import * as omniboxManager from "./omnibox";
 import * as pathModule from "path"
 import $ from "./common";
 import { t } from "./i18n";
@@ -61,6 +62,7 @@ userData.lastlaunch.set({ launchFailed: true })
 
 app.on('ready', () => {
   ipcManager.init();
+  omniboxManager.init();
 
   thisProcess.init()
 

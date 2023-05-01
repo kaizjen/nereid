@@ -1,7 +1,7 @@
 // Tabs' creation, removal and whatever else
 
 import type { TabWindow, TabOptions, Tab, RealTab, PaneView } from "./types";
-import { BrowserView, BrowserViewConstructorOptions, BrowserWindow, dialog, nativeTheme, session, webContents, WebContents, WebPreferences } from "electron";
+import { BrowserView, BrowserViewConstructorOptions, BrowserWindow, dialog, nativeTheme, session, WebContents, WebPreferences } from "electron";
 import fetch from "electron-fetch";
 import * as userData from './userdata'
 import { DEFAULT_PARTITION, NO_CACHE_PARTITION, PRIVATE_PARTITION, validateDomainByURL } from './sessions'

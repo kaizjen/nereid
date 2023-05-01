@@ -4,7 +4,7 @@
     padding: 0.3rem;
     height: 2.3rem;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     -webkit-app-region: no-drag;
     position: relative;
     border-top: 1px solid var(--t-white-5);
@@ -67,7 +67,7 @@
 <script>
   export let tab = {};
   const { ipcRenderer } = window.nereid;
-  import AddressBar from "./AddressBar.svelte"
+  import Omnibox from "./Omnibox.svelte"
   import { getContext } from "svelte/internal";
   import Downloads from "./popups/Downloads.svelte";
 
@@ -124,7 +124,7 @@
     <button class="tool nav arrow-img" class:disabled={!tab.nav?.canGoFwd} on:click={navFwd}><img alt={_.FWD} src="n-res://{$colorTheme}/arrow.svg"></button>
     <button class="tool nav wide" on:click={refreshOrStop}><img alt={tab.isLoading ? _.STOPLOAD : _.REFRESHLOAD} src={tab.isLoading ? `n-res://${$colorTheme}/cross.svg` : `n-res://${$colorTheme}/redo.svg`}></button>
   {/if}
-  <AddressBar {tab} disabled={window.isSingleTab} />
+  <Omnibox {tab} disabled={window.isSingleTab} />
   <button
     class="tool wide progressbar-container"
     class:open={downloadsDialog}

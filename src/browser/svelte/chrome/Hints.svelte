@@ -1,121 +1,120 @@
 <style>
   .hints {
-    position: absolute;
     display: flex;
     flex-direction: column;
-    background: var(--active-background);
-    top: 100%;
-    left: 0;
+    background: var(--dark-1);
     width: 100%;
-    /* border-radius: 0 0 10px 10px; */
     overflow: hidden;
     z-index: 1;
     -webkit-app-region: no-drag;
+    padding-top: 0.2rem;
   }
-  .h-link {
-    padding: 8px;
-    padding-left: 120px;
-    display: block;
+  .hint {
+    padding-block: 0.65rem;
+    padding-inline-start: 0.08rem;
+    display: flex;
     text-align: left;
     white-space: nowrap;
+    position: relative;
+    align-items: center;
   }
-  .h-link:hover {
-    background: var(--t-white-4);
+  .hint.sel {
+    background: var(--t-white-2);
   }
-  .h-link:active {
-    background: var(--t-white-6);
+  .hint.sel::before {
+    content: '';
+    background: var(--accent-5);
+    left: 0;
+    height: calc(100% - 0.2rem);
+    width: 0.3rem;
+    border-radius: 0 1rem 1rem 0;
+    margin-block: 0.1rem;
+    position: absolute;
   }
-  .h-link.sel {
-    background: var(--t-white-4);
+  .icon {
+    padding-inline: 0.95rem;
+    width: 0.98rem;
+    height: 0.98rem;
   }
-  span.h-body {
+  .hint:hover {
+    background: var(--t-white-3);
+  }
+  .hint:active {
+    background: var(--t-white-1);
+  }
+  .content {
     display: inline-flex;
+    margin-inline-start: 0.2rem;
   }
-  span.h-more {
-    color: var(--t-white-7);
+  .sel .h-body {
+    color: var(--accent-5) !important;
   }
 
   @media (prefers-color-scheme: light) {
     .hints {
-      background: var(--active-background);
+      background: var(--t-white-9);
     }
-    .h-link:hover {
+    .hint.sel {
+      background: var(--t-black-2);
+    }
+    .hint:hover {
       background: var(--t-black-3);
     }
-    .h-link:active {
-      background: var(--t-black-5);
+    .hint:active {
+      background: var(--t-black-1);
     }
-    .h-link.sel {
-      background: var(--t-black-3);
-    }
-    span.h-more {
-      color: var(--t-black-7);
+    .sel .h-body {
+      color: var(--accent-5) !important;
     }
   }
 </style>
 
 <script>
-  export let isActive;
-  export let isprivate = false;
   export let hints;
-  export let selected = -1;
-  const { ipcRenderer } = window.nereid
+  export let selected = 0;
+  export let clickHint;
+  export let getRealImageURL;
   import { fade } from 'svelte/transition'
-  import { getContext } from 'svelte/internal'
+  import RichText from './RichText.svelte';
+  import { getContext } from 'svelte';
 
-  const URLParse = getContext('URLParse')
-  const setTop = getContext('setTop')
+  const colorTheme = getContext('colorTheme');
 
-  const getURL = (function(){
-    let memStr = '';
-    let memResult = {};
-    return function (str) {
-      if (memStr != str) {
-        memResult = URLParse(str)
-        memStr = str;
-      }
-      return memResult;
-    }
-  })()
-
-  export function clickHintF(hint) {
-    return function () {
-      isActive = false;
-      setTop(false);
-      if (hint.internal == 'url') {
-        ipcRenderer.send('currentTab.navigate', hint.url, true);
-        
-      } else {
-        ipcRenderer.send('currentTab.search', hint.text);
-      }
-    }
+  function clickHintF(hint) {
+    return () => clickHint(hint)
   }
-  function getFullPath(url) {
-    return decodeURI((url.pathname ?? '') + (url.search ?? '') + (url.hash ?? ''))
+
+  let imageURLs = []
+
+  function updateImageURLs() {
+    imageURLs = hints.map(getRealImageURL)
+  }
+
+  $: {
+    hints, updateImageURLs()
   }
 </script>
 
-<div class="hints" in:fade={{ duration: 80 }} class:isprivate>
+<div class="hints" in:fade={{ duration: 80 }}>
   {#each hints as hint, index}
     <button
       tabindex="0"
       on:click={clickHintF(hint)}
       class:sel={selected == index}
-      class="h-link"
+      class="hint"
     >
-      {#if hint.internal == 'search'}
-        <span class="h-body">{hint.text}</span> <span class="h-more">— {hint.type}</span>
-      {:else}
-        {#if hint.title}
-          <span class="h-body"> {hint.title} </span> <span class="h-more">— {hint.url}</span>
-        {:else}
-          <span class="h-body">
-            <span class="protocol">{ getURL(hint.url).protocol }{ getURL(hint.url).slashes ? '//' : '' }</span>
-            <span class="host">{ getURL(hint.url).host }</span>
-            <span class="page">{ getFullPath(getURL(hint.url)) }</span>
-          </span> <span class="h-more">— URL</span>
-        {/if}
-      {/if}
+      <img
+        class="icon"
+        src="{imageURLs[index]}"
+        alt=""
+        on:error={() => imageURLs[index] = `n-res://${$colorTheme}/webpage.svg`}
+      >
+      <span class="h-body content">
+        <RichText value={hint.contents} />
+      </span>
+      <span class="content">
+        <RichText value={hint.desc} />
+      </span>
     </button>
   {/each}
 </div>

@@ -1,8 +1,7 @@
 // Manages the recieving IPC
 
-import { ipcMain, BrowserWindow, clipboard, nativeTheme, safeStorage, dialog, shell, session, app, Menu, nativeImage } from "electron";
+import { ipcMain, BrowserWindow, clipboard, nativeTheme, safeStorage, dialog, shell, session, app, Menu } from "electron";
 import type { WebContents, IpcMainEvent } from "electron";
-import fetch from "electron-fetch";
 import * as userData from "./userdata";
 import type { TabWindow, TabOptions, Configuration, RealTab } from "./types"
 import $ from "./common";
@@ -10,19 +9,14 @@ import * as tabManager from './tabs'
 import * as _url from "url";
 import { appMenu, displayOptions, menuNewTab, menuOfAddressBar, menuOfBookmark, menuOfPaneDivider, menuOfProcess, menuOfTab } from "./menu";
 import { getTabWindowByID, setHeadHeight, isTabWindow, newDialogWindow, setCurrentTabBounds, getAllTabWindows, getIDOfTabWindow, PANE_SEP_WIDTH, newTabWindow } from "./windows";
-import type TypeFuse from "fuse.js";
-import { certificateCache, DEFAULT_PARTITION, NO_CACHE_PARTITION, PRIVATE_PARTITION } from "./sessions";
+import { certificateCache, DEFAULT_PARTITION, PRIVATE_PARTITION } from "./sessions";
 import { getSupportedLanguage, t, availableTranslations } from "./i18n";
 import { adBlockerError, isAdBlockerReady, webContentsABMap } from "./adblocker";
 import { kill } from "./process";
 import { addTabToGroup, createTabGroup, getTabGroupByID, getTabsFromTabGroup, ungroup } from "./tabgroups";
-// must use require here because these libraries, when require()d, don't have a .default property.
-const Fuse = require('fuse.js') as typeof TypeFuse;
+import { getHints } from "./omnibox";
 
 const URLParse = $.URLParse
-
-let _historyLengthFeat = userData.control.options.max_history_for_hints
-const maxHistoryHintLength = _historyLengthFeat?.type == 'num' ? _historyLengthFeat.value : 3000;
 
 export function createDialog(wc: WebContents, type: string, arg: any): Promise<string | null | boolean> {
   return new Promise(resolve => {
@@ -400,113 +394,10 @@ export function init() {
     }
   })
 
-  ipcMain.on('getHints', async (e, query: string) => {
-    // MAYBE: move getHints to another place?
-    console.log('querying hints for %o', query);
-
-    let win = BrowserWindow.fromWebContents(e.sender) as TabWindow;
-    if (!win) return;
-
-    let _searchTemp = userData.config.get().search;
-    let hints: ({
-      internal: 'url'
-      title?: string
-      url: string
-    } | {
-      internal: 'search'
-      text: string
-      type: string
-    })[] = [];
-    hints.push({
-      internal: 'search',
-      text: query,
-      type: t('ui.hints.search', { engine: _searchTemp.available[_searchTemp.selectedIndex].name })
-    })
-    if ($.isValidURL(query)) {
-      hints.push({
-        url: URLParse(query).protocol ? query : ('http://' + query),
-        internal: 'url'
-      })
-    }
-    try {
-      let history = await userData.history.get();
-
-      if (history.length > maxHistoryHintLength) {
-        history.length = maxHistoryHintLength;
-      }
-
-      let instance = new Fuse(history, {
-        sortFn: (a, b) => a.score - b.score,
-        ignoreLocation: true,
-        keys: ['url', 'title'],
-        threshold: 0.3
-      })
-
-      let matches = instance.search(query);
-
-      let merged = matches
-        .map(({ item }) => {
-          if (item.reason.startsWith('searched:')) {
-            return {
-              internal: 'search' as const,
-              text: item.reason.slice("searched:".length),
-              type: t('ui.hints.prev-search', { site: URLParse(item.url).hostname })
-            }
-          }
-          return {
-            title: item.title,
-            url: item.url,
-            internal: 'url' as const
-          }
-        })
-        .filter($.uniqBy((val1, val2) => val1.title == val2.title && val2.url == val2.url))
-      ;
-
-      if (merged.length > 5) {
-        merged.length = 5
-      }
-
-      hints.push(...merged)
-
-    } catch (e) {
-      console.log('There was an error while trying to get history-based hints:', e);
-    }
-    block: try {
-      let { privacy } = userData.config.get();
-      if (!privacy.useSuggestions) break block;
-
-      let searchEngine = _searchTemp.available[_searchTemp.selectedIndex]
-      if (win.currentTab.private || query.startsWith('nereid:')) break block;
-
-      let suggestAlgorithm: (res) => (Promise<string[]> | string[]) = $.searchHintAlgorithms[
-        searchEngine.suggestAlgorithm == 'google-like' ? 'googleLike' :
-          searchEngine.suggestAlgorithm == 'startpage-like' ? 'startpageLike' :
-              searchEngine.suggestAlgorithm == 'find' ? 'finder' :
-                'error'
-      ]
-
-      const response = await fetch(
-        searchEngine.suggestURL.replaceAll('%s', encodeURIComponent(query)),
-        {
-          session: session.fromPartition(privacy.hideSessionForSuggestions ? NO_CACHE_PARTITION : DEFAULT_PARTITION)
-        }
-      )
-
-      let suggestions = (await suggestAlgorithm(response)).map(text => ({
-        text, internal: 'search' as const, type: t('ui.hints.search', { engine: searchEngine.name })
-      }))
-
-      hints.push(...suggestions);
-
-      if (hints.length > 12) {
-        hints.length = 12
-      }
-
-    } catch (e) {
-      console.log('There was an error while trying to get hints:', e);
-    }
-    win.chrome.webContents.send('gotHints', hints)
-    //console.log('gotHints:: ', hints);
+  onWindow('getHints', async (win, _e, query: string) => {
+    getHints(query, (hints) => {
+      win.chrome.webContents.send('updateHints', hints)
+    }, { isPrivate: win.currentTab?.private })
   })
 
   ipcMain.handle('getProcesses', () => {
