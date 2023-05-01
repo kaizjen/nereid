@@ -119,7 +119,7 @@
       background: var(--t-white-9);
     }
     .omnibox.focus, .omnibox.hashints {
-      background: var(--t-white-9)
+      background: var(--light-9)
     }
     .omnibox.focus {
       outline: none;

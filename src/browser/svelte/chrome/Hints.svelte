@@ -52,7 +52,7 @@
 
   @media (prefers-color-scheme: light) {
     .hints {
-      background: var(--t-white-9);
+      background: var(--light-9);
     }
     .hint.sel {
       background: var(--t-black-2);
