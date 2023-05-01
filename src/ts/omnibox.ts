@@ -27,6 +27,7 @@ type Hint = {
   contents: RichText
   desc: RichText
   url: string
+  omniboxValue?: string
   icon: string
 }
 type HintProvider = (query: string, params: GetHintsParams) => Hint[] | Promise<Hint[]>
@@ -217,6 +218,7 @@ export function init() {
       icon: '::search',
       relevance: 1,
       privileged: true,
+      omniboxValue: query,
       url: searchCfg.available[searchCfg.selectedIndex].searchURL.replaceAll('%s', query)
     }]
   })
@@ -235,7 +237,7 @@ export function init() {
         privileged: true,
         icon: URLParse(url).protocol + '//' + URLParse(url).host + '/favicon.ico',
         relevance: 10,
-        url
+        url, omniboxValue: query
       }]
 
     } else {
@@ -285,6 +287,7 @@ export function init() {
           desc: [{ text: ' - ' + t('ui.hints.search', { engine: searchEngine.name }), gray: true }],
           relevance: Math.min(rel, 900),
           icon: '::search',
+          omniboxValue: result,
           url: searchCfg.available[searchCfg.selectedIndex].searchURL.replaceAll('%s', result)
         }
       })
@@ -343,6 +346,7 @@ export function init() {
               desc: [{ text: ' - ' + t('ui.hints.prev-search', { site: URLParse(item.url).hostname }), gray: true }],
               icon: '::search',
               url: item.url,
+              omniboxValue: text,
               relevance: (1 - score) * HISTORY_HINT_MULTIPLIER * 1.45 // amplify this even further
             }
           }

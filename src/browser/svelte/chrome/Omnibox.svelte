@@ -279,7 +279,7 @@
     if (hints[selectedHint] == undefined) return;
 
     const hint = hints[selectedHint];
-    inputValue = hint.contents.map(rt => rt.text).join('');
+    inputValue = hint.omniboxValue || hint.url;
     requestAnimationFrame(() => {
       inputRef.setSelectionRange(inputValue.length, inputValue.length)
     })
