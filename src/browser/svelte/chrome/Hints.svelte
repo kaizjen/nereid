@@ -46,9 +46,6 @@
     display: inline-flex;
     margin-inline-start: 0.2rem;
   }
-  .sel .h-body {
-    color: var(--accent-5) !important;
-  }
 
   @media (prefers-color-scheme: light) {
     .hints {
@@ -62,9 +59,6 @@
     }
     .hint:active {
       background: var(--t-black-1);
-    }
-    .sel .h-body {
-      color: var(--accent-5) !important;
     }
   }
 </style>
