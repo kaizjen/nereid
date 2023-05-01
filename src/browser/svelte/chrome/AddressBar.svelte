@@ -16,7 +16,7 @@
   #addressbar:hover {
     transition: 0s;
   }
-  #addressbar:not(.noborder):not(.focus):hover {
+  #addressbar:not(:has(.tab-state:hover)):not(.focus):hover {
     box-shadow: 0 0 0 1px var(--t-white-3);
     background: var(--t-black-9);
   }
@@ -79,6 +79,7 @@
     font-family: inherit;
     padding-left: 0.565rem;
     direction: ltr;
+    height: 100%;
   }
   #ab-input:focus-visible {
     box-shadow: none; /* box-shadow defined for all elements in index.html */
@@ -99,7 +100,7 @@
     #addressbar {
       background: var(--t-white-8);
     }
-    #addressbar:not(.noborder):not(.focus):hover {
+    #addressbar:not(:has(.tab-state:hover)):not(.focus):hover {
       box-shadow: 0 0 0 1px var(--t-black-3);
       background: var(--t-white-9);
     }
@@ -168,7 +169,6 @@
   let inputValue = '';
   let hints = [];
   let inputRef;
-  let noBorder = false;
 
   let config = getContext('config');
   let bookmarks = getContext('bookmarks');
@@ -201,15 +201,6 @@
 
   document.body.addEventListener('keydown', recieveKey)
   ipcRenderer.on('keySent', (_, i) => recieveKey(i))
-
-  function hover(node) {
-    node.addEventListener('mouseover', () => {
-      noBorder = true;
-    })
-    node.addEventListener('mouseout', () => {
-      noBorder = false;
-    })
-  }
 
   $: {
     console.log('zoom is', $globalZoom, 'default:', $config?.ui.defaultZoomFactor)
@@ -353,8 +344,8 @@
   bookmarkDialog = false;
   adblockerDialog = false;
 }} />
-<div class:noborder={anyDialog || noBorder} id="addressbar" class:disabled class:focus={isActive}>
-  <button use:hover on:click={() => securityDialog = !securityDialog} class="tab-state sec" class:open={securityDialog}>
+<div id="addressbar" class:disabled class:focus={isActive}>
+  <button on:click={() => securityDialog = !securityDialog} class="tab-state sec" class:open={securityDialog}>
     <img alt={_.SECURITY}
       src={
         tab.security === true ? `n-res://${$colorTheme}/secure.svg` : 
@@ -401,7 +392,6 @@
     <button
       class="tab-state"
       on:click={() => zoomDialog = true}
-      use:hover
       class:open={zoomDialog}
     >
       <img
@@ -415,7 +405,6 @@
     <button
       class="tab-state"
       on:click={() => adblockerDialog = true}
-      use:hover
       class:open={adblockerDialog}
     >
       <img
@@ -429,7 +418,6 @@
     <button
       class="tab-state"
       on:click={() => bookmarkDialog = true}
-      use:hover
       class:open={bookmarkDialog}
     >
       <img
