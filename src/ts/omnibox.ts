@@ -21,13 +21,21 @@ type RichText = {
   blue?: boolean
 }[]
 type Hint = {
+  /** The name of the provider. Will be set automatically. */
   provider?: string
+  /** Privileged hints are always shown at the top, though ranked between each other. */
   privileged?: boolean
+  /** The relevance score of the hint, the higher it is, the higher the hint appears in the list. */
   relevance: number
+  /** The `RichText` object that appears *the first* in the hint UI. */
   contents: RichText
+  /** The `RichText` object that appears *the second* in the hint UI. */
   desc: RichText
+  /** Go to this URL when the user clicks this hint */
   url: string
+  /** When the user selects the hint using the arrow keys, what will be put in the omnibox */
   omniboxValue?: string
+  /** Specify the icon with `::` at the beginning to use the internal Nereid resources. */
   icon: string
 }
 type HintProvider = (query: string, params: GetHintsParams) => Hint[] | Promise<Hint[]>
@@ -155,13 +163,18 @@ export async function getHints(query: string, updateHints: (hints: Hint[]) => an
     const provider = hintProviders[name];
 
     // TODO: Make this asynchronous so we don't have to wait for every provider to finish
-    const provHints = await provider(query, params);
-    provHints.forEach(h => {
-      h.provider = name;
-      h.relevance = Math.round(h.relevance);
-      if (isNaN(h.relevance)) h.relevance = 0;
-    })
-    hints.push(...provHints)
+    try {
+      const provHints = await provider(query, params);
+      provHints.forEach(h => {
+        h.provider = name;
+        h.relevance = Math.round(h.relevance);
+        if (isNaN(h.relevance)) h.relevance = 0;
+      })
+      hints.push(...provHints)
+
+    } catch (error) {
+      console.warn(`Hint provider "${name}" has thrown an error:`, error);
+    }
   }
 
   hints = hints.sort(({ relevance: rel1, privileged: p1 }, { relevance: rel2, privileged: p2 }) => {
@@ -328,6 +341,8 @@ export function init() {
           const contents: RichText = [];
 
           if (item.reason.startsWith('searched:')) {
+            // TODO: move this section to a different provider so that this will be
+            // prioritized over just the search URL in the `.filter()` call
             const text = item.reason.slice("searched:".length);
 
             const allOccs = allOccurences(text, query);

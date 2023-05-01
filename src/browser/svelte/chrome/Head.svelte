@@ -325,7 +325,7 @@
   $: shouldBeColored = $config?.ui.showTabGroupColor;
 
   $: {
-    // lock keypresses so that addressbar won't
+    // lock keypresses so that the Omnibox won't
     // intercept them when the user is editing a group
     $keypressesLocked = !!editingTabGroup
   }
