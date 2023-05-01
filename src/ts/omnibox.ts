@@ -356,9 +356,9 @@ export function init() {
             let prevIndex = 0;
             titleMatches.indices.forEach(match => {
               contents.push({ text: titleMatches.value.slice(prevIndex, match[0]) });
-              contents.push({ text: titleMatches.value.slice(match[0], match[1]), bold: true });
+              contents.push({ text: titleMatches.value.slice(match[0], match[1] + 1), bold: true });
 
-              prevIndex = match[1];
+              prevIndex = match[1] + 1;
             })
             contents.push({ text: titleMatches.value.slice(prevIndex) });
 
@@ -370,9 +370,9 @@ export function init() {
             let prevIndex = 0;
             urlMatches.indices.forEach(match => {
               urlRT.push({ text: urlMatches.value.slice(prevIndex, match[0]), blue: true });
-              urlRT.push({ text: urlMatches.value.slice(match[0], match[1]), bold: true, blue: true });
+              urlRT.push({ text: urlMatches.value.slice(match[0], match[1] + 1), bold: true, blue: true });
 
-              prevIndex = match[1];
+              prevIndex = match[1] + 1;
             })
             urlRT.push({ text: urlMatches.value.slice(prevIndex), blue: true });
 
