@@ -154,8 +154,12 @@ const maxHistoryHintLength = _historyLengthFeat?.type == 'num' ? _historyLengthF
 
 const hintProviders: Record<string, HintProvider> = {}
 
+let currentGetHintsCall = 0;
 export async function getHints(query: string, updateHints: (hints: Hint[]) => any, params: GetHintsParams = {}) {
   console.log('querying hints for %o', query);
+
+  currentGetHintsCall++;
+  const thisCall = currentGetHintsCall;
 
   let hints: Hint[] = [];
 
@@ -189,7 +193,8 @@ export async function getHints(query: string, updateHints: (hints: Hint[]) => an
     hints.length = 17;
   }
 
-  updateHints(hints);
+  if (currentGetHintsCall == thisCall) updateHints(hints);
+  else console.warn(`The hints for "${query}" weren't sent because the query was updated.`);
 }
 
 export async function addHintProvider(name: string, provider: HintProvider) {
