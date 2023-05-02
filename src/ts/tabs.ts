@@ -855,6 +855,8 @@ export function attach(win: TabWindow, tab: RealTab) {
     pushToHistory(tab)
   })
   tab.webContents.on('did-fail-load', (e, code, desc, url, isMainFrame, ...args) => {
+    if (isMainFrame && url != tab.webContents.getURL()) return; // The tab has already loaded a new URL
+
     handleNetError(tab.webContents, e, code, desc, url, isMainFrame, ...args)
 
     if (!isMainFrame) return;
