@@ -216,6 +216,11 @@
   document.body.addEventListener('keydown', recieveKey)
   ipcRenderer.on('keySent', (_, i) => recieveKey(i))
 
+  ipcRenderer.on('updateHints', (_e, hintArray) => {
+    console.log('updateHints', hintArray);
+    hints = hintArray;
+  })
+
   $: {
     console.log('zoom is', $globalZoom, 'default:', $config?.ui.defaultZoomFactor)
   }
@@ -331,10 +336,6 @@
         requestIdleCallback(() => {
           // Update the `inputValue` binding
           ipcRenderer.send('getHints', inputValue);
-          ipcRenderer.once('updateHints', (_e, hintArray) => {
-            console.log('updateHints', hintArray);
-            hints = hintArray;
-          })
         })
 
         // We return because we don't want to trigger hintToInputValue()

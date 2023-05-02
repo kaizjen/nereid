@@ -11,7 +11,7 @@ const Fuse = require('fuse.js') as typeof TypeFuse;
 
 const URLParse = $.URLParse;
 
-type GetHintsParams = { isPrivate?: boolean };
+type GetHintsParams = { isPrivate?: boolean, disableEntropy?: boolean };
 type RichText = {
   text: string
   bold?: boolean
@@ -152,8 +152,40 @@ let _historyLengthFeat = control.options.max_history_for_hints
 const maxHistoryHintLength = _historyLengthFeat?.type == 'num' ? _historyLengthFeat.value : 3000;
 
 
-const hintProviders: Record<string, HintProvider> = {}
+const hintProviders: Record<string, HintProvider> = {};
 
+/** Queues the manipulation of hints so that if
+ * multiple hint providers finish at the same time, 
+ * the hints would be sent only once. */
+const queueSort = (() => {
+  let isQueued = false;
+  let hints: Hint[] = [];
+
+  return function(newHints: Hint[], updateHints: (hints: Hint[]) => any) {
+    hints = newHints;
+    if (isQueued) return;
+
+    isQueued = true;
+    setImmediate(() => {
+      isQueued = false;
+
+      hints = hints.sort(({ relevance: rel1, privileged: p1 }, { relevance: rel2, privileged: p2 }) => {
+        if ((p1 && p2) || (!p1 && !p2)) {
+          return rel2 - rel1;
+
+        } else if (p1 && !p2) return -Infinity;
+        else return Infinity;
+      })
+      if (hints.length > 15) {
+        hints.length = 15;
+      }
+      updateHints(hints);
+    })
+  }
+})()
+
+/** Keep track of previous hints to replace them by provider. */
+let previousHints: Hint[] = [];
 let currentGetHintsCall = 0;
 export async function getHints(query: string, updateHints: (hints: Hint[]) => any, params: GetHintsParams = {}) {
   console.log('querying hints for %o', query);
@@ -161,40 +193,50 @@ export async function getHints(query: string, updateHints: (hints: Hint[]) => an
   currentGetHintsCall++;
   const thisCall = currentGetHintsCall;
 
-  let hints: Hint[] = [];
+  let hints: Hint[] = params.disableEntropy ? [] : previousHints;
+
+  const safeQueueSort = () => {
+    queueSort(hints, sortedHints => {
+      if (currentGetHintsCall != thisCall)
+        return console.warn(`The hints for "${query}" weren't sent because the query was updated.`)
+      ;
+      updateHints(sortedHints);
+      previousHints = hints;
+    });
+  }
 
   for (const name in hintProviders) {
     const provider = hintProviders[name];
 
-    // TODO: Make this asynchronous so we don't have to wait for every provider to finish
-    try {
-      const provHints = await provider(query, params);
-      provHints.forEach(h => {
-        h.provider = name;
-        h.relevance = Math.round(h.relevance);
-        if (isNaN(h.relevance)) h.relevance = 0;
-      })
-      hints.push(...provHints)
+    (async () => {
+      // This will queue all providers at the same time,
+      // and update the hints every time each provider finishes.
+      //
+      // After each iteration, we cache the hints in `previousHints`
+      // Every time `getHints()` gets called, it will first send already
+      // cached hints (from a previous response).
+      // Before adding new hints of each provider, we first remove
+      // its cached hints.
+      //
+      // ^ This all is done to prevent the annoying jitter when the hints
+      // update because some providers work slower than others.
+      try {
+        const provHints = await provider(query, params);
+        provHints.forEach(h => {
+          h.provider = name;
+          h.relevance = Math.round(h.relevance);
+          if (isNaN(h.relevance)) h.relevance = 0;
+        })
+        hints = hints.filter(hint => hint.provider != name); // Remove all previous hints of this p-er
+        hints.push(...provHints);
 
-    } catch (error) {
-      console.warn(`Hint provider "${name}" has thrown an error:`, error);
-    }
+        safeQueueSort();
+
+      } catch (error) {
+        console.warn(`Hint provider "${name}" has thrown an error:`, error);
+      }
+    })()
   }
-
-  hints = hints.sort(({ relevance: rel1, privileged: p1 }, { relevance: rel2, privileged: p2 }) => {
-    if ((p1 && p2) || (!p1 && !p2)) {
-      return rel2 - rel1;
-
-    } else if (p1 && !p2) return -Infinity;
-    else return Infinity;
-  })
-
-  if (hints.length > 17) {
-    hints.length = 17;
-  }
-
-  if (currentGetHintsCall == thisCall) updateHints(hints);
-  else console.warn(`The hints for "${query}" weren't sent because the query was updated.`);
 }
 
 export async function addHintProvider(name: string, provider: HintProvider) {
@@ -375,7 +417,7 @@ export function init() {
 
           const titleMatches = matches.find(m => m.key == 'title');
           const urlMatches = matches.find(m => m.key == 'url');
-          
+
           if (titleMatches) {
             let prevIndex = 0;
             titleMatches.indices.forEach(match => {
@@ -415,7 +457,7 @@ export function init() {
         .filter($.uniqBy((val1, val2) =>
           val1.url == val2.url
         ))
-      ;
+        ;
 
       hints.push(...merged)
 
