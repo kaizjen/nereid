@@ -240,7 +240,7 @@ export async function getHints(query: string, updateHints: (hints: Hint[]) => an
           if (isNaN(h.relevance)) h.relevance = 0;
           h.navigationReason ||= 'input-url';
         })
-        hints = hints.filter(hint => hint.provider != name); // Remove all previous hints of this p-er
+        $.mutFilter(hints, hint => hint.provider != name); // Remove all previous hints of this p-er
         hints.push(...provHints);
 
         safeQueueSort();

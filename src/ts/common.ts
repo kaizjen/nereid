@@ -139,7 +139,8 @@ export default {
     let i = -1;
     while (++i < array.length) {
       if (!predicate(array[i], i, array))
-        array.splice(i, 1)
+        array.splice(i--, 1)
+        // Decrease the i because we've decreased the array length
       ;
     }
     return array;
