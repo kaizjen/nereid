@@ -409,7 +409,7 @@
 >
   <div id="addressbar">
     {#if isActive && hints.length > 0}
-      <button class="tab-state sec hint-icon">
+      <button class="tab-state sec hint-icon" on:click={() => handleKeyDown({ key: 'Enter' })}>
         <img
           alt=""
           src={hintImageURL}
