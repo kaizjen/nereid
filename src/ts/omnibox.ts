@@ -361,7 +361,7 @@ export function init() {
       return [];
     }
   })
-  addHintProvider("Search", async (query, params) => {
+  addHintProvider("Search", async (query, params, { isDone }) => {
     const searchCfg = config.get().search;
 
     const hints = [];
@@ -385,6 +385,8 @@ export function init() {
           session: session.fromPartition(privacy.hideSessionForSuggestions ? NO_CACHE_PARTITION : DEFAULT_PARTITION)
         }
       )
+
+      if (isDone()) return;
 
       let suggestions: Hint[] = (await suggestAlgorithm(response)).map(({ result, rel }) => {
         const allOccs = allOccurences(result, query);
@@ -419,7 +421,7 @@ export function init() {
       return [];
     }
   })
-  addHintProvider("History", async (query) => {
+  addHintProvider("History", async (query, _, { isDone }) => {
     const hints: Hint[] = [];
 
     if (query.length > MAX_SHORT_QUERY_LEN) {
@@ -429,6 +431,8 @@ export function init() {
 
     try {
       let entries = await history.get();
+
+      if (isDone()) return [];
 
       if (entries.length > maxHistoryHintLength) {
         entries.length = maxHistoryHintLength;
@@ -533,13 +537,15 @@ export function init() {
       return [];
     }
   })
-  addHintProvider("HistoryLong", async (query) => {
+  addHintProvider("HistoryLong", async (query, _, { isDone }) => {
     // This provider only handles long queries
     // and uses plain indexOf() search instead of the fuzzy seach
     // algorithm as it gets really slow (~500 ms/query) on long queries.
     if (query.length <= MAX_SHORT_QUERY_LEN) return [];
 
     const entries = await history.get();
+
+    if (isDone()) return [];
 
     if (entries.length > maxHistoryHintLength) {
       entries.length = maxHistoryHintLength;
