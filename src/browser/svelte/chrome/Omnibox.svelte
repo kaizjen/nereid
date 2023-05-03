@@ -331,7 +331,6 @@
       }
       default: {
         if (e.key.length > 1 && e.key != 'Backspace') return;
-        if (e.shiftKey || e.ctrlKey) return;
         // key.length > 1 if the key is a special one (like 'Space', but not 'e')
 
         selectedHint = 0
