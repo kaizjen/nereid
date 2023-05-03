@@ -1035,6 +1035,11 @@ export function selectTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: n
 
   if (!win.tabs[index]) throw new Error(`tabManager.selectTab: tab #${index} is not in window`)
 
+  if (win.currentPaneView) {
+    win.removeBrowserView(win.currentPaneView.leftTab);
+    win.removeBrowserView(win.currentPaneView.rightTab);
+    win.currentTab = null; // So we don't call `removeBrowserView` twice
+  }
   if (win.currentTab) win.removeBrowserView(win.currentTab);
   if (tab.isGhost) {
     tab = toRealTab(tab);
