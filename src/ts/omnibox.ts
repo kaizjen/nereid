@@ -250,7 +250,7 @@ export async function getHints(query: string, updateHints: (hints: Hint[]) => an
       // update because some providers work slower than others.
       try {
         const provHints = await provider(query, params, {
-          isDone: () => currentGetHintsCall == thisCall
+          isDone: () => currentGetHintsCall != thisCall
         });
         provHints.forEach(h => {
           h.provider = name;
@@ -386,7 +386,7 @@ export function init() {
         }
       )
 
-      if (isDone()) return;
+      if (isDone()) return [];
 
       let suggestions: Hint[] = (await suggestAlgorithm(response)).map(({ result, rel }) => {
         const allOccs = allOccurences(result, query);
