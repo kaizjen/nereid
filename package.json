@@ -10,7 +10,7 @@
     "dev": "npm run build && electron .",
     "dev-inspect": "npm run build && electron . --inspect",
     "localize": "node src/i18n/fill.js && node src/i18n/transform.js",
-    "begin": "npm install && node svlc/hack_empty_svelte_styles.js && cd src/browser/webui && npm install && svbuild && cd ../../.. && npm run build",
+    "begin": "npm install && node patches/hack_empty_svelte_styles.js && cd src/browser/webui && npm install && cd ../../.. && npm run build",
     "watch": "ilo tsc --watch + svbuild --watch -c src/browser/svbuild.config.js + svbuild --watch -c src/browser/webui/svbuild.config.js"
   },
   "private": true,
@@ -45,7 +45,7 @@
     "files": [
       "!branding",
       "!docs",
-      "!svlc",
+      "!patches",
       "!src/i18n/src",
       "!src/i18n/*.js",
       "!src/ts",
