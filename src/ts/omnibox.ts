@@ -193,6 +193,8 @@ const queueSort = (() => {
 let previousHints: Hint[] = [];
 let currentGetHintsCall = 0;
 export async function getHints(query: string, updateHints: (hints: Hint[]) => any, params: GetHintsParams = {}) {
+  if (query == '') return updateHints([]);
+
   console.log('querying hints for %o', query);
 
   currentGetHintsCall++;

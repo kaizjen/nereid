@@ -99,6 +99,7 @@ export function init() {
     win.chrome.webContents.send('zoomUpdate', wc.zoomFactor)
   })
   onCurrentTab('currentTab.go', (wc, win, _e, q) => {
+    if (q == '') return;
     console.log('go', q);
 
     function search() {
