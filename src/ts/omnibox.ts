@@ -3,9 +3,11 @@ import $ from "./common";
 import { config, control, history } from "./userdata";
 import type TypeFuse from "fuse.js";
 import fetch from "electron-fetch";
-import { session } from "electron";
+import { BrowserWindow, ipcMain, session } from "electron";
 import { DEFAULT_PARTITION, NO_CACHE_PARTITION } from "./sessions";
-import { History, NavigationReason } from "./types";
+import { History, NavigationReason, TabWindow } from "./types";
+import { getAllTabWindows, isTabWindow } from "./windows";
+import { asRealTab, selectTab } from "./tabs";
 
 // must use require here because these libraries, when require()d, don't have a .default property.
 const Fuse = require('fuse.js') as typeof TypeFuse;
@@ -40,8 +42,24 @@ type Hint = {
   icon: string
   /** The navigation reason recorded in history when the user clicks this hint */
   navigationReason?: NavigationReason
+  /**
+   * If this is present, then, when this hint is clicked, a function specified by the 
+   * provider will be called. See `registerPedal` for more info
+   * ```ts
+   * return [{
+   *   ...,
+   *   pedalID: registerPedal(() => {
+   *     // do something here instead of going to the URL
+   *   }),
+   *   ...
+   * }]
+   * ```
+   * **Warning!** The `.url` and `.navigationReason` properties will be ignored if you specify pedalID!
+   */
+  pedalID?: number
 }
 type HintProvider = (query: string, params: GetHintsParams, util: { isDone(): boolean }) => Hint[] | Promise<Hint[]>
+type Pedal = (win: TabWindow) => any
 
 type _SearchAlgorithmResponse = { result: string, rel?: number }[]
 const searchHintAlgorithms = {
@@ -157,6 +175,8 @@ const maxHistoryHintLength = _historyLengthFeat?.type == 'num' ? _historyLengthF
 
 const hintProviders: Record<string, HintProvider> = {};
 
+let pedalIDMap: ReadonlyArray<Pedal> = []
+
 /** Queues the manipulation of hints so that if
  * multiple hint providers finish at the same time, 
  * the hints would be sent only once. */
@@ -191,6 +211,9 @@ const queueSort = (() => {
 let previousHints: Hint[] = [];
 let currentGetHintsCall = 0;
 export async function getHints(query: string, updateHints: (hints: Hint[]) => any, params: GetHintsParams = {}) {
+  // Remove all the previous pedals
+  pedalIDMap = [];
+
   if (query == '') return updateHints([]);
 
   console.log('querying hints for %o', query);
@@ -247,6 +270,11 @@ export async function getHints(query: string, updateHints: (hints: Hint[]) => an
   }
 }
 
+/** Registers a pedal and returns its ID. A pedal allows to identify and call a main function from the chrome. */
+export function registerPedal(callback: Pedal) {
+  return (pedalIDMap as Pedal[]).push(callback) - 1;
+}
+
 export async function addHintProvider(name: string, provider: HintProvider) {
   if (hintProviders[name]) {
     console.warn(`Hint provider "${name}" was reset without being removed first!`)
@@ -273,6 +301,12 @@ function allOccurences(string: string, subString: string) {
   return result;
 }
 
+function matchReducer(array: [number, number][]) {
+  let num = 0;
+  array.forEach(([beginning, end]) => num += end - beginning);
+  return num;
+}
+
 /** Multiply the relevance by this number */
 const HISTORY_HINT_MULTIPLIER = 950
 /**
@@ -281,6 +315,15 @@ const HISTORY_HINT_MULTIPLIER = 950
  */
 const MAX_SHORT_QUERY_LEN = 25
 export function init() {
+  ipcMain.on('triggerPedal', (e, pedalID) => {
+    // MAYBE: move this to ipc.ts??
+    const win = BrowserWindow.fromWebContents(e.sender)
+    if (!isTabWindow(win)) return;
+    if (!pedalIDMap[pedalID]) return console.warn(`The pedal ${pedalID} does not exist.`);
+
+    pedalIDMap[pedalID](win);
+  })
+
   addHintProvider("SearchWhatYouTyped", (query) => {
     const configData = config.get();
     const searchCfg = configData.search;
@@ -556,6 +599,75 @@ export function init() {
         relevance,
         url: entry.url,
         icon: entry.faviconURL
+      })
+    })
+
+    return hints;
+  })
+  addHintProvider("Tabs", (query) => {
+    const tabs = getAllTabWindows().map(w => w.tabs).flat();
+
+    const words = $.mutFilter(query.toLowerCase().split(/\s/), item => item);
+
+    const hints: Hint[] = [];
+    tabs.forEach(tab => {
+      const titleMatches: [number, number][] = [];
+      const urlMatches: [number, number][] = [];
+
+      const title = tab.isGhost ? tab.title : asRealTab(tab).webContents.getTitle();
+      const url = tab.isGhost ? tab.url : asRealTab(tab).webContents.getURL();
+
+      let prevTitleIndex = -1;
+      let prevURLIndex = -1;
+      words.forEach(wd => {
+        const wdTitleIndex = title.toLowerCase().indexOf(wd, prevTitleIndex + 1);
+        const wdURLIndex = url.toLowerCase().indexOf(wd, prevURLIndex + 1);
+
+        if (wdTitleIndex != -1) {
+          titleMatches.push([wdTitleIndex, wdTitleIndex + wd.length]);
+          prevTitleIndex = wdTitleIndex + wd.length;
+        }
+        if (wdURLIndex != -1) {
+          urlMatches.push([wdURLIndex, wdURLIndex + wd.length]);
+          prevURLIndex = wdURLIndex + wd.length;
+        }
+      });
+      if (titleMatches.length == 0 && urlMatches.length == 0) return;
+
+      const relevance = 400 + ((matchReducer(titleMatches) + (matchReducer(urlMatches) * 0.3)) * 30);
+      if (relevance == 400) return;
+
+      const titleRT: RichText = [];
+      const urlRT: RichText = [];
+
+      let prevIndex = 0;
+      titleMatches.forEach(match => {
+        titleRT.push({ text: title.slice(prevIndex, match[0]) });
+        titleRT.push({ text: title.slice(match[0], match[1]), bold: true });
+
+        prevIndex = match[1];
+      })
+      titleRT.push({ text: title.slice(prevIndex) });
+
+      prevIndex = 0;
+      urlMatches.forEach(match => {
+        urlRT.push({ text: url.slice(prevIndex, match[0]), blue: true });
+        urlRT.push({ text: url.slice(match[0], match[1]), bold: true, blue: true });
+
+        prevIndex = match[1];
+      })
+      urlRT.push({ text: url.slice(prevIndex), blue: true });
+
+      hints.push({
+        contents: [{ text: t('ui.hints.tabHint.sign') + '  ', gray: true, italic: true }, ...titleRT],
+        desc: [...urlRT, { text: ' - ' + t('ui.hints.tabHint.description'), gray: true }],
+        relevance,
+        url: url,
+        pedalID: registerPedal(() => {
+          tab.owner?.focus();
+          if (tab.owner) selectTab(tab.owner, { tab });
+        }),
+        icon: tab.faviconURL
       })
     })
 

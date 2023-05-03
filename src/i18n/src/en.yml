@@ -191,6 +191,9 @@ ui:
     prev-search: Previous search on ${site}
     url: URL
     search: ${engine} search
+    tabHint:
+      sign: (Tab)
+      description: Switch to this tab
   inPageSearch:
     placeholder: Find in page...
     prev: Previous

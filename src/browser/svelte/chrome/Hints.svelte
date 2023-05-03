@@ -104,10 +104,10 @@
         on:error={() => imageURLs[index] = `n-res://${$colorTheme}/webpage.svg`}
       >
       <span class="h-body content">
-        <RichText value={hint.contents} />
+        <RichText value={hint.contents} allowNewLines={selected == index} />
       </span>
       <span class="content">
-        <RichText value={hint.desc} />
+        <RichText value={hint.desc} allowNewLines={selected == index} />
       </span>
     </button>
   {/each}

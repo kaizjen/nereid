@@ -12,6 +12,14 @@
 
 <script>
   export let value;
+  export let allowNewLines = true;
+
+  function sanitize(text) {
+    if (!allowNewLines) {
+      text = text.replaceAll('\n', '  ')
+    }
+    return text;
+  }
 </script>
 
 {#each value as rt}
@@ -21,5 +29,5 @@
     class:underline={rt.underline}
     class:gray={rt.gray}
     class:blue={rt.blue}
-  >{rt.text}</span>
+  >{sanitize(rt.text, allowNewLines)}</span>
 {/each}

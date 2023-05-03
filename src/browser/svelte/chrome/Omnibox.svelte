@@ -260,7 +260,13 @@
     isActive = false;
     setTop(false)
     hints = [];
-    ipcRenderer.send('currentTab.navigate', hint.url, hint.navigationReason);
+
+    if (hint.pedalID == undefined) {
+      ipcRenderer.send('currentTab.navigate', hint.url, hint.navigationReason);
+
+    } else {
+      ipcRenderer.send('triggerPedal', hint.pedalID);
+    }
   }
 
   let hintImageURL = false;

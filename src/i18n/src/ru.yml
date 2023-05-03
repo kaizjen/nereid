@@ -152,6 +152,9 @@ ui:
     prev-search: Вы раньше искали на ${site}
     url: URL
     search: ${engine} поиск
+    tabHint:
+      sign: (Вкладка)
+      description: Переключиться на эту вкладку
   inPageSearch:
     placeholder: Найти на странице...
     prev: Пред.
