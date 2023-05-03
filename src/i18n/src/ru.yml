@@ -151,7 +151,7 @@ ui:
   hints:
     prev-search: Вы раньше искали на ${site}
     url: URL
-    search: ${engine} поиск
+    search: Поиск в ${engine}
     tabHint:
       sign: (Вкладка)
       description: Переключиться на эту вкладку
