@@ -217,7 +217,10 @@
   ipcRenderer.on('keySent', (_, i) => recieveKey(i))
 
   ipcRenderer.on('updateHints', (_e, hintArray) => {
-    console.log('updateHints', hintArray);
+    window._debugHintArray = hintArray;
+    // Not logging the array directly to avoid memory leaks
+    console.log('updateHints', hintArray.length);
+
     hints = hintArray;
   })
 

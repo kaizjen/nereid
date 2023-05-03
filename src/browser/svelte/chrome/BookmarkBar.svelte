@@ -113,7 +113,7 @@
         <button
           class="bookmark"
           title={bm.url}
-          on:click={() => ipcRenderer.send('currentTab.navigate', bm.url, true)}
+          on:click={() => ipcRenderer.send('currentTab.navigate', bm.url, 'input-url')}
           on:contextmenu|preventDefault={ctxMenuF(bm, i)}
         >
           {#if bm.iconURL}

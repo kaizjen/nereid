@@ -127,13 +127,21 @@ export default {
   },
   URLParse,
   parseWindowOpenFeatures,
-  /**
-   * Gets unique values from an array by comparing them to each other using `compareFn`.
-   */
+  /** Gets unique values from an array by comparing them to each other using `compareFn`. */
   uniqBy<T extends ReadonlyArray<unknown>>(compareFn: (val1: T[0], val2: T[0], obj: T) => boolean) {
     // will be passed to Array.prototype.filter()
     return function uniq(firstValue: T[0], firstIndex: number, self: T) {
       return self.findIndex(secondValue => compareFn(firstValue, secondValue, self)) === firstIndex;
     }
+  },
+  /** Filters items in an array with mutating the array, not creating a new one. Returns the reference to the array. */
+  mutFilter<T extends unknown[]>(array: T, predicate: (arg: T[0], index: number, array: T) => any) {
+    let i = -1;
+    while (++i < array.length) {
+      if (!predicate(array[i], i, array))
+        array.splice(i, 1)
+      ;
+    }
+    return array;
   }
 }

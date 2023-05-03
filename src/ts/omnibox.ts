@@ -41,7 +41,9 @@ type Hint = {
   /** The navigation reason recorded in history when the user clicks this hint */
   navigationReason?: NavigationReason
 }
-type HintProvider = (query: string, params: GetHintsParams) => Hint[] | Promise<Hint[]>
+type HintProvider = (query: string, params: GetHintsParams, util: {
+  isDone(): boolean, cache: { history: History }
+}) => Hint[] | Promise<Hint[]>
 
 type _SearchAlgorithmResponse = { result: string, rel?: number }[]
 const searchHintAlgorithms = {
@@ -224,7 +226,12 @@ export async function getHints(query: string, updateHints: (hints: Hint[]) => an
       // ^ This all is done to prevent the annoying jitter when the hints
       // update because some providers work slower than others.
       try {
-        const provHints = await provider(query, params);
+        const provHints = await provider(query, params, {
+          isDone: () => currentGetHintsCall == thisCall,
+          cache: {
+            history: Object.seal(await history.get())
+          }
+        });
         provHints.forEach(h => {
           h.provider = name;
           h.relevance = Math.round(h.relevance);
@@ -271,6 +278,11 @@ function allOccurences(string: string, subString: string) {
 
 /** Multiply the relevance by this number */
 const HISTORY_HINT_MULTIPLIER = 950
+/**
+ * After that length, the query will be considered "long".
+ * MUST NOT BE > 32 because of a Fuse.js bug with `includeMatches`
+ */
+const MAX_SHORT_QUERY_LEN = 25
 export function init() {
   addHintProvider("SearchWhatYouTyped", (query) => {
     const configData = config.get();
@@ -283,7 +295,8 @@ export function init() {
       relevance: 1,
       privileged: true,
       omniboxValue: query,
-      url: searchCfg.available[searchCfg.selectedIndex].searchURL.replaceAll('%s', query)
+      url: searchCfg.available[searchCfg.selectedIndex].searchURL.replaceAll('%s', query),
+      navigationReason: `searched:${query}`
     }]
   })
   addHintProvider("URLWhatYouTyped", (query) => {
@@ -369,6 +382,11 @@ export function init() {
   addHintProvider("History", async (query) => {
     const hints: Hint[] = [];
 
+    if (query.length > MAX_SHORT_QUERY_LEN) {
+      // Long queries are handled by HistoryLong for perf reasons
+      return [];
+    }
+
     try {
       let entries = await history.get();
 
@@ -377,19 +395,20 @@ export function init() {
       }
 
       let fuseInstance = new Fuse(entries, {
-        sortFn: (a, b) => a.score - b.score,
+        shouldSort: false,
         ignoreLocation: true,
         includeMatches: true,
         includeScore: true,
         keys: ['url', 'title'],
         threshold: 0.3,
-        minMatchCharLength: 2
+        minMatchCharLength: 2,
+        ignoreFieldNorm: true
       })
 
       let matches = fuseInstance.search(query);
 
-      let merged: Hint[] = matches
-        .map(({ item, score, matches }): Hint => {
+      let merged: Hint[] = $.mutFilter(
+        matches.map(({ item, score, matches }): Hint => {
           const contents: RichText = [];
 
           if (item.reason.startsWith('searched:')) {
@@ -459,11 +478,11 @@ export function init() {
             icon: item.faviconURL,
             relevance: (1 - score) * HISTORY_HINT_MULTIPLIER
           }
-        })
-        .filter($.uniqBy((val1, val2) =>
+        }),
+        $.uniqBy((val1, val2) =>
           val1.url == val2.url
-        ))
-        ;
+        )
+      );
 
       hints.push(...merged)
 
@@ -473,5 +492,76 @@ export function init() {
       console.log('There was an error while trying to get history-based hints:', e);
       return [];
     }
+  })
+  addHintProvider("HistoryLong", async (query) => {
+    // This provider only handles long queries
+    // and uses plain indexOf() search instead of the fuzzy seach
+    // algorithm as it gets really slow (~500 ms/query) on long queries.
+    if (query.length <= MAX_SHORT_QUERY_LEN) return [];
+
+    const entries = await history.get();
+
+    if (entries.length > maxHistoryHintLength) {
+      entries.length = maxHistoryHintLength;
+    }
+
+    const words = $.mutFilter(query.toLowerCase().split(/\s/), item => item);
+
+    const hints: Hint[] = [];
+    entries.forEach(entry => {
+      const titleMatches: [number, number][] = [];
+      const urlMatches: [number, number][] = [];
+
+      let prevTitleIndex = -1;
+      let prevURLIndex = -1;
+      words.forEach(wd => {
+        const wdTitleIndex = entry.title.toLowerCase().indexOf(wd, prevTitleIndex + 1);
+        const wdURLIndex = entry.url.toLowerCase().indexOf(wd, prevURLIndex + 1);
+
+        if (wdTitleIndex != -1) {
+          titleMatches.push([wdTitleIndex, wdTitleIndex + wd.length]);
+          prevTitleIndex = wdTitleIndex + wd.length;
+        }
+        if (wdURLIndex != -1) {
+          urlMatches.push([wdURLIndex, wdURLIndex + wd.length]);
+          prevURLIndex = wdURLIndex + wd.length;
+        }
+      });
+      if (titleMatches.length == 0 && urlMatches.length == 0) return;
+
+      const relevance = ((titleMatches.length + urlMatches.length) / 2) * 75;
+      if (relevance < 300) return;
+
+      const contents: RichText = [];
+      const urlRT: RichText = [];
+
+      let prevIndex = 0;
+      titleMatches.forEach(match => {
+        contents.push({ text: entry.title.slice(prevIndex, match[0]) });
+        contents.push({ text: entry.title.slice(match[0], match[1]), bold: true });
+
+        prevIndex = match[1];
+      })
+      contents.push({ text: entry.title.slice(prevIndex) });
+
+      prevIndex = 0;
+      urlMatches.forEach(match => {
+        urlRT.push({ text: entry.url.slice(prevIndex, match[0]), blue: true });
+        urlRT.push({ text: entry.url.slice(match[0], match[1]), bold: true, blue: true });
+
+        prevIndex = match[1];
+      })
+      urlRT.push({ text: entry.url.slice(prevIndex), blue: true });
+
+      hints.push({
+        contents,
+        desc: urlRT,
+        relevance,
+        url: entry.url,
+        icon: entry.faviconURL
+      })
+    })
+
+    return hints;
   })
 }
