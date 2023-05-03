@@ -393,8 +393,8 @@ export function init() {
           const contents: RichText = [];
 
           if (item.reason.startsWith('searched:')) {
-            // TODO: move this section to a different provider so that this will be
-            // prioritized over just the search URL in the `.filter()` call
+            // TODO: move this section to a different provider so that these results
+            // don't come up when the query is the search engine URL
             const text = item.reason.slice("searched:".length);
 
             const allOccs = allOccurences(text, query);
