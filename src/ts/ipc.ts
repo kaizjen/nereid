@@ -138,8 +138,10 @@ export function init() {
     win.currentTab.lastNavigationReason = `searched:${q}` // the 'via' property in history
     wc.loadURL(SE.searchURL.replaceAll('%s', encodeURIComponent(q)))
   })
-  onCurrentTab('currentTab.navigate', (wc, win, _e, url, isInputURL) => {
-    if (isInputURL) win.currentTab.lastNavigationReason = 'input-url'
+  onCurrentTab('currentTab.navigate', (wc, win, _e, url, reason) => {
+    if (reason == 'input-url' || reason.startsWith('searched:'))
+      win.currentTab.lastNavigationReason = reason
+    ;
     wc.loadURL(url);
   })
   onCurrentTab('currentTab.stop', (wc) => {

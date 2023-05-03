@@ -5,6 +5,7 @@ import type TypeFuse from "fuse.js";
 import fetch from "electron-fetch";
 import { session } from "electron";
 import { DEFAULT_PARTITION, NO_CACHE_PARTITION } from "./sessions";
+import { History, NavigationReason } from "./types";
 
 // must use require here because these libraries, when require()d, don't have a .default property.
 const Fuse = require('fuse.js') as typeof TypeFuse;
@@ -37,6 +38,8 @@ type Hint = {
   omniboxValue?: string
   /** Specify the icon with `::` at the beginning to use the internal Nereid resources. */
   icon: string
+  /** The navigation reason recorded in history when the user clicks this hint */
+  navigationReason?: NavigationReason
 }
 type HintProvider = (query: string, params: GetHintsParams) => Hint[] | Promise<Hint[]>
 
@@ -226,6 +229,7 @@ export async function getHints(query: string, updateHints: (hints: Hint[]) => an
           h.provider = name;
           h.relevance = Math.round(h.relevance);
           if (isNaN(h.relevance)) h.relevance = 0;
+          h.navigationReason ||= 'input-url';
         })
         hints = hints.filter(hint => hint.provider != name); // Remove all previous hints of this p-er
         hints.push(...provHints);
@@ -348,7 +352,8 @@ export function init() {
           relevance: Math.min(rel, 900),
           icon: '::search',
           omniboxValue: result,
-          url: searchCfg.available[searchCfg.selectedIndex].searchURL.replaceAll('%s', result)
+          url: searchCfg.available[searchCfg.selectedIndex].searchURL.replaceAll('%s', result),
+          navigationReason: `searched:${result}`
         }
       })
 
@@ -409,7 +414,8 @@ export function init() {
               icon: '::search',
               url: item.url,
               omniboxValue: text,
-              relevance: (1 - score) * HISTORY_HINT_MULTIPLIER * 1.45 // amplify this even further
+              relevance: (1 - score) * HISTORY_HINT_MULTIPLIER * 1.45, // amplify this even further
+              navigationReason: `searched:${text}`
             }
           }
 

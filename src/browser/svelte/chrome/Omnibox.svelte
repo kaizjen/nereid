@@ -257,7 +257,7 @@
     isActive = false;
     setTop(false)
     hints = [];
-    ipcRenderer.send('currentTab.navigate', hint.url);
+    ipcRenderer.send('currentTab.navigate', hint.url, hint.navigationReason);
   }
 
   let hintImageURL = false;
