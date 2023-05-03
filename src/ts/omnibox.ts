@@ -41,9 +41,7 @@ type Hint = {
   /** The navigation reason recorded in history when the user clicks this hint */
   navigationReason?: NavigationReason
 }
-type HintProvider = (query: string, params: GetHintsParams, util: {
-  isDone(): boolean, cache: { history: History }
-}) => Hint[] | Promise<Hint[]>
+type HintProvider = (query: string, params: GetHintsParams, util: { isDone(): boolean }) => Hint[] | Promise<Hint[]>
 
 type _SearchAlgorithmResponse = { result: string, rel?: number }[]
 const searchHintAlgorithms = {
@@ -229,10 +227,7 @@ export async function getHints(query: string, updateHints: (hints: Hint[]) => an
       // update because some providers work slower than others.
       try {
         const provHints = await provider(query, params, {
-          isDone: () => currentGetHintsCall == thisCall,
-          cache: {
-            history: Object.seal(await history.get())
-          }
+          isDone: () => currentGetHintsCall == thisCall
         });
         provHints.forEach(h => {
           h.provider = name;
