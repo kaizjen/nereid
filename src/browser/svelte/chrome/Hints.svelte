@@ -55,7 +55,7 @@
       background: var(--t-black-2);
     }
     .hint:hover {
-      background: var(--t-black-3);
+      background: var(--t-black-2);
     }
     .hint:active {
       background: var(--t-black-1);
