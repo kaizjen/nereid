@@ -986,7 +986,7 @@ export function detach(tab: RealTab) {
     tab.webContents.removeAllListeners(event)
   })
   tab.webContents.setWindowOpenHandler(null)
-  if (tab.paneView) {
+  if (tab.paneView && !tab.owner.isDestroyed()) {
     undividePanes(tab.owner, tab.paneView)
   }
   tab.owner = null;
