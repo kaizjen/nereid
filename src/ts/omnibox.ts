@@ -308,7 +308,7 @@ function matchReducer(array: [number, number][]) {
 }
 
 /** Multiply the relevance by this number */
-const HISTORY_HINT_MULTIPLIER = 950
+const HISTORY_HINT_MULTIPLIER = 850
 /**
  * After that length, the query will be considered "long".
  * MUST NOT BE > 32 because of a Fuse.js bug with `includeMatches`
