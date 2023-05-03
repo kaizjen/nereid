@@ -575,7 +575,7 @@ export function init() {
       });
       if (titleMatches.length == 0 && urlMatches.length == 0) return;
 
-      const relevance = ((titleMatches.length + urlMatches.length) / 2) * 75;
+      const relevance = ((matchReducer(titleMatches) + matchReducer(urlMatches)) / 1.5) * 75;
       if (relevance < 300) return;
 
       const contents: RichText = [];
