@@ -494,7 +494,7 @@
         class:open={bookmarkDialog}
       >
         <img
-          src="n-res://{$colorTheme}/bookmark{isInBookmarks ? '-selected' : ''}.svg"
+          src="n-res://{$colorTheme}/star{isInBookmarks ? '-filled' : ''}.svg"
           alt={isInBookmarks ? _.BOOKMARK_ADD_OR_RM : _.BOOKMARK_ADD}
           title={isInBookmarks ? _.BOOKMARK_ADD_OR_RM : _.BOOKMARK_ADD}
         >
