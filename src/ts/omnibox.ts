@@ -367,10 +367,10 @@ export function init() {
     const hints = [];
     try {
       let { privacy } = config.get();
-      if (!privacy.useSuggestions) throw "";
+      if (!privacy.useSuggestions) return [];
 
       let searchEngine = searchCfg.available[searchCfg.selectedIndex]
-      if (params.isPrivate || query.startsWith('nereid:')) throw "";
+      if (params.isPrivate || query.startsWith('nereid:')) return [];
 
       let suggestAlgorithm: (res) => (Promise<_SearchAlgorithmResponse> | _SearchAlgorithmResponse) = searchHintAlgorithms[
         searchEngine.suggestAlgorithm == 'google-like' ? 'googleLike' :
