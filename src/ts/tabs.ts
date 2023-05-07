@@ -589,10 +589,6 @@ export function attach(win: TabWindow, tab: RealTab) {
         // Usually doesn't happen
         return newTabWindow([{ url, private: tab.private }])
       }
-
-      case 'save-to-disk': {
-        return tab.webContents.downloadURL(url)
-      }
     }
   })
   tab.webContents.setWindowOpenHandler(({ disposition }) => {
