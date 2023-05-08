@@ -373,6 +373,10 @@ export async function newSingleTabWindow(tab: RealTab, windowOptions: Partial<Br
 
   w.owner = owner;
 
+  // We store a reference to the window of the owner-tab here because the
+  // owner-tab is already detached when the single-tab window is closed
+  const grandParent = w.owner.owner;
+
   tabManager.attach(w, tab);
   tabManager.addTab(w, tab, { url: tab.webContents.getURL() });
   tabManager.updateTabState(w, { tab });
@@ -381,10 +385,8 @@ export async function newSingleTabWindow(tab: RealTab, windowOptions: Partial<Br
   function handleCreateTab({ win, options, preventDefault }) {
     if (win != w) return;
 
-    const ownerWindow = w.owner.owner;
-
     preventDefault();
-    tabManager.createTab(ownerWindow, { ...options, position: ownerWindow.tabs.indexOf(w.owner) + 1 })
+    tabManager.createTab(grandParent, { ...options, position: grandParent.tabs.indexOf(w.owner) + 1 })
   }
   function handleCloseTab({ win, preventDefault }) {
     if (win != w) return;
@@ -406,7 +408,7 @@ export async function newSingleTabWindow(tab: RealTab, windowOptions: Partial<Br
   tabManager.tabEvents.on('closeTab', handleCloseTab)
   tabManager.tabEvents.on('moveTab', handleMoveTab)
 
-  w.owner.owner.once('closed', handleGrandParentClose)
+  grandParent.once('closed', handleGrandParentClose)
 
   w.on('closed', () => {
     windows.splice(windows.indexOf(w), 1);
@@ -423,7 +425,7 @@ export async function newSingleTabWindow(tab: RealTab, windowOptions: Partial<Br
       w.currentTab.childWindow.close()
     }
 
-    w.owner?.owner?.off('closed', handleGrandParentClose)
+    grandParent.off('closed', handleGrandParentClose)
 
     tabManager.tabEvents.off('createTab', handleCreateTab)
     tabManager.tabEvents.off('closeTab', handleCloseTab)
