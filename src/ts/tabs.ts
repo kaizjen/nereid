@@ -925,6 +925,10 @@ export function attach(win: TabWindow, tab: RealTab) {
   tab.webContents.on('context-menu', (_e, opts) => {
     showContextMenu(win, tab, opts)
   })
+  tab.webContents.on('devtools-open-url' as any, (_e, url: string) => {
+    // The default Electron types here are wrong >:(
+    createTab(win, { url, position: getTabIndex() + 1 })
+  })
 
   tab.webContents.on('render-process-gone', (_e, crashDetails) => {
     sendUpdate({ crashDetails })
@@ -975,6 +979,7 @@ export function detach(tab: RealTab) {
     'enter-html-full-screen',
     'leave-html-full-screen',
     'context-menu',
+    'devtools-open-url',
     'render-process-gone',
     'destroyed',
   ];
