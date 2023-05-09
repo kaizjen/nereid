@@ -288,6 +288,7 @@ export async function newTabWindow(tabOptionsArray: TabOptions[]): Promise<TabWi
     showAppMenu();
   })
 
+  // TODO: handle 'beforeunload' events of all tabs
   w.on('close', () => updateWindowBounds(w))
 
   w.on('closed', () => {
@@ -297,7 +298,7 @@ export async function newTabWindow(tabOptionsArray: TabOptions[]): Promise<TabWi
     w.tabs.forEach(item => {
       if (item.isGhost) return;
       tabManager.detach(tabManager.asRealTab(item));
-      tabManager.asRealTab(item).webContents.close();
+      tabManager.destroyWebContents(tabManager.asRealTab(item));
     });
 
     let index = windows.indexOf(w);
@@ -399,16 +400,9 @@ export async function newSingleTabWindow(tab: RealTab, windowOptions: Partial<Br
     preventDefault();
   }
 
-  function handleGrandParentClose() {
-    // I thought it would be funny to name the parent window "grandparent" ngl
-    w.close();
-  }
-
   tabManager.tabEvents.on('createTab', handleCreateTab)
   tabManager.tabEvents.on('closeTab', handleCloseTab)
   tabManager.tabEvents.on('moveTab', handleMoveTab)
-
-  grandParent.once('closed', handleGrandParentClose)
 
   w.on('closed', () => {
     windows.splice(windows.indexOf(w), 1);
@@ -424,8 +418,6 @@ export async function newSingleTabWindow(tab: RealTab, windowOptions: Partial<Br
     if (w.currentTab.childWindow) {
       w.currentTab.childWindow.close()
     }
-
-    grandParent.off('closed', handleGrandParentClose)
 
     tabManager.tabEvents.off('createTab', handleCreateTab)
     tabManager.tabEvents.off('closeTab', handleCloseTab)

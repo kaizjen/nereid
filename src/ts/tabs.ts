@@ -353,7 +353,9 @@ export function createBrowserView(
 
 export function destroyWebContents(bv: RealTab) {
   delayExecution(() => {
-    bv.webContents.close();
+    if (bv.webContents && !bv.webContents.isDestroyed()) {
+      bv.webContents.close();
+    }
 
     if (bv.childWindow) {
       bv.childWindow.close();
