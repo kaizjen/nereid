@@ -319,6 +319,7 @@ try {
         }
       ],
       maxRecentTabs: 'number',
+      keyboardOpensTabNearby: 'boolean',
       downloadPath: ['string', null, undefined],
       spellChecker: {
         enabled: 'boolean',

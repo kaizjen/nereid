@@ -114,7 +114,8 @@ if (location.protocol == 'nereid:') {
     app: {
       restart: () => sendInternal('restart'),
       quit: () => sendInternal('quit'),
-      about: () => sendInternalSync('getAboutInfo')
+      about: () => sendInternalSync('getAboutInfo'),
+      os: process.platform
     },
     tab: {
       close: () => sendInternal('closeMe'),

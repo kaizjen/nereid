@@ -60,6 +60,7 @@
   import Privacy from "./Settings/Privacy.svelte"
   import SearchEngines from "./Settings/SearchEngines.svelte"
   import OnStart from "./Settings/OnStart.svelte"
+  import Keyboard from "./Settings/Keyboard.svelte"
   import Downloads from "./Settings/Downloads.svelte"
   import Languages from "./Settings/Languages.svelte"
 
@@ -81,6 +82,7 @@
     { name: t('pages.settings.privacy.title'), element: null, component: Privacy },
     { name: t('pages.settings.search.title'), element: null, component: SearchEngines },
     { name: t('pages.settings.on-start.title'), element: null, component: OnStart },
+    { name: t('pages.settings.keyboard.title'), element: null, component: Keyboard },
     { name: t('pages.settings.downloads.title'), element: null, component: Downloads },
     { name: t('pages.settings.languages.title'), element: null, component: Languages },
   ]

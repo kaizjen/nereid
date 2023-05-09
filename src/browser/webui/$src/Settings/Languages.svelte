@@ -1,7 +1,3 @@
-<style>
-  
-</style>
-
 <script>
   import { RadioButton, TextBlock, Button, ContentDialog, InfoBar } from "fluent-svelte";
   import { getContext } from "svelte/internal";

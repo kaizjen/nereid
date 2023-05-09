@@ -620,6 +620,15 @@ pages:
       specificPage: Open a specific page
       specificPageURL: The URL of the page that should open
       button-save: Save
+    keyboard:
+      title: Keyboard
+      ctrlTOpensTabNearby:
+        title: ${shortcut} opens a tab nearby
+        description: When you press ${shortcut}, a new tab will open to the right of the
+          active one.
+      rebind:
+        title: Change keyboard shortcuts
+        description: Override the default keyboard shortucts with your own.
     downloads:
       title: Downloads
       subtitle: "Save downloaded files to:"

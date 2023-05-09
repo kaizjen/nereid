@@ -204,6 +204,7 @@ export interface Configuration {
       url: string
     }
     maxRecentTabs: number
+    keyboardOpensTabNearby: boolean
     downloadPath: string | false
     spellChecker: {
       enabled: boolean

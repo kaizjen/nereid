@@ -634,6 +634,15 @@ pages:
       dialog: Выберите язык
       restart-notification: Перезапустите Nereid чтобы применить изменения
       restart-button: Перезапуск
+    keyboard:
+      title: Клавиатура
+      ctrlTOpensTabNearby:
+        title: Открывать вкладку рядом с выбранной
+        description: Когда вы нажмете ${shortcut}, новая вкладка откроется справа от
+          выбранной вкладки.
+      rebind:
+        title: Настроить сочетания клавиш
+        description: Настроить свои сочетания клавиш для действий Nereid.
   history:
     button-clear: Очистить историю...
     deleteEntry: Удалить запись

@@ -64,6 +64,7 @@
       type: "last-tabs"
     },
     maxRecentTabs: 10,
+    keyboardOpensTabNearby: false,
     downloadPath: null,
     a11yEnabled: null,
     spellChecker: {
