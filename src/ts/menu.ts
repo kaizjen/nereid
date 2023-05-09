@@ -189,10 +189,26 @@ const tabs_windows: Electron.MenuItemConstructorOptions[] = [
     click(_m, win) {
       if (!isTabWindow(win)) return;
 
-      createTab(win, {
-        url: 'nereid://private',
-        private: true
-      })
+      if (config.get().behaviour.keyboardOpensTabNearby) {
+        createTab(win, {
+          url: $.newTabUrl,
+          position: win.tabs.indexOf(win.currentTab) + 1,
+          private: true
+        })
+
+      } else {
+        const tabGroup = getTabGroupByTab(win.currentTab);
+        if (tabGroup && config.get().ui.onlyShowCurrentTabGroup) {
+          // In this case, open the tab at the end of the tab group
+          createTab(win, {
+            url: $.newTabUrl,
+            position: tabGroup.endIndex,
+            groupID: tabGroup.id,
+            private: true
+          })
+
+        } else createTab(win, { url: $.newTabUrl, private: true });
+      }
       focusChrome(win)
     },
     accelerator: 'CmdOrCtrl+P',
