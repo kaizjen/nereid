@@ -1037,8 +1037,10 @@ export function selectTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: n
   if (!win.tabs[index]) throw new Error(`tabManager.selectTab: tab #${index} is not in window`)
 
   if (win.currentPaneView) {
-    win.removeBrowserView(win.currentPaneView.leftTab);
-    win.removeBrowserView(win.currentPaneView.rightTab);
+    // We don't want to remove, then re-add the other pane
+    // because it messes with the focus.
+    if (win.currentPaneView.leftTab != tab) win.removeBrowserView(win.currentPaneView.leftTab);
+    if (win.currentPaneView.rightTab != tab) win.removeBrowserView(win.currentPaneView.rightTab);
     win.currentTab = null; // So we don't call `removeBrowserView` twice
   }
   if (win.currentTab) win.removeBrowserView(win.currentTab);
