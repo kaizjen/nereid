@@ -359,6 +359,19 @@ const findInPage: Electron.MenuItemConstructorOptions = {
     win.chrome.webContents.focus();
   }
 }
+const menuSelectTabF = (index: number): Electron.MenuItemConstructorOptions => ({
+  label: `tab-${index}-hidden`,
+  accelerator: `CmdOrCtrl+${index}`,
+  visible: false,
+  click(_, win) {
+    const realIndex = index - 1; // 1 on the keyboard corresponds to the 0th tab
+
+    if (!isTabWindow(win)) return;
+    if (!win.tabs[realIndex]) return;
+
+    selectTab(win, { index: realIndex });
+  }
+})
 export const appMenu = Menu.buildFromTemplate([
   {
     label: t('name'),
@@ -470,7 +483,74 @@ export const appMenu = Menu.buildFromTemplate([
             separatorPosition: win.currentPaneView.separatorPosition
           })
         }
-      }
+      },
+      menuSelectTabF(1),
+      menuSelectTabF(2),
+      menuSelectTabF(3),
+      menuSelectTabF(4),
+      menuSelectTabF(5),
+      menuSelectTabF(6),
+      menuSelectTabF(7),
+      menuSelectTabF(8),
+      menuSelectTabF(9),
+      {
+        label: 'tab-last-hidden',
+        visible: false,
+        accelerator: 'CmdOrCtrl+0',
+        click(_, win) {
+          if (!isTabWindow(win)) return;
+
+          selectTab(win, { index: win.tabs.length - 1 })
+        }
+      },
+      {
+        label: 'tab-next-hidden',
+        visible: false,
+        accelerator: 'CmdOrCtrl+Tab',
+        click(_, win) {
+          if (!isTabWindow(win)) return;
+
+          const nextTabIndex = win.tabs.indexOf(win.currentTab) + 1;
+          if (!win.tabs[nextTabIndex]) return;
+
+          selectTab(win, { index: nextTabIndex })
+        }
+      },
+      {
+        label: 'tab-prev-hidden',
+        visible: false,
+        accelerator: 'CmdOrCtrl+Shift+Tab',
+        click(_, win) {
+          if (!isTabWindow(win)) return;
+
+          const prevTabIndex = win.tabs.indexOf(win.currentTab) - 1;
+          if (!win.tabs[prevTabIndex]) return;
+
+          selectTab(win, { index: prevTabIndex })
+        }
+      },
+      {
+        label: 'pane-right-hidden',
+        visible: false,
+        accelerator: 'CmdOrCtrl+.',
+        click(_, win) {
+          if (!isTabWindow(win)) return;
+          if (!win.currentPaneView) return;
+
+          selectTab(win, { tab: win.currentPaneView.rightTab })
+        }
+      },
+      {
+        label: 'pane-left-hidden',
+        visible: false,
+        accelerator: 'CmdOrCtrl+,',
+        click(_, win) {
+          if (!isTabWindow(win)) return;
+          if (!win.currentPaneView) return;
+
+          selectTab(win, { tab: win.currentPaneView.leftTab })
+        }
+      },
     ]
   },
   {
