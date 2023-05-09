@@ -4,4 +4,5 @@ src/js
 src/i18n/final/**
 src/browser/webui/js
 package-lock.json
+**/*.code-workspace
 dist
