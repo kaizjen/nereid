@@ -41,7 +41,9 @@
 <script>
   import StartPanel from "./Newtab/StartPanel.svelte";
 
-  const timeFmt = Intl.DateTimeFormat(navigator.language, { timeStyle: 'short', hour12: false })
+  // TODO: allow for selecting 24-h format vs 12-h format
+  const timeFmt = Intl.DateTimeFormat(navigator.language, { timeStyle: 'short', hourCycle: 'h23' })
+  // 'h23' because `hour12: false` would show "0:30" as "24:30" (https://support.google.com/chrome/thread/29828561?hl=en)
   const dateFmt = Intl.DateTimeFormat(navigator.language, { dateStyle: 'full' })
   let unixMs = Date.now();
   setInterval(() => {
