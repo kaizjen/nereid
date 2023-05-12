@@ -1307,6 +1307,11 @@ export function moveTab(
   return tab;
 }
 
+/**
+ * Opens a unique tab with a `nereid://` url. Will move the nearest tab with
+ * the same `page` to the desired position.
+ * @param nextToCurrentTab Whether to open this tab next to the current one
+ */
 export function openUniqueNereidTab(win: TabWindow, page: string, nextToCurrentTab?: boolean, path?: string) {
   if (page.endsWith('/')) {
     page = page.slice(0, -1)
