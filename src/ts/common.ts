@@ -104,7 +104,7 @@ function parseWindowOpenFeatures(features: string) {
   };
 }
 
-export default {
+const $ = {
   // TODO: when extensions are implemented, move this to an appropriate file
   newTabUrl: 'nereid://newtab',
   isValidURL(url: string) {
@@ -144,5 +144,25 @@ export default {
       ;
     }
     return array;
+  },
+  propsEqual(object1: any, object2: any) {
+    if (!object1 || !object2) {
+      return object1 == object2;
+    }
+
+    const objKeys2 = Object.keys(object2);
+
+    let i = 0;
+    for (let key in object1) {
+      const value1 = object1[key];
+      const value2 = object2[key];
+
+      if (value1 != value2) return false;
+      i++;
+    }
+    if (i != objKeys2.length) return false;
+    return true;
   }
 }
+
+export default $;

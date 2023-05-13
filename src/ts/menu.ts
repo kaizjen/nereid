@@ -2,7 +2,7 @@
 
 import { app, clipboard, dialog, ipcMain, Menu, MenuItem, session } from "electron";
 import { Bookmark, RealTab, Tab, TabGroup, TabOptions, TabWindow } from "./types";
-import { isTabWindow, newTabWindow, setCurrentTabBounds, openUtilityWindow } from './windows'
+import { isTabWindow, newTabWindow, setCurrentTabBounds } from './windows'
 import { bookmarks, config, control, downloads } from './userdata'
 import * as pathModule from "path";
 import * as fs from "fs"
@@ -14,6 +14,35 @@ import { DEFAULT_PARTITION, PRIVATE_PARTITION } from "./sessions";
 import { t } from "./i18n";
 import { kill } from "./process";
 import { createTabGroup, getTabGroupByTab, pinTab, removeTabFromGroup, unpinTab } from "./tabgroups";
+import { commands } from "./commands";
+
+const lazyLoaded: Function[] = [];
+function lazy(fn: () => any[]) {
+  const arrayRef = [];
+
+  lazyLoaded.push(() => {
+    arrayRef.push(...fn())
+  })
+
+  return arrayRef;
+}
+
+function appendMenuItems(menu: Menu, items: MenuItem[]) {
+  items.forEach(item => {
+    menu.append(item)
+  })
+  return menu;
+}
+
+function appendMIConstructors(menu: Menu, items: Electron.MenuItemConstructorOptions[]) {
+  items.forEach(constructorOptions => {
+    menu.append(new MenuItem(constructorOptions))
+  })
+  return menu;
+}
+
+const hidden = { visible: false };
+const clickToTrigger = (_: any, win: Electron.BrowserWindow) => [win] as [Electron.BrowserWindow];
 
 function obtainWebContents(win: Electron.BrowserWindow | TabWindow) {
   return isTabWindow(win) ? win.currentTab.webContents : win.webContents
@@ -54,309 +83,33 @@ const SEPARATOR: Electron.MenuItemConstructorOptions = {
   type: 'separator'
 }
 
-const newTabInPanes: Electron.MenuItemConstructorOptions[] = [
-  {
-    label: t('menu.tabs.newTabInLeftPane'),
-    click(_m, win) {
-      if (!isTabWindow(win)) return;
+const SEPARATOR_ITEM = new MenuItem(SEPARATOR);
 
-      let newTab = createTab(win, {
-        url: $.newTabUrl,
-        position: win.tabs.indexOf(win.currentTab),
-        background: true
-      })
-      if (!newTab) return;
-      dividePanes(win, { left: newTab, right: win.currentTab })
-      selectTab(win, { tab: newTab })
-
-      focusChrome(win)
-    },
-    accelerator: 'CmdOrCtrl+Alt+Left',
-  },
-  {
-    label: t('menu.tabs.newTabInRightPane'),
-    click(_m, win) {
-      if (!isTabWindow(win)) return;
-
-      let newTab = createTab(win, {
-        url: $.newTabUrl,
-        position: win.tabs.indexOf(win.currentTab) + 1,
-        background: true
-      })
-      if (!newTab) return;
-      dividePanes(win, { left: win.currentTab, right: newTab })
-      selectTab(win, { tab: newTab })
-
-      focusChrome(win)
-    },
-    accelerator: 'CmdOrCtrl+Alt+Right',
-  },
-]
-const openNearbyTabsInPanes: Electron.MenuItemConstructorOptions[] = [
+// We lazy-load these two because the `toAppMenuItem()` function requires
+// the buildAppMenu() to be exported, and it isn't yet.
+// (Remember, Electron uses cjs modules!)
+const newTabInPanes: MenuItem[] = lazy(() => [
+  commands.newTabInLeftPane.toAppMenuItem(clickToTrigger),
+  commands.newTabInRightPane.toAppMenuItem(clickToTrigger),
+])
+const openNearbyTabsInPanes: Electron.MenuItemConstructorOptions[] = lazy(() => [
   {
     label: t('menu.tabs.openLeftTabIn'),
-    submenu: [
-      {
-        label: t('menu.tabs.openTabIn.leftPane'),
-        accelerator: "CmdOrCtrl+Alt+,",
-        click(_, win) {
-          if (!isTabWindow(win)) return;
-          if (win.tabs.indexOf(win.currentTab) - 1 < 0) return;
-
-          dividePanes(win, {
-            left: win.tabs[win.tabs.indexOf(win.currentTab) - 1],
-            right: win.currentTab
-          })
-        }
-      },
-      {
-        label: t('menu.tabs.openTabIn.rightPane'),
-        click(_, win) {
-          if (!isTabWindow(win)) return;
-          if (win.tabs.indexOf(win.currentTab) - 1 < 0) return;
-
-          dividePanes(win, {
-            left: win.currentTab,
-            right: win.tabs[win.tabs.indexOf(win.currentTab) - 1]
-          })
-        }
-      },
-    ]
+    submenu: appendMenuItems(new Menu(), [
+      commands.leftTabInLeftPane.toAppMenuItem({ label: t('menu.tabs.openTabIn.leftPane') }, clickToTrigger),
+      commands.leftTabInRightPane.toAppMenuItem({ label: t('menu.tabs.openTabIn.rightPane') }, clickToTrigger)
+    ])
   },
   {
     label: t('menu.tabs.openRightTabIn'),
-    submenu: [
-      {
-        label: t('menu.tabs.openTabIn.leftPane'),
-        click(_, win) {
-          if (!isTabWindow(win)) return;
-          if (!win.tabs[win.tabs.indexOf(win.currentTab) + 1]) return;
-
-          dividePanes(win, {
-            left: win.tabs[win.tabs.indexOf(win.currentTab) + 1],
-            right: win.currentTab
-          })
-        }
-      },
-      {
-        label: t('menu.tabs.openTabIn.rightPane'),
-        accelerator: "CmdOrCtrl+Alt+.",
-        click(_, win) {
-          if (!isTabWindow(win)) return;
-          if (!win.tabs[win.tabs.indexOf(win.currentTab) + 1]) return;
-
-          dividePanes(win, {
-            left: win.currentTab,
-            right: win.tabs[win.tabs.indexOf(win.currentTab) + 1]
-          })
-        }
-      },
-    ]
+    submenu: appendMenuItems(new Menu(), [
+      commands.rightTabInLeftPane.toAppMenuItem({ label: t('menu.tabs.openTabIn.leftPane') }, clickToTrigger),
+      commands.rightTabInRightPane.toAppMenuItem({ label: t('menu.tabs.openTabIn.rightPane') }, clickToTrigger)
+    ])
   }
-]
+])
 
-const tabs_windows: Electron.MenuItemConstructorOptions[] = [
-  {
-    label: t('menu.common.newTab'),
-    click(_m, win) {
-      if (!isTabWindow(win)) return;
-
-      if (config.get().behaviour.keyboardOpensTabNearby) {
-        createTab(win, {
-          url: $.newTabUrl,
-          position: win.tabs.indexOf(win.currentTab) + 1
-        })
-
-      } else {
-        const tabGroup = getTabGroupByTab(win.currentTab);
-        if (tabGroup && config.get().ui.onlyShowCurrentTabGroup) {
-          // In this case, open the tab at the end of the tab group
-          createTab(win, {
-            url: $.newTabUrl,
-            position: tabGroup.endIndex,
-            groupID: tabGroup.id
-          })
-
-        } else createTab(win, { url: $.newTabUrl });
-      }
-      focusChrome(win)
-    },
-    accelerator: 'CmdOrCtrl+T',
-    id: 'new-tab'
-  },
-  {
-    label: t('menu.common.newPrivateTab'),
-    click(_m, win) {
-      if (!isTabWindow(win)) return;
-
-      if (config.get().behaviour.keyboardOpensTabNearby) {
-        createTab(win, {
-          url: $.newTabUrl,
-          position: win.tabs.indexOf(win.currentTab) + 1,
-          private: true
-        })
-
-      } else {
-        const tabGroup = getTabGroupByTab(win.currentTab);
-        if (tabGroup && config.get().ui.onlyShowCurrentTabGroup) {
-          // In this case, open the tab at the end of the tab group
-          createTab(win, {
-            url: $.newTabUrl,
-            position: tabGroup.endIndex,
-            groupID: tabGroup.id,
-            private: true
-          })
-
-        } else createTab(win, { url: $.newTabUrl, private: true });
-      }
-      focusChrome(win)
-    },
-    accelerator: 'CmdOrCtrl+P',
-    id: 'new-tab-p'
-  },
-  SEPARATOR,
-  ...newTabInPanes,
-  SEPARATOR,
-  {
-    label: t('menu.panes.close'),
-    click(_m, win) {
-      if (!isTabWindow(win)) return;
-      if (!win.currentPaneView) return;
-
-      undividePanes(win, win.currentPaneView)
-    },
-    accelerator: 'CmdOrCtrl+Alt+W',
-    id: 'close-panes'
-  },
-  {
-    label: t('menu.tabs.close'),
-    click(_m, win) {
-      if (!isTabWindow(win)) return;
-
-      closeTab(win, { tab: win.currentTab })
-    },
-    accelerator: 'CmdOrCtrl+W',
-    id: 'close-tab'
-  },
-  {
-    label: t('menu.tabs.openClosed'),
-    click(_m, win) {
-      if (!isTabWindow(win)) return;
-
-      openClosedTab(win)
-    },
-    accelerator: 'CmdOrCtrl+Shift+T',
-    id: 'open-closed'
-  },
-  SEPARATOR,
-  {
-    label: t('menu.common.newWindow'),
-    click() {
-      let url;
-      let onStart = config.get().behaviour.onStart
-      if (onStart.type == 'page') {
-        url = onStart.url
-      } else {
-        url = $.newTabUrl
-      }
-      newTabWindow([{ url }]);
-    },
-    accelerator: 'CmdOrCtrl+N',
-    id: 'new-win'
-  },
-  {
-    label: t('menu.openFile'),
-    accelerator: 'CmdOrCtrl+O',
-    async click(_m, win) {
-      if (!isTabWindow(win)) return;
-
-      let result = await dialog.showOpenDialog(win, {
-        title: t('menu.openFile'),
-        properties: ['openFile']
-      })
-      result.filePaths.forEach(pth => {
-        pth = pth.replaceAll('\\', '/');
-        pth = 'file://' + pth;
-
-        createTab(win, {
-          url: pth,
-          private: win.currentTab.private
-        })
-      })
-    }
-  },
-  {
-    label: t('menu.window.close'),
-    click(_m, win) {
-      win.close()
-    },
-    id: 'close-win'
-  }
-]
-const tools: Electron.MenuItemConstructorOptions[] = [
-  {
-    label: t('common.downloads'),
-    click(_, win) {
-      if (!isTabWindow(win)) return;
-
-      openUniqueNereidTab(win, 'downloads', true)
-    },
-    id: 'dls'
-  },
-  /* {
-    label: t('common.extensions'),
-    click(_, win) {
-      if (!isTabWindow(win)) return;
-
-      openUniqueNereidTab(win, 'downloads', true)
-    },
-    id: 'exts'
-  }, */
-  {
-    label: t('common.bookmarks'),
-    click(_, win) {
-      if (!isTabWindow(win)) return;
-
-      openUniqueNereidTab(win, 'bookmarks', true)
-    },
-    id: 'bookms'
-  },
-  {
-    label: t('common.settings'),
-    click(_, win) {
-      if (!isTabWindow(win)) return;
-
-      openUniqueNereidTab(win, 'settings', true)
-    },
-    id: 'settings'
-  }
-]
-const about: Electron.MenuItemConstructorOptions = {
-  label: t('menu.about'),
-  click(_, win) {
-    if (!isTabWindow(win)) return;
-
-    openUniqueNereidTab(win, 'about', true)
-  }
-}
-const view: Electron.MenuItemConstructorOptions[] = [
-  {
-    label: t('menu.fullscreen'),
-    accelerator: 'F11',
-    click(_m, win) {
-      if (!isTabWindow(win)) return;
-
-      if (!win.isFullScreen()) {
-        win.setFullScreen(true);
-        const { width, height } = win.getContentBounds()
-        win.currentTab.setBounds({ x: 0, y: 0, width, height })
-
-      } else {
-        win.setFullScreen(false);
-        setCurrentTabBounds(win)
-      }
-    }
-  },
+const viewItems: Electron.MenuItemConstructorOptions[] = [
   {
     label: t('menu.zoom.in'),
     accelerator: 'CmdOrCtrl+numadd',
@@ -380,16 +133,6 @@ const view: Electron.MenuItemConstructorOptions[] = [
     }
   }
 ]
-const findInPage: Electron.MenuItemConstructorOptions = {
-  label: t('menu.findInPage'),
-  accelerator: 'CmdOrCtrl+F',
-  click(_, win) {
-    if (!isTabWindow(win)) return;
-
-    win.chrome.webContents.send('toggleFindInPage')
-    win.chrome.webContents.focus();
-  }
-}
 const menuSelectTabF = (index: number): Electron.MenuItemConstructorOptions => ({
   label: `tab-${index}-hidden`,
   accelerator: `CmdOrCtrl+${index}`,
@@ -403,370 +146,324 @@ const menuSelectTabF = (index: number): Electron.MenuItemConstructorOptions => (
     selectTab(win, { index: realIndex });
   }
 })
-export const appMenu = Menu.buildFromTemplate([
-  {
-    label: t('name'),
-    submenu: [
-      about,
-      tools.find(i => i.id == 'settings'),
-      ...(process.platform == 'darwin' ? [
-        SEPARATOR,
-        {
-          label: t('menu.hide'),
-          role: 'hide' as const
-        },
-        {
-          label: t('menu.hideOthers'),
-          role: 'hideOthers' as const
-        },
-        {
-          label: t('menu.unhide'),
-          role: 'unhide' as const
-        },
-        SEPARATOR,
-        {
-          label: t('menu.services'),
-          role: 'services' as const
-        },
-        SEPARATOR
-      ] : []),
-      {
-        label: t('menu.common.quit'),
-        click() {
-          app.quit()
-        }
-      },
 
-      // HIDDEN ITEMS
-      // These items are only used for app-wide keyboard shortcuts.
+export let appMenu: Menu;
 
-      {
-        label: 'devtools-hidden',
-        accelerator: 'F12',
-        click(_, win) {
-          let wc = obtainWebContents(win)
-          toggleDevTools(wc)
-        },
-        visible: false
-      },
-      {
-        label: 'zoomin-num-hidden',
-        accelerator: 'CmdOrCtrl+numadd',
-        click: zoom('in'),
-        visible: false
-      },
-      {
-        label: 'zoomin-std-eq-hidden',
-        // when you press the plus not on the numpad, but on the other keyboard, you actually press the equal sign!
-        accelerator: 'CmdOrCtrl+=',
-        click: zoom('in'),
-        visible: false
-      },
-      {
-        label: 'zoomin-std-plus-hidden',
-        accelerator: 'CmdOrCtrl++',
-        click: zoom('in'),
-        visible: false
-      },
-      {
-        label: 'zoomout-num-hidden',
-        accelerator: 'CmdOrCtrl+numsub',
-        click: zoom('out'),
-        visible: false
-      },
-      {
-        label: 'zoomout-std-hidden',
-        accelerator: 'CmdOrCtrl+-',
-        click: zoom('out'),
-        visible: false
-      },
-      {
-        label: "f5-reload-hidden",
-        visible: false,
-        accelerator: "F5",
-        click(_, win) {
-          let wc = obtainWebContents(win)
-          wc.reload()
-        }
-      },
-      {
-        label: 'esc-exit-fullscreen-hidden',
-        visible: false,
-        accelerator: 'Escape',
-        click(_, win) {
-          if (!isTabWindow(win)) return;
+export function buildAppMenu() {
+  const nereidMenu = new Menu();
 
-          win.setFullScreen(false);
-          setCurrentTabBounds(win);
-        }
-      },
-      {
-        label: 'switch-panes-hidden',
-        visible: false,
-        accelerator: 'CmdOrCtrl+Alt+S',
-        click(_, win) {
-          if (!isTabWindow(win)) return;
-          if (!win.currentPaneView) return;
-
-          dividePanes(win, {
-            left: win.currentPaneView.rightTab,
-            right: win.currentPaneView.leftTab,
-            separatorPosition: win.currentPaneView.separatorPosition
-          })
-        }
-      },
-      menuSelectTabF(1),
-      menuSelectTabF(2),
-      menuSelectTabF(3),
-      menuSelectTabF(4),
-      menuSelectTabF(5),
-      menuSelectTabF(6),
-      menuSelectTabF(7),
-      menuSelectTabF(8),
-      menuSelectTabF(9),
-      {
-        label: 'tab-last-hidden',
-        visible: false,
-        accelerator: 'CmdOrCtrl+0',
-        click(_, win) {
-          if (!isTabWindow(win)) return;
-
-          selectTab(win, { index: win.tabs.length - 1 })
-        }
-      },
-      {
-        label: 'tab-next-hidden',
-        visible: false,
-        accelerator: 'CmdOrCtrl+Tab',
-        click(_, win) {
-          if (!isTabWindow(win)) return;
-
-          const nextTabIndex = win.tabs.indexOf(win.currentTab) + 1;
-          if (!win.tabs[nextTabIndex]) return;
-
-          selectTab(win, { index: nextTabIndex })
-        }
-      },
-      {
-        label: 'tab-prev-hidden',
-        visible: false,
-        accelerator: 'CmdOrCtrl+Shift+Tab',
-        click(_, win) {
-          if (!isTabWindow(win)) return;
-
-          const prevTabIndex = win.tabs.indexOf(win.currentTab) - 1;
-          if (!win.tabs[prevTabIndex]) return;
-
-          selectTab(win, { index: prevTabIndex })
-        }
-      },
-      {
-        label: 'pane-right-hidden',
-        visible: false,
-        accelerator: 'CmdOrCtrl+.',
-        click(_, win) {
-          if (!isTabWindow(win)) return;
-          if (!win.currentPaneView) return;
-
-          selectTab(win, { tab: win.currentPaneView.rightTab })
-        }
-      },
-      {
-        label: 'pane-left-hidden',
-        visible: false,
-        accelerator: 'CmdOrCtrl+,',
-        click(_, win) {
-          if (!isTabWindow(win)) return;
-          if (!win.currentPaneView) return;
-
-          selectTab(win, { tab: win.currentPaneView.leftTab })
-        }
-      },
-    ]
-  },
-  {
-    label: t('menu.appMenu.file'),
-    submenu: [
-      ...tabs_windows
-    ]
-  },
-  {
-    label: t('menu.appMenu.edit'),
-    submenu: [
-      { label: t('menu.undo'), role: 'undo', accelerator: 'CmdOrCtrl+Z' },
-      { label: t('menu.redo'), role: 'redo', accelerator: 'CmdOrCtrl+Y' },
-      SEPARATOR,
-      { label: t('menu.cut'), role: 'cut', accelerator: 'CmdOrCtrl+X' },
-      { label: t('menu.copy'), role: 'copy', accelerator: 'CmdOrCtrl+C' },
-      { label: t('menu.paste'), role: 'paste', accelerator: 'CmdOrCtrl+V' },
-      { label: t('menu.pasteAndMatchStyle'), role: 'pasteAndMatchStyle', accelerator: 'CmdOrCtrl+Shift+V' },
-      { label: t('menu.delete'), role: 'delete', accelerator: 'Delete' },
-      { label: t('menu.selectAll'), role: 'selectAll', accelerator: 'CmdOrCtrl+A' },
-      SEPARATOR,
-      findInPage,
-      ...(app.isEmojiPanelSupported() ? [
-        SEPARATOR,
-        {
-          label: t('menu.emojiPanel'),
-          accelerator: 'Meta+.',
-          registerAccelerator: false,
-          click() {
-            app.showEmojiPanel();
-          }
-        }
-      ] : [])
-    ]
-  },
-  {
-    label: t('menu.appMenu.view'),
-    submenu: view
-  },
-  {
-    label: t('menu.tools'),
-    submenu: [
-      {
-        label: t('common.history'),
-        click(_, win) {
-          if (!isTabWindow(win)) return;
-
-          openUniqueNereidTab(win, 'history', true)
-        }
-      },
-      ...tools,
+  nereidMenu.append(commands.openAbout.toAppMenuItem(clickToTrigger));
+  nereidMenu.append(commands.openSettings.toAppMenuItem(clickToTrigger));
+  if (process.platform == 'darwin') {
+    appendMIConstructors(nereidMenu, [
       SEPARATOR,
       {
-        label: t('menu.devTools'),
-        accelerator: 'CmdOrCtrl+Shift+I',
-        click(_, win) {
-          let wc = obtainWebContents(win)
-          toggleDevTools(wc);
-        }
+        label: t('menu.hide'),
+        role: 'hide' as const
       },
       {
-        label: t('menu.taskManager'),
-        accelerator: 'Shift+Escape',
-        click() {
-          openUtilityWindow({ type: 'taskmanager', options: { width: 650, resizable: true, minimizable: true } })
-        }
-      },
-
-    ]
-  },
-  {
-    label: t('menu.appMenu.tab'),
-    submenu: [
-      {
-        label: t('navigation.reload'),
-        accelerator: "CmdOrCtrl+R",
-        click(_, win) {
-          let wc = obtainWebContents(win)
-          wc.reload()
-        }
+        label: t('menu.hideOthers'),
+        role: 'hideOthers' as const
       },
       {
-        label: t('menu.tabs.hardReload'),
-        accelerator: "CmdOrCtrl+Shift+R",
-        click(_, win) {
-          let wc = obtainWebContents(win)
-          wc.reloadIgnoringCache()
-        }
+        label: t('menu.unhide'),
+        role: 'unhide' as const
       },
       SEPARATOR,
       {
-        label: t('menu.tabs.onePageUp'),
-        accelerator: "CmdOrCtrl+Backspace",
-        click(_, win) {
-          let wc = obtainWebContents(win);
-          const url = wc.getURL();
-          if (!url.startsWith('http')) return;
-
-          const parsed = $.URLParse(url);
-          const newPathname = pathModule.posix.dirname(parsed.pathname);
-          const newURL = (new URL(newPathname, parsed.href)).href;
-          if (newURL == parsed.href) return;
-          wc.loadURL(newURL);
-        }
+        label: t('menu.services'),
+        role: 'services' as const
       },
-      SEPARATOR,
-      ...newTabInPanes,
-      ...openNearbyTabsInPanes,
-      SEPARATOR,
-      tabs_windows.find(i => i.id == 'close-panes'),
-      tabs_windows.find(i => i.id == 'close-tab')
-    ]
-  },
-  {
-    label: t('menu.appMenu.window'),
-    submenu: [
-      { role: 'minimize' },
-      {
-        label: t('menu.window.maximize') + '/' + t('menu.window.unmaximize'),
-        click(_m, win) {
-          if (win.isMaximized()) win.unmaximize()
-          else win.maximize()
-        }
-      },
-      tabs_windows.find(i => i.id == 'close-win'),
-    ]
+      SEPARATOR
+    ])
   }
-])
+  nereidMenu.append(commands.quit.toAppMenuItem())
+  // Hidden items
+  appendMIConstructors(nereidMenu, [
+    {
+      label: 'devtools-hidden',
+      accelerator: 'F12',
+      click(_, win) {
+        let wc = obtainWebContents(win)
+        toggleDevTools(wc)
+      },
+      visible: false
+    },
+    {
+      label: 'zoomin-num-hidden',
+      accelerator: 'CmdOrCtrl+numadd',
+      click: zoom('in'),
+      visible: false
+    },
+    {
+      label: 'zoomin-std-eq-hidden',
+      // when you press the plus not on the numpad, but on the other keyboard, you actually press the equal sign!
+      accelerator: 'CmdOrCtrl+=',
+      click: zoom('in'),
+      visible: false
+    },
+    {
+      label: 'zoomin-std-plus-hidden',
+      accelerator: 'CmdOrCtrl++',
+      click: zoom('in'),
+      visible: false
+    },
+    {
+      label: 'zoomout-num-hidden',
+      accelerator: 'CmdOrCtrl+numsub',
+      click: zoom('out'),
+      visible: false
+    },
+    {
+      label: 'zoomout-std-hidden',
+      accelerator: 'CmdOrCtrl+-',
+      click: zoom('out'),
+      visible: false
+    },
+    {
+      label: "f5-reload-hidden",
+      visible: false,
+      accelerator: "F5",
+      click(_, win) {
+        let wc = obtainWebContents(win)
+        wc.reload()
+      }
+    },
+    {
+      label: 'esc-exit-fullscreen-hidden',
+      visible: false,
+      accelerator: 'Escape',
+      click(_, win) {
+        if (!isTabWindow(win)) return;
 
-Menu.setApplicationMenu(appMenu)
+        win.setFullScreen(false);
+        setCurrentTabBounds(win);
+      }
+    },
+    menuSelectTabF(1),
+    menuSelectTabF(2),
+    menuSelectTabF(3),
+    menuSelectTabF(4),
+    menuSelectTabF(5),
+    menuSelectTabF(6),
+    menuSelectTabF(7),
+    menuSelectTabF(8),
+    menuSelectTabF(9),
+    {
+      label: 'tab-last-hidden',
+      visible: false,
+      accelerator: 'CmdOrCtrl+0',
+      click(_, win) {
+        if (!isTabWindow(win)) return;
 
+        selectTab(win, { index: win.tabs.length - 1 })
+      }
+    },
+    // TODO: maybe register them as commands?
+    {
+      label: 'pane-right-hidden',
+      visible: false,
+      accelerator: 'CmdOrCtrl+.',
+      click(_, win) {
+        if (!isTabWindow(win)) return;
+        if (!win.currentPaneView) return;
+
+        selectTab(win, { tab: win.currentPaneView.rightTab })
+      }
+    },
+    {
+      label: 'pane-left-hidden',
+      visible: false,
+      accelerator: 'CmdOrCtrl+,',
+      click(_, win) {
+        if (!isTabWindow(win)) return;
+        if (!win.currentPaneView) return;
+
+        selectTab(win, { tab: win.currentPaneView.leftTab })
+      }
+    }
+  ])
+  nereidMenu.append(commands.swapPanes.toAppMenuItem(hidden, clickToTrigger))
+  nereidMenu.append(commands.nextTab.toAppMenuItem(hidden, clickToTrigger))
+  nereidMenu.append(commands.previousTab.toAppMenuItem(hidden, clickToTrigger))
+  nereidMenu.append(commands.reloadAll.toAppMenuItem(hidden, clickToTrigger))
+
+
+  const fileMenu = new Menu();
+  fileMenu.append(commands.newTab.toAppMenuItem(clickToTrigger))
+  fileMenu.append(commands.newPrivateTab.toAppMenuItem(clickToTrigger))
+  fileMenu.append(SEPARATOR_ITEM);
+  appendMenuItems(fileMenu, newTabInPanes)
+  fileMenu.append(SEPARATOR_ITEM);
+  fileMenu.append(commands.closePanes.toAppMenuItem(clickToTrigger))
+  fileMenu.append(commands.closeTab.toAppMenuItem(clickToTrigger))
+  fileMenu.append(commands.openClosed.toAppMenuItem(clickToTrigger))
+  fileMenu.append(SEPARATOR_ITEM);
+  fileMenu.append(commands.newWindow.toAppMenuItem())
+  fileMenu.append(commands.openFile.toAppMenuItem(clickToTrigger))
+  fileMenu.append(commands.closeWindow.toAppMenuItem(clickToTrigger))
+
+
+  const editMenu = Menu.buildFromTemplate([
+    { label: t('menu.contextMenu.undo'), role: 'undo', accelerator: 'CmdOrCtrl+Z' },
+    { label: t('menu.contextMenu.redo'), role: 'redo', accelerator: 'CmdOrCtrl+Y' },
+    SEPARATOR,
+    { label: t('menu.contextMenu.cut'), role: 'cut', accelerator: 'CmdOrCtrl+X' },
+    { label: t('menu.contextMenu.copy'), role: 'copy', accelerator: 'CmdOrCtrl+C' },
+    { label: t('menu.contextMenu.paste'), role: 'paste', accelerator: 'CmdOrCtrl+V' },
+    { label: t('menu.contextMenu.pasteAndMatchStyle'), role: 'pasteAndMatchStyle', accelerator: 'CmdOrCtrl+Shift+V' },
+    { label: t('menu.contextMenu.delete'), role: 'delete', accelerator: 'Delete' },
+    { label: t('menu.contextMenu.selectAll'), role: 'selectAll', accelerator: 'CmdOrCtrl+A' }
+  ]);
+  editMenu.append(commands.findInPage.toAppMenuItem(clickToTrigger))
+  if (app.isEmojiPanelSupported()) {
+    appendMIConstructors(editMenu, [
+      SEPARATOR,
+      {
+        label: t('menu.emojiPanel'),
+        accelerator: 'Meta+.',
+        registerAccelerator: false,
+        click() {
+          app.showEmojiPanel();
+        }
+      }
+    ])
+  }
+
+
+  const viewMenu = new Menu();
+  viewMenu.append(commands.fullscreen.toAppMenuItem(clickToTrigger))
+  appendMIConstructors(viewMenu, viewItems)
+
+
+  const toolsMenu = new Menu();
+  toolsMenu.append(commands.openHistory.toAppMenuItem(clickToTrigger))
+  toolsMenu.append(commands.openDownloads.toAppMenuItem(clickToTrigger))
+  toolsMenu.append(commands.openBookmarks.toAppMenuItem(clickToTrigger))
+  toolsMenu.append(commands.openSettings.toAppMenuItem(clickToTrigger))
+  toolsMenu.append(SEPARATOR_ITEM)
+  toolsMenu.append(commands.toggleDevTools.toAppMenuItem(clickToTrigger))
+  toolsMenu.append(commands.taskMgr.toAppMenuItem())
+
+
+  const tabMenu = new Menu();
+  tabMenu.append(commands.reload.toAppMenuItem(clickToTrigger))
+  tabMenu.append(commands.hardReload.toAppMenuItem(clickToTrigger))
+  tabMenu.append(commands.onePageUp.toAppMenuItem(clickToTrigger))
+  appendMenuItems(tabMenu, newTabInPanes)
+  appendMIConstructors(tabMenu, openNearbyTabsInPanes)
+  fileMenu.append(commands.closePanes.toAppMenuItem(clickToTrigger))
+  fileMenu.append(commands.closeTab.toAppMenuItem(clickToTrigger))
+
+
+  const winMenu = Menu.buildFromTemplate([
+    { role: 'minimize' },
+    {
+      label: t('menu.window.maximize') + '/' + t('menu.window.unmaximize'),
+      click(_m, win) {
+        if (win.isMaximized()) win.unmaximize()
+        else win.maximize()
+      }
+    }
+  ]);
+  winMenu.append(commands.closeWindow.toAppMenuItem(clickToTrigger))
+
+
+  appMenu = Menu.buildFromTemplate([
+    {
+      label: t('name'),
+      submenu: nereidMenu
+    },
+    {
+      label: t('menu.appMenu.file'),
+      submenu: fileMenu
+    },
+    {
+      label: t('menu.appMenu.edit'),
+      submenu: editMenu
+    },
+    {
+      label: t('menu.appMenu.view'),
+      submenu: viewMenu
+    },
+    {
+      label: t('menu.tools'),
+      submenu: toolsMenu
+    },
+    {
+      label: t('menu.appMenu.tab'),
+      submenu: tabMenu
+    },
+    {
+      label: t('menu.appMenu.window'),
+      submenu: winMenu
+    }
+  ])
+  Menu.setApplicationMenu(appMenu)
+}
+
+// Block to scope all the variables
+{
+  const len = lazyLoaded.length;
+  let i = -1;
+  while (++i < len) {
+    lazyLoaded.pop()();
+  }
+}
+buildAppMenu();
 
 export function showAppMenu() {
   Menu.getApplicationMenu().popup();
 }
 
 export async function displayOptions(win: TabWindow, { x, y }) {
-  let multiplier /* markiplier */ = config.get().ui.chromeZoomFactor
+  let multiplier = config.get().ui.chromeZoomFactor;
 
-  let menu = Menu.buildFromTemplate([
-    ...tabs_windows,
-    SEPARATOR,
-    findInPage,
-    SEPARATOR,
-    ...view,
-    {
-      label: t('menu.zoom.info', { zoom: win.currentTab.webContents.zoomFactor * 100 }),
-      enabled: false
-    },
-    SEPARATOR,
-    {
-      label: t('common.history'),
-      submenu: [
-        {
-          label: t('common.history'),
-          click(_, win) {
-            if (!isTabWindow(win)) return;
-
-            openUniqueNereidTab(win, 'history', true)
-          }
-        },
-        SEPARATOR,
-        {
-          label: t('menu.recentlyClosedTabs'),
-          enabled: false
-        },
-        ...win.recentlyClosed.map((tab, i) => ({
-          label: tab.lastTitle,
-          sublabel: tab.lastURL,
-          click() {
-            console.log('oct', win.recentlyClosed, i, tab);
-            openClosedTab(win, i)
-          }
-        }))
-      ]
-    },
-    ...tools,
-    SEPARATOR,
-    {
-      label: t('menu.common.quit'),
-      click() {
-        app.quit()
-      }
-    }
-  ]);
+  const menu = new Menu();
+  menu.append(commands.newTab.toMenuItem(clickToTrigger))
+  menu.append(commands.newPrivateTab.toMenuItem(clickToTrigger))
+  menu.append(SEPARATOR_ITEM)
+  appendMenuItems(menu, newTabInPanes)
+  menu.append(SEPARATOR_ITEM)
+  menu.append(commands.closePanes.toMenuItem(clickToTrigger))
+  menu.append(commands.closeTab.toMenuItem(clickToTrigger))
+  menu.append(commands.openClosed.toMenuItem(clickToTrigger))
+  menu.append(SEPARATOR_ITEM)
+  menu.append(commands.newWindow.toMenuItem())
+  menu.append(commands.openFile.toMenuItem(clickToTrigger))
+  menu.append(commands.closeWindow.toMenuItem(clickToTrigger))
+  menu.append(SEPARATOR_ITEM)
+  menu.append(commands.findInPage.toMenuItem(clickToTrigger))
+  menu.append(SEPARATOR_ITEM)
+  menu.append(commands.fullscreen.toMenuItem(clickToTrigger))
+  appendMIConstructors(menu, viewItems)
+  menu.append(new MenuItem({
+    label: t('menu.zoom.info', { zoom: win.currentTab.webContents.zoomFactor * 100 }),
+    enabled: false
+  }))
+  menu.append(SEPARATOR_ITEM)
+    const historyMenu = new Menu();
+    historyMenu.append(commands.openHistory.toMenuItem(clickToTrigger))
+    appendMIConstructors(historyMenu, [
+      {
+        label: t('menu.recentlyClosedTabs'),
+        enabled: false
+      },
+      ...win.recentlyClosed.map((tab, i) => ({
+        label: tab.lastTitle,
+        sublabel: tab.lastURL,
+        click() {
+          console.log('oct', win.recentlyClosed, i, tab);
+          openClosedTab(win, i)
+        }
+      })).reverse()
+    ])
+  menu.append(new MenuItem({ label: t('common.history'), submenu: historyMenu }))
+  menu.append(commands.openDownloads.toMenuItem(clickToTrigger))
+  menu.append(commands.openBookmarks.toMenuItem(clickToTrigger))
+  menu.append(commands.openSettings.toMenuItem(clickToTrigger))
+  menu.append(SEPARATOR_ITEM)
+  menu.append(commands.quit.toMenuItem())
 
   x = Math.round(x * multiplier);
   y = Math.round(y * multiplier);
@@ -914,7 +611,7 @@ export async function showContextMenu(win: TabWindow, tab: RealTab, opts: Electr
       addItem({ label: $t('image.viewInNewTab'), click() { createContextTab({ url: opts.srcURL }) } })
       addItem({ label: $t('image.copyURL'), click() { clipboard.writeText(opts.srcURL) } })
       addItem(SEPARATOR)
-  }
+    }
     addItem({ label: $t('image.saveAs'), async click() {
       let response: Response;
       try {
@@ -1131,26 +828,20 @@ export function menuOfTab(win: TabWindow, tab: Tab) {
     return t(`menu.tabMenu.${str}`, obj)
   }
 
-  addItem({ label: $t('createNewTab'), accelerator: 'CmdOrCtrl+T', click() {
+  addItem({ label: $t('createNewTab'), accelerator: commands.newTab.accelerator, click() {
     createContextTab({
       private: false,
       url: $.newTabUrl
     })
     focusChrome(win)
   } })
-  addItem({ label: $t('createNewPrivateTab'), accelerator: 'CmdOrCtrl+P', click() {
+  addItem({ label: $t('createNewPrivateTab'), accelerator: commands.newPrivateTab.accelerator, click() {
     createContextTab({ url: 'nereid://private', private: true })
     focusChrome(win)
   } })
   addItem(SEPARATOR)
   addItem({ label: t('navigation.reload'), click() { toRealTab(tab).webContents.reload() } })
-  addItem({
-    label: $t('reloadAll'), click() {
-      win.tabs.forEach(t => {
-        toRealTab(t).webContents.reload()
-      })
-    }
-  })
+  menu.append(commands.reloadAll.toMenuItem(clickToTrigger))
   addItem({ label: $t('copyURL'), click() { toRealTab(tab).webContents.getURL() } })
   addItem(SEPARATOR)
   addItem({ label: $t('duplicate'), click() {
@@ -1207,7 +898,7 @@ export function menuOfTab(win: TabWindow, tab: Tab) {
   } })
   addItem(SEPARATOR)
   addItem({
-    label: $t('close-this'), accelerator: 'Ctrl+W', async click() {
+    label: $t('close-this'), accelerator: commands.closeTab.accelerator, async click() {
       try {
         await closeTab(win, { tab }, true)
 
@@ -1252,7 +943,7 @@ export function menuNewTab(win: TabWindow, group?: TabGroup) {
   Menu.buildFromTemplate([
     {
       label: $t('createNewTab'),
-      accelerator: 'CmdOrCtrl+T',
+      accelerator: commands.newTab.accelerator,
       click() {
         createTab(win, { url: $.newTabUrl, groupID: group?.id })
         focusChrome(win)
@@ -1260,7 +951,7 @@ export function menuNewTab(win: TabWindow, group?: TabGroup) {
     },
     {
       label: $t('createNewPrivateTab'),
-      accelerator: 'CmdOrCtrl+P',
+      accelerator: commands.newPrivateTab.accelerator,
       click() {
         createTab(win, { url: 'nereid://private', private: true, groupID: group?.id })
         focusChrome(win)
@@ -1378,28 +1069,13 @@ export function menuOfProcess(process: Electron.ProcessMetric) {
 
 export function menuOfPaneDivider(win: TabWindow) {
   let menu = new Menu();
-  function addItem(options: Electron.MenuItemConstructorOptions) {
-    menu.append(new MenuItem(options))
-  }
 
   if (!win.currentPaneView) {
     return dialog.showErrorBox("Error", "No panes opened")
   }
 
-  function $t(str: string, obj?: {}) {
-    return t(`menu.panes.${str}`, obj)
-  }
-
-  addItem({ label: $t('close'), async click() {
-    undividePanes(win, win.currentPaneView)
-  }})
-  addItem({ label: $t('switch'), accelerator: 'CmdOrCtrl+Alt+S', async click() {
-    dividePanes(win, {
-      left: win.currentPaneView.rightTab,
-      right: win.currentPaneView.leftTab,
-      separatorPosition: win.currentPaneView.separatorPosition
-    })
-  }})
+  menu.append(commands.closePanes.toMenuItem(clickToTrigger))
+  menu.append(commands.swapPanes.toMenuItem(clickToTrigger))
 
   menu.popup()
 }
