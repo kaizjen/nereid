@@ -557,7 +557,12 @@ export async function showContextMenu(win: TabWindow, tab: RealTab, opts: Electr
     if ($.isValidURL(opts.selectionText)) {
       let linkText = opts.selectionText;
 
-      if (!linkText.startsWith('http:') && !linkText.startsWith('https:')) {
+      if (
+        !linkText.startsWith('http:') &&
+        !linkText.startsWith('https:') &&
+        !linkText.startsWith('nereid:') &&
+        !linkText.startsWith('chrome:')
+      ) {
         linkText = `http://${linkText}`
       }
 
