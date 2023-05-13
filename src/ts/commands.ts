@@ -4,7 +4,7 @@ import { buildAppMenu } from "./menu"
 import $ from "./common"
 import * as pathModule from "path"
 import { t } from "./i18n"
-import { isTabWindow, newTabWindow, openUtilityWindow } from "./windows"
+import { isTabWindow, newTabWindow, openUtilityWindow, setCurrentTabBounds } from "./windows"
 import { config } from "./userdata"
 import { closeTab, createTab, dividePanes, openClosedTab, openUniqueNereidTab, selectTab, toRealTab, undividePanes } from "./tabs"
 import { getTabGroupByTab } from "./tabgroups"
@@ -543,7 +543,9 @@ registerCommand({
   accelerator: 'F11',
   trigger(win: BrowserWindow) {
     if (!isTabWindow(win)) return;
-    openUniqueNereidTab(win, 'about', true)
+
+    win.setFullScreen(!win.isFullScreen())
+    setCurrentTabBounds(win)
   }
 })
 
