@@ -369,9 +369,12 @@ function buildAppMenuImmediately() {
   const tabMenu = new Menu();
   tabMenu.append(commands.reload.toAppMenuItem(clickToTrigger))
   tabMenu.append(commands.hardReload.toAppMenuItem(clickToTrigger))
+  tabMenu.append(SEPARATOR_ITEM)
   tabMenu.append(commands.onePageUp.toAppMenuItem(clickToTrigger))
+  tabMenu.append(SEPARATOR_ITEM)
   appendMenuItems(tabMenu, newTabInPanes)
   appendMIConstructors(tabMenu, openNearbyTabsInPanes)
+  tabMenu.append(SEPARATOR_ITEM)
   tabMenu.append(commands.closePanes.toAppMenuItem(clickToTrigger))
   tabMenu.append(commands.closeTab.toAppMenuItem(clickToTrigger))
 
