@@ -2,9 +2,9 @@
   "compilerOptions": {
     "target": "esnext",
     "outDir": "src/js",
-    //"rootDir": "src",
     "moduleResolution": "node",
-    "module": "commonjs"
+    "module": "commonjs",
+    "esModuleInterop": true
   },
   "include": ["src/ts/**/*"]
 }

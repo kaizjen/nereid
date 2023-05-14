@@ -1,16 +1,13 @@
 import { t } from "./i18n";
 import $ from "./common";
 import { config, control, history } from "./userdata";
-import type TypeFuse from "fuse.js";
+import Fuse from "fuse.js";
 import fetch from "electron-fetch";
 import { BrowserWindow, ipcMain, session } from "electron";
 import { DEFAULT_PARTITION, NO_CACHE_PARTITION } from "./sessions";
-import { History, NavigationReason, TabWindow } from "./types";
+import { NavigationReason, TabWindow } from "./types";
 import { getAllTabWindows, isTabWindow } from "./windows";
 import { asRealTab, selectTab } from "./tabs";
-
-// must use require here because these libraries, when require()d, don't have a .default property.
-const Fuse = require('fuse.js') as typeof TypeFuse;
 
 const URLParse = $.URLParse;
 
