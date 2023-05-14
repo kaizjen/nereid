@@ -1,6 +1,6 @@
 // Manages command-line arguments and second instances
 
-import * as _argvParse from "argv-parse";
+import argvParse from "argv-parse";
 import * as userData from "./userdata";
 import { app, dialog } from 'electron'
 import { getTabWindowByID, newTabWindow } from './windows'
@@ -8,8 +8,7 @@ import { createTab } from './tabs'
 import * as pathModule from 'path'
 import $ from './common'
 import { TabOptions } from "./types";
-import type TypeTerminate from "terminate";
-const terminate = require('terminate') as typeof TypeTerminate;
+import terminate from "terminate";
 
 type Spec = {
   [key: string]: {
@@ -20,8 +19,6 @@ type Spec = {
 type ArgvParse = <S extends Spec>(spec?: S) => {
   [name in keyof S]: any
 } & { _: any[] }
-
-const argvParse: ArgvParse = _argvParse;
 
 const argv = argvParse({
   'second-instance': {
