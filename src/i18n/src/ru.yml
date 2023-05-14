@@ -434,6 +434,7 @@ menu:
     openDevTools: Код элемента
     undo: Отменить
     redo: Повторить
+    selectAll: Выбрать все
     copy: Копировать
     cut: Вырезать
     delete: Удалить
