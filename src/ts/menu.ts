@@ -372,8 +372,8 @@ function buildAppMenuImmediately() {
   tabMenu.append(commands.onePageUp.toAppMenuItem(clickToTrigger))
   appendMenuItems(tabMenu, newTabInPanes)
   appendMIConstructors(tabMenu, openNearbyTabsInPanes)
-  fileMenu.append(commands.closePanes.toAppMenuItem(clickToTrigger))
-  fileMenu.append(commands.closeTab.toAppMenuItem(clickToTrigger))
+  tabMenu.append(commands.closePanes.toAppMenuItem(clickToTrigger))
+  tabMenu.append(commands.closeTab.toAppMenuItem(clickToTrigger))
 
 
   const winMenu = Menu.buildFromTemplate([
