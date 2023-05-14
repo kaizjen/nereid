@@ -51,11 +51,15 @@
       return [false, "F2" + key.slice("Soft".length)]
     }
 
-    if (!isNaN(Number(key))) {
-      if (code.includes("Numpad")) {
-        return [false, 'num' + key]
-      }
-      return [false, key]
+    if (code.startsWith("Numpad")) {
+      return [false, 'num' + code.slice("Numpad".length)]
+    }
+    if (code.startsWith("Digit")) {
+      return [false, code.slice("Digit".length)]
+    }
+    if (code.startsWith("Key")) {
+      // If another keyboard layout is selected, use the English key
+      return [false, code.slice("Key".length)]
     }
     if (key.length == 1) {
       if (code == "NumpadDecimal") return [false, 'numdec'];
