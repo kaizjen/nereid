@@ -19,6 +19,7 @@
     "@cliqz/adblocker": "^1.25.0",
     "argv-parse": "^1.0.1",
     "electron-fetch": "^1.9.1",
+    "electron-is-accelerator": "^0.2.0",
     "fs-extra": "^10.0.1",
     "fuse.js": "^6.6.1",
     "i18next": "^21.8.3",

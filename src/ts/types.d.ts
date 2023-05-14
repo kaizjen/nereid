@@ -212,6 +212,9 @@ export interface Configuration {
     }
     a11yEnabled: null | boolean
   }
+  keybinds: {
+    [command: string]: Electron.Accelerator
+  }
   // to be added
 }
 

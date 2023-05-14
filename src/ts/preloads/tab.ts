@@ -86,7 +86,8 @@ if (location.protocol == 'nereid:') {
       }
     },
     interface: {
-      getTheme: () => sendInternalSync('getTheme')
+      getTheme: () => sendInternalSync('getTheme'),
+      getAllCommands: () => sendInternal('getAllCommands')
     },
     safeStorage: {
       isAvailable: () => sendInternal('safeStorage.check'),
@@ -121,7 +122,8 @@ if (location.protocol == 'nereid:') {
       close: () => sendInternal('closeMe'),
       create: (url) => sendInternal('createTab', url),
       go: (url) => sendInternal('navigateMe', url),
-      sendKeyToChrome: (keyData: object) => sendInternal('sendKeyToChrome', keyData)
+      sendKeyToChrome: (keyData: object) => sendInternal('sendKeyToChrome', keyData),
+      ignoreMenuShortcuts: (ignore: boolean) => sendInternal('ignoreMenuShortcuts', ignore)
     }
   })
 }

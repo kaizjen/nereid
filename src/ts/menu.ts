@@ -21,6 +21,7 @@ function lazy(fn: () => any[]) {
   const arrayRef = [];
 
   lazyLoaded.push(() => {
+    arrayRef.length = 0
     arrayRef.push(...fn())
   })
 
@@ -149,7 +150,26 @@ const menuSelectTabF = (index: number): Electron.MenuItemConstructorOptions => (
 
 export let appMenu: Menu;
 
-export function buildAppMenu() {
+let appMenuBeingBuilt: false | Promise<void> = false;
+/** Queues up building of the App Menu. The returned promise is resolved when the app menu is set. */
+export async function buildAppMenu() {
+  if (!appMenuBeingBuilt) {
+    appMenuBeingBuilt = new Promise<void>(res => {
+      setImmediate(() => {
+        buildAppMenuImmediately();
+        res();
+        appMenuBeingBuilt = false;
+      })
+    });
+  }
+
+  return await appMenuBeingBuilt
+}
+
+function buildAppMenuImmediately() {
+  // Reload all lazy menuitems
+  lazyLoaded.forEach(fn => fn());
+
   const nereidMenu = new Menu();
 
   nereidMenu.append(commands.openAbout.toAppMenuItem(clickToTrigger));
@@ -403,13 +423,6 @@ export function buildAppMenu() {
 }
 
 // Block to scope all the variables
-{
-  const len = lazyLoaded.length;
-  let i = -1;
-  while (++i < len) {
-    lazyLoaded.pop()();
-  }
-}
 buildAppMenu();
 
 export function showAppMenu() {

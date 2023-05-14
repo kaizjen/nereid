@@ -1,16 +1,18 @@
 <style>
-  kbd {
-    background: #8080808c;
-    border: 1px solid var(--fds-text-tertiary);
-    padding: 2px;
-    border-radius: 3px;
+  .command {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
   }
 </style>
 
 <script>
-  import { TextBlock, ToggleSwitch } from "fluent-svelte";
+  import { TextBlock, ToggleSwitch, ListItem, ContentDialog, Button } from "fluent-svelte";
   import noFirstTime from "nereid://js/nft.js"
   import { getContext } from "svelte/internal";
+  import Keybind from "./Keyboard/Keybind.svelte";
+  import Rebinder from "./Keyboard/Rebinder.svelte";
 
   export let update;
 
@@ -31,16 +33,66 @@
   })
   $: {openTabNearby; updateOpenTabNearby()}
 
-  // TODO: Ability to change keyboard shortcuts
+  let keybindDialog = false;
+
+  let allCommands = [];
+  async function updateCommands(){
+    allCommands = await nereid.interface.getAllCommands();
+  }
+  updateCommands()
+
+  function handleRebindF(command) {
+    return ({ detail: newAccelerator }) => {
+      if (newAccelerator == null) {
+        delete $config.keybinds[command.name];
+        $config = $config;
+        update();
+        requestIdleCallback(() => {
+          updateCommands();
+        })
+        return;
+      }
+
+      $config.keybinds[command.name] = newAccelerator;
+      update();
+      requestIdleCallback(() => {
+        updateCommands();
+      })
+    }
+  }
+
+  $: newTabAccelerator = allCommands.find(c => c.name == 'newTab')?.accelerator || '';
 </script>
 
+
+<ContentDialog
+  title={tt('rebind.title')}
+  size="max"
+  append={document.body}
+  bind:open={keybindDialog}
+  closable={false}
+  style="max-height: 100%; overflow: auto;"
+>
+  {#each allCommands as command}
+    <div class="command">
+      <div class="cmdinfo">
+        <TextBlock variant="body">{command.label}</TextBlock>
+        {#if command.sublabel} <br><TextBlock variant="caption">{command.sublabel}</TextBlock> {/if}
+      </div>
+      <Rebinder {command} on:change={handleRebindF(command)} />
+    </div>
+  {/each}
+  <Button variant="accent" style="width: 100%" on:click={() => keybindDialog = false}>
+    {t('common.done')}
+  </Button>
+</ContentDialog>
 
 <div class="s-option">
   <TextBlock variant="body">
     <span>
       {#each openTabNearbyTTitle.split('$$SH') as segment, i}
         {#if i != 0}
-          <kbd>{window.nereid.app.os == 'darwin' ? "⌘" : "Ctrl"}</kbd>+<kbd>T</kbd>
+          <Keybind accelerator={newTabAccelerator} />
         {/if}
         {segment}
       {/each}
@@ -49,7 +101,7 @@
     <TextBlock variant="caption" style="color: gray;">
       {#each openTabNearbyTDesc.split('$$SH') as segment, i}
         {#if i != 0}
-          <kbd>{window.nereid.app.os == 'darwin' ? "⌘" : "Ctrl"}</kbd>+<kbd>T</kbd>
+          <Keybind accelerator={newTabAccelerator} />
         {/if}
         {segment}
       {/each}
@@ -57,3 +109,7 @@
   </TextBlock>
   <ToggleSwitch bind:checked={openTabNearby} />
 </div>
+<ListItem on:click={() => keybindDialog = true} style="block-size: 57px;">
+  <TextBlock variant="body">{tt('rebind.title')}</TextBlock><br>
+  <TextBlock variant="caption" style="color: gray;">{tt('rebind.description')}</TextBlock>
+</ListItem>

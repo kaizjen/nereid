@@ -15,6 +15,7 @@ import { adBlockerError, isAdBlockerReady, webContentsABMap } from "./adblocker"
 import { kill } from "./process";
 import { addTabToGroup, createTabGroup, getTabGroupByID, getTabsFromTabGroup, ungroup } from "./tabgroups";
 import { getHints } from "./omnibox";
+import { commands } from "./commands";
 
 const URLParse = $.URLParse
 
@@ -749,6 +750,19 @@ export function init() {
   onInternalSync('getTheme', (e) => {
     e.returnValue = nativeTheme.shouldUseDarkColors ? 'dark' : 'light'
   })
+  onInternal('getAllCommands', () => {
+    const cmdinfo: { name: string, accelerator: Electron.Accelerator, label: string, sublabel: string }[] = [];
+
+    for (const name in commands) {
+      const cmd = commands[name];
+      cmdinfo.push({
+        name, accelerator: cmd.accelerator,
+        label: cmd.label, sublabel: cmd.sublabel
+      })
+    }
+
+    return cmdinfo;
+  })
 
   onInternal('safeStorage.check', (_e) => {
     return safeStorage.isEncryptionAvailable()
@@ -935,6 +949,20 @@ export function init() {
 
     win.chrome.webContents.focus();
     win.chrome.webContents.send('keySent', { code, key, ctrlKey })
+  })
+  const imsMap: Record<number, () => any> = {}
+  onInternal('ignoreMenuShortcuts', (e, ignore: boolean) => {
+    const win = BrowserWindow.fromWebContents(e.sender) as TabWindow
+    if (!win || !isTabWindow(win)) return;
+
+    e.sender.setIgnoreMenuShortcuts(!!ignore);
+    if (ignore) {
+      imsMap[e.sender.id] = () => e.sender.setIgnoreMenuShortcuts(false);
+      e.sender.once('did-navigate', imsMap[e.sender.id])
+
+    } else {
+      e.sender.off('did-navigate', imsMap[e.sender.id])
+    }
   })
 }
 

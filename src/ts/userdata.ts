@@ -326,6 +326,9 @@ try {
         languages: [[ 'string' ]]
       },
       a11yEnabled: [ 'boolean', null ]
+    },
+    keybinds: {
+      '*': 'string'
     }
   });
 

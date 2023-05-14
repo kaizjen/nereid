@@ -9,6 +9,7 @@ import { config } from "./userdata"
 import { closeTab, createTab, dividePanes, openClosedTab, openUniqueNereidTab, selectTab, toRealTab, undividePanes } from "./tabs"
 import { getTabGroupByTab } from "./tabgroups"
 import { registerPedal } from "./omnibox"
+import isAccelerator from "electron-is-accelerator"
 
 type AnyFn = (...args: any[]) => any
 
@@ -96,13 +97,17 @@ export class Command<T extends AnyFn> {
   constructor(options: CommandConstructorOptions<T>) {
     this.name = options.name;
 
-    this._label = options.label;
-    this._sublabel = options.sublabel || '';
-    this._accel = options.accelerator;
+    this.defaultLabel = this._label = options.label;
+    this.defaultSubLabel = this._sublabel = options.sublabel || '';
+    this.defaultAccelerator = this._accel = options.accelerator;
     this._trigger = options.trigger;
   }
 
   readonly name: string;
+
+  readonly defaultLabel: string;
+  readonly defaultSubLabel: string;
+  readonly defaultAccelerator: Electron.Accelerator;
 
   /**
    * Registers a listener to any changes of this command.
@@ -210,7 +215,6 @@ export class Command<T extends AnyFn> {
     ;
 
     if (this.accelerator && !this.appMenuListenerRegistered) {
-      console.log(this.name, !!buildAppMenu);
       this.onChange(buildAppMenu)
       this.appMenuListenerRegistered = true;
     }
@@ -237,8 +241,6 @@ export function registerCommand<T extends AnyFn>(options: CommandConstructorOpti
   return cmd;
 }
 
-
-globalThis['AllCommands'] = commands;
 
 function obtainWebContents(win: Electron.BrowserWindow | TabWindow) {
   return isTabWindow(win) ? win.currentTab.webContents : win.webContents
@@ -357,7 +359,7 @@ registerCommand({
 
 registerCommand({
   name: 'leftTabInLeftPane',
-  label: t('menu.tabs.leftTabInLeftPane'), // TODO: add translations
+  label: t('menu.tabs.leftTabInLeftPane'),
   accelerator: 'CmdOrCtrl+Alt+,',
   trigger(win: Electron.BrowserWindow) {
     if (!isTabWindow(win)) return;
@@ -371,7 +373,7 @@ registerCommand({
 })
 registerCommand({
   name: 'leftTabInRightPane',
-  label: t('menu.tabs.leftTabInRightPane'), // TODO: add translations
+  label: t('menu.tabs.leftTabInRightPane'),
   trigger(win: Electron.BrowserWindow) {
     if (!isTabWindow(win)) return;
     if (win.tabs.indexOf(win.currentTab) - 1 < 0) return;
@@ -384,7 +386,7 @@ registerCommand({
 })
 registerCommand({
   name: 'rightTabInLeftPane',
-  label: t('menu.tabs.rightTabInLeftPane'), // TODO: add translations
+  label: t('menu.tabs.rightTabInLeftPane'),
   trigger(win: Electron.BrowserWindow) {
     if (!isTabWindow(win)) return;
     if (!win.tabs[win.tabs.indexOf(win.currentTab) + 1]) return;
@@ -397,7 +399,7 @@ registerCommand({
 })
 registerCommand({
   name: 'rightTabInRightPane',
-  label: t('menu.tabs.rightTabInRightPane'), // TODO: add translations
+  label: t('menu.tabs.rightTabInRightPane'),
   accelerator: 'CmdOrCtrl+Alt+.',
   trigger(win: Electron.BrowserWindow) {
     if (!isTabWindow(win)) return;
@@ -579,7 +581,7 @@ registerCommand({
 
 registerCommand({
   name: 'nextTab',
-  label: t('menu.tabs.next'), // TODO: add translations
+  label: t('menu.tabs.next'),
   accelerator: 'CmdOrCtrl+Tab',
   trigger(win: BrowserWindow) {
     if (!isTabWindow(win)) return;
@@ -592,7 +594,7 @@ registerCommand({
 })
 registerCommand({
   name: 'previousTab',
-  label: t('menu.tabs.previous'), // TODO: add translations
+  label: t('menu.tabs.previous'),
   accelerator: 'CmdOrCtrl+Shift+Tab',
   trigger(win: BrowserWindow) {
     if (!isTabWindow(win)) return;
@@ -669,11 +671,42 @@ registerCommand({
   }
 })
 
-
 registerCommand({
   name: 'quit',
   label: t('menu.common.quit'),
   trigger() {
     app.quit()
   }
+})
+
+
+config.listenCall(({ keybinds }) => {
+  for (const cmdName in keybinds) {
+    const accelerator = keybinds[cmdName];
+    if (!(cmdName in commands)) {
+      console.log(
+        `Error registering the accelerator for "${cmdName}" - "${cmdName}" is not a registered command.`
+      );
+      continue;
+    }
+    if (!isAccelerator(accelerator as string)) {
+      console.log(
+        `Error registering the accelerator for "${cmdName}" - "${accelerator}" is not a valid accelerator.`
+      );
+      continue;
+    }
+
+    commands[cmdName].setAccelerator(accelerator);
+  }
+
+  setImmediate(() => {
+    for (const cmdName in commands) {
+      // Reset all previously changed accelerators
+      const cmd = commands[cmdName];
+      if (!keybinds[cmdName] && cmd.accelerator != cmd.defaultAccelerator) {
+        console.log('resetting', cmd.name);
+        cmd.setAccelerator(cmd.defaultAccelerator)
+      }
+    }
+  })
 })

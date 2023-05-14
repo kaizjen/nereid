@@ -383,8 +383,14 @@ menu:
     openClosed: Open closed tab
     hardReload: Hard refresh
     onePageUp: Go one page up
+    next: Next tab
+    previous: Previous tab
     newTabInLeftPane: New tab in the left pane
     newTabInRightPane: New tab in the right pane
+    leftTabInLeftPane: Left tab in the left pane
+    leftTabInRightPane: Left tab in the right pane
+    rightTabInLeftPane: Right tab in the left pane
+    rightTabInRightPane: Right tab in the right pane
     openLeftTabIn: Open the left tab in...
     openRightTabIn: Open the right tab in...
     openTabIn:
@@ -629,6 +635,9 @@ pages:
       rebind:
         title: Change keyboard shortcuts
         description: Override the default keyboard shortucts with your own.
+        noKeybind: No keybind
+        prompt: Enter a key combination...
+        reset: Reset to default
     downloads:
       title: Downloads
       subtitle: "Save downloaded files to:"

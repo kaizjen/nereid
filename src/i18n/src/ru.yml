@@ -379,8 +379,14 @@ menu:
     openClosed: Открыть закрытую вкладку
     hardReload: Полная перезагрузка
     onePageUp: На сегмент назад
+    next: Следующая вкладка
+    previous: Предыдущая вкладка
     newTabInLeftPane: Новая вкладка в левой панели
     newTabInRightPane: Новая вкладка в правой панели
+    leftTabInLeftPane: Левая вкладка в левой панели
+    leftTabInRightPane: Левая вкладка в правой панели
+    rightTabInLeftPane: Правая вкладка в левой панели
+    rightTabInRightPane: Правая вкладка в правой панели
     openLeftTabIn: Открыть левую вкладку...
     openRightTabIn: Открыть правую вкладку...
     openTabIn:
@@ -643,6 +649,9 @@ pages:
       rebind:
         title: Настроить сочетания клавиш
         description: Настроить свои сочетания клавиш для действий Nereid.
+        noKeybind: Нет
+        prompt: Введите сочетание клавиш...
+        reset: Сбросить к настройкам по умолчанию
   history:
     button-clear: Очистить историю...
     deleteEntry: Удалить запись
