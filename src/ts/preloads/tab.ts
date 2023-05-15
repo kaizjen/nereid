@@ -173,11 +173,11 @@ try {
     let { extendNavigator, extendWindow } = window['[NEREID]'];
 
     for (let prop in extendNavigator) {
-      Object.defineProperty(navigator, prop, Object.getOwnPropertyDescriptor(extendNavigator, prop))
+      window.navigator[prop] = extendNavigator[prop]
     }
 
     for (let prop in extendWindow) {
-      Object.defineProperty(window, prop, Object.getOwnPropertyDescriptor(extendWindow, prop))
+      window[prop] = extendWindow[prop]
     }
   }());`)
 } catch (error) {
