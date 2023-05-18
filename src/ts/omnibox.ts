@@ -74,10 +74,10 @@ const searchHintAlgorithms = {
     return json[1].map((result, i) => ({ result, rel: relArray[i] }))
   },
   async startpageLike(res: Response): Promise<_SearchAlgorithmResponse> {
-      const json: any = await res.json();
+    const json: any = await res.json();
 
-      return json.suggestions.map(s => s.text)
-    },
+    return json.suggestions.map(s => ({ result: s.text }))
+  },
   error(): _SearchAlgorithmResponse {
     return [
       { result: "⚠ Something went wrong while trying to get hints. Check your config.json5 file." }
@@ -401,7 +401,7 @@ export function init() {
         return {
           contents,
           desc: [{ text: ' - ' + t('ui.hints.search', { engine: searchEngine.name }), gray: true }],
-          relevance: Math.min(rel, 900),
+          relevance: Math.min(rel ?? 300, 900),
           icon: '::search',
           omniboxValue: result,
           url: searchCfg.available[searchCfg.selectedIndex].searchURL.replaceAll('%s', result),
