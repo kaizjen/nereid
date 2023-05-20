@@ -88,11 +88,15 @@
 
   let downloadsDialog = false;
 
-  ipcRenderer.on('downloadStatus', (_e, { state, recieved, total }) => {
+  ipcRenderer.on('downloadStatus', (_e, { state, recieved, total, savePath }) => {
     if (state == 'interrupted' || state == 'cancelled' || state == 'completed') {
       downloadPercent = 0;
       downloadInfo = null;
     } else downloadPercent = recieved / total * 100
+
+    if (savePath) {
+      downloadInfo.savePath = savePath;
+    }
   })
   ipcRenderer.on('downloadStart', (_e, i) => {
     downloadInfo = { ...i, paused: false };

@@ -272,6 +272,7 @@ export function registerSession(ses: Session) {
 
   let isDownloadInProgress = false;
   ses.on('will-download', async(e, item) => {
+    // TODO: allow for multiple downloads
     if (isDownloadInProgress) e.preventDefault()
 
     if (item.getState() == 'interrupted') {
@@ -343,10 +344,13 @@ export function registerSession(ses: Session) {
 
     isDownloadInProgress = true;
 
+    let prevPath = item.getSavePath();
+
     item.on('updated', (_e, state) => {
       if (state == 'progressing') {
         send('downloadStatus', {
-          state, recieved: item.getReceivedBytes(), total: item.getTotalBytes()
+          state, recieved: item.getReceivedBytes(), total: item.getTotalBytes(),
+          savePath: prevPath != item.getSavePath() ? item.getSavePath() : null
         });
 
         currentOffset = item.getReceivedBytes();
