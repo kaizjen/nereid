@@ -1,6 +1,6 @@
 <style>
   .dialog {
-    right: 0.625rem;
+    right: 0;
   }
   main {
     padding: 0.68rem;
@@ -85,6 +85,7 @@
   export let open;
   export let hostname;
   export let protocol;
+  export let triggerRect;
 
   let abEnabled = true;
   let isError = false;
@@ -124,8 +125,16 @@
       ipcRenderer.send('newTab', { url: 'https://github.com/ghostery/adblocker' });
     }
   }
+
+  $: marginRight = (document.body.clientWidth - triggerRect.x - triggerRect.width) + 'px'
 </script>
-<div class="dialog" in:appear={window.flyoutProperties} out:fly={window.flyoutProperties} on:outroend={() => setTop(false)}>
+<div
+  class="dialog"
+  in:appear={window.flyoutProperties}
+  out:fly={window.flyoutProperties}
+  on:outroend={() => setTop(false)}
+  style:margin-right={marginRight}
+>
   <main>
     <div class="biginfo">
       <img

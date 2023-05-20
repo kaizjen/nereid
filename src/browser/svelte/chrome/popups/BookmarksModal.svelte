@@ -1,6 +1,6 @@
 <style>
   .dialog {
-    right: 10px;
+    right: 0;
   }
   .preview-container {
     background: var(--t-black-6);
@@ -93,6 +93,7 @@
   export let open;
   export let tab;
   export let bookmarks;
+  export let triggerRect;
 
   let previewSrc = 'n-res://dark/webpage.svg';
 
@@ -160,6 +161,7 @@
     sendInternal('userData.bookmarks.setFolder', { folder: folderName, value: folder })
   }
 
+  $: marginRight = (document.body.clientWidth - triggerRect.x - triggerRect.width) + 'px'
 </script>
 <div
   class="dialog"
@@ -167,6 +169,7 @@
   out:fly={window.flyoutProperties}
   on:outroend={() => setTop(false)}
   use:modalPageAnimations={{ animationControls, duration: 200, easing: 'cubic-bezier(0,.5,.44,.85)' }}
+  style:margin-right={marginRight}
 >
   {#if page == 0}
     <!--

@@ -16,6 +16,7 @@
 <script>
   export let open = true;
   export let level = 0;
+  export let triggerRect;
 
   const { t } = window;
   const _ = {
@@ -36,10 +37,16 @@
   setTop(true)
 
   let config = getContext('config')
-  
+
+  $: marginRight = (document.body.clientWidth - triggerRect.x - triggerRect.width) + 'px'
 </script>
 
-<div class="dialog" in:appear={{...window.flyoutProperties, isStatic: true}} out:fly={window.flyoutProperties} on:outroend={() => setTop(false)}>
+<div class="dialog"
+  in:appear={{...window.flyoutProperties, isStatic: true}}
+  out:fly={window.flyoutProperties}
+  on:outroend={() => setTop(false)}
+  style:margin-right={marginRight}
+>
   <div class="dialog-content">
     <div class="title">
       <img

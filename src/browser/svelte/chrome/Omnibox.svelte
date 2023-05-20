@@ -105,8 +105,7 @@
     position: absolute;
     width: -webkit-fill-available;
     height: -webkit-fill-available;
-    margin-right: 30px;
-    margin-left: 30px;
+    left: 0;
   }
 
   @media (prefers-color-scheme: light) {
@@ -298,6 +297,9 @@
     })
   }
 
+  // TODO: make hints tab-specific
+  ipcRenderer.on('tabChange', () => hints = [])
+
   /**
    * @param {KeyboardEvent} e
    */
@@ -416,7 +418,7 @@
         >
       </button>
     {:else}
-      <button on:click={() => securityDialog = !securityDialog} class="tab-state sec" class:open={securityDialog}>
+      <button on:click={({ currentTarget }) => securityDialog = currentTarget.getBoundingClientRect()} class="tab-state sec" class:open={securityDialog}>
         <img alt={_.SECURITY}
           src={
             tab.security === true ? `n-res://${$colorTheme}/secure.svg` : 
@@ -463,7 +465,7 @@
     {#if $globalZoom != $config?.ui.defaultZoomFactor}
       <button
         class="tab-state"
-        on:click={() => zoomDialog = true}
+        on:click={({ currentTarget }) => zoomDialog = currentTarget.getBoundingClientRect()}
         class:open={zoomDialog}
       >
         <img
@@ -476,7 +478,7 @@
     {#if url.protocol.startsWith('http')}
       <button
         class="tab-state"
-        on:click={() => adblockerDialog = true}
+        on:click={({ currentTarget }) => adblockerDialog = currentTarget.getBoundingClientRect()}
         class:open={adblockerDialog}
       >
         <img
@@ -489,7 +491,7 @@
     {#if url.protocol != 'nereid:' && !isANewTabURL()}
       <button
         class="tab-state"
-        on:click={() => bookmarkDialog = true}
+        on:click={({ currentTarget }) => bookmarkDialog = currentTarget.getBoundingClientRect()}
         class:open={bookmarkDialog}
       >
         <img
@@ -507,15 +509,15 @@
 </div>
 <div class="wrapper" style="z-index: {anyDialog ? '99' : '-1'};">
   {#if securityDialog}
-    <Security bind:isOpen={securityDialog} {tab} />
+    <Security bind:isOpen={securityDialog} {tab} triggerRect={securityDialog} />
   {/if}
   {#if zoomDialog}
-    <ZoomPopup level={$globalZoom} bind:open={zoomDialog} />
+    <ZoomPopup level={$globalZoom} bind:open={zoomDialog} triggerRect={zoomDialog} />
   {/if}
   {#if bookmarkDialog}
-    <BookmarksModal bind:open={bookmarkDialog} {tab} bookmarks={$bookmarks} />
+    <BookmarksModal bind:open={bookmarkDialog} {tab} bookmarks={$bookmarks} triggerRect={bookmarkDialog} />
   {/if}
   {#if adblockerDialog}
-    <AdBlocker bind:open={adblockerDialog} hostname={url.hostname} protocol={url.protocol} />
+    <AdBlocker bind:open={adblockerDialog} hostname={url.hostname} protocol={url.protocol} triggerRect={adblockerDialog} />
   {/if}
 </div>

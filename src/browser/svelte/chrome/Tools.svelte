@@ -128,7 +128,7 @@
   <button
     class="tool wide progressbar-container"
     class:open={downloadsDialog}
-    on:click={() => downloadsDialog = !downloadsDialog}
+    on:click={({ currentTarget }) => downloadsDialog = downloadsDialog ? false : currentTarget.getBoundingClientRect()}
   >
     <img src="n-res://{$colorTheme}/downloads.svg" alt={_.DOWNLOADS}>
     {#if downloadInfo}
@@ -146,6 +146,6 @@
     }}><img alt={_.MORE} src="n-res://{$colorTheme}/more.svg"></button>
   {/if}
   {#if downloadsDialog}
-    <Downloads bind:open={downloadsDialog} {downloadPercent} {downloadInfo} />
+    <Downloads bind:open={downloadsDialog} {downloadPercent} {downloadInfo} triggerRect={downloadsDialog} />
   {/if}
 </div>

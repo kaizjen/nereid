@@ -32,6 +32,7 @@
   export let open = true;
   export let downloadInfo;
   export let downloadPercent;
+  export let triggerRect;
   import { getContext } from "svelte/internal";
   const { ipcRenderer, shell, basename } = window.nereid;
   import { fly } from "svelte/transition";
@@ -59,6 +60,8 @@
 
   setTop(true)
 
+  $: marginRight = (document.body.clientWidth - triggerRect.x - triggerRect.width) + 'px'
+
   let downloadsAPI = getContext('downloads')
   let config = getContext('config')
 
@@ -69,7 +72,13 @@
   }}
 </script>
 
-<div class="dialog" in:appear={window.flyoutProperties} out:fly={window.flyoutProperties} on:outroend={() => setTop(false)}>
+<div
+  class="dialog"
+  in:appear={window.flyoutProperties}
+  out:fly={window.flyoutProperties}
+  on:outroend={() => setTop(false)}
+  style:margin-right={marginRight}
+>
   <div class="dialog-content">
     {#if downloadInfo}
       <h3>{_.CURRENT}</h3>

@@ -40,6 +40,7 @@
 <script>
   export let isOpen;
   export let tab;
+  export let triggerRect;
   const { ipcRenderer, sendInternal } = window.nereid
   import { getContext } from 'svelte/internal';
   import { fly } from 'svelte/transition';
@@ -109,7 +110,13 @@
   }
 </script>
 
-<div class="dialog" in:appear={window.flyoutProperties} out:fly={window.flyoutProperties} on:outroend={() => setTop(false)}>
+<div
+  class="dialog"
+  in:appear={window.flyoutProperties}
+  out:fly={window.flyoutProperties}
+  on:outroend={() => setTop(false)}
+  style:margin-left={triggerRect.x + 'px'}
+>
   <div class="dialog-content">
     <div class="info" style:color={tab.security === true ? ('#' + GREEN_COLOR) : ''}>
       <img src={
