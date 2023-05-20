@@ -23,7 +23,7 @@
 </script>
 
 <button on:click={() => open = !open}>
-  <img src="n-res://dark/arrow.svg" class:rotated={open} alt="">
+  <img src="n-res://dark/chevron.svg" class:rotated={open} alt="">
   <slot name="button" />
 </button>
 
