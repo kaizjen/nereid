@@ -288,17 +288,17 @@ export function registerSession(ses: Session) {
     })()
 
     const ipcFunctions = {
-      "dl:resume"() {
+      "download.resume"() {
         item.resume()
       },
-      "dl:pause"() {
+      "download.pause"() {
         console.log('download paused by chrome');
         item.pause();
         BrowserWindow.getAllWindows().forEach(win => {
           win.setProgressBar(currentOffset / total, { mode: 'paused' })
         })
       },
-      "dl:cancel"() {
+      "download.cancel"() {
         console.log('download cancelled by chrome');
         item.cancel()
       }
@@ -566,7 +566,7 @@ export function registerSession(ses: Session) {
       let uid = win.tabs.find(t => (t as RealTab).webContents == wc)?.uniqueID;
       if (uid == undefined) throw(new Error("No tab in window. This should NOT happen!"));
 
-      win.chrome.webContents.send('permission-add', uid, {
+      win.chrome.webContents.send('askPermission', uid, {
         name: getValidName(permission),
         hostname,
         externalURL: details.externalURL
@@ -576,28 +576,27 @@ export function registerSession(ses: Session) {
         name: string
         hostname: string
       }
-      function handleIPC(_e: Electron.Event, channel: string, data: {
+      function handleIPC(_e: Electron.Event, _ch: string, data: {
         allow: boolean|null, tabUID: number, permission: PermissionIPC
       }) {
         if (
-          channel != 'permission-response' ||
           data.tabUID != uid ||
           data.permission.name != getValidName(permission)
         ) return;
 
-        win.chrome.webContents.off('ipc-message', handleIPC);
+        win.chrome.webContents.ipc.off('setPermission', handleIPC);
         if (data.allow != null) {
           callback(data.allow)
-          writePermission(permission == 'openExternal' ? null : data.allow)
+          writePermission((data.allow && permission == 'openExternal') ? null : data.allow)
           // openExternal isn't saved due to security reasons: a site that has this permission can open
           // ANY app that has a protocol handler
         }
-        win.chrome.webContents.send('permission-remove', uid, {
+        win.chrome.webContents.send('removePermission', uid, {
           name: getValidName(permission),
           hostname
         })
       }
-      win.chrome.webContents.on('ipc-message', handleIPC)
+      win.chrome.webContents.ipc.on('setPermission', handleIPC)
     }
 
     if (hostname in sitePermissions) {

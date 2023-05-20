@@ -47,7 +47,7 @@
     })
   }
 
-  ipcRenderer.on('permission-add', (_e, tabUID, permObject) => {
+  ipcRenderer.on('askPermission', (_e, tabUID, permObject) => {
     if (tabUID in permissionPendingMap) {
       permissionPendingMap[tabUID].push(permObject);
       
@@ -56,7 +56,7 @@
     }
     updateMap()
   })
-  ipcRenderer.on('permission-remove', (_e, tabUID, { name, hostname }) => {
+  ipcRenderer.on('removePermission', (_e, tabUID, { name, hostname }) => {
     let perms = permissionPendingMap[tabUID];
     let id = perms.find(o => o.name == name && o.hostname == hostname);
     if (id == -1) return;
@@ -66,21 +66,21 @@
   })
 
   function sendAllow() {
-    ipcRenderer.send('permission-response', {
+    ipcRenderer.send('setPermission', {
       allow: true,
       tabUID: tab.uid,
       permission: thisPerm
     })
   }
   function sendDeny() {
-    ipcRenderer.send('permission-response', {
+    ipcRenderer.send('setPermission', {
       allow: false,
       tabUID: tab.uid,
       permission: thisPerm
     })
   }
   function sendIndifferent() {
-    ipcRenderer.send('permission-response', {
+    ipcRenderer.send('setPermission', {
       allow: null,
       tabUID: tab.uid,
       permission: thisPerm

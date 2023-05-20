@@ -82,12 +82,12 @@
         <div class="dl-buttons">
           <button class="mini-btn" on:click={() => {
             if (downloadInfo.paused) {
-              ipcRenderer.send('dl:resume');
+              ipcRenderer.send('download.resume');
               downloadInfo.paused = false
               downloadInfo = downloadInfo;
               
             } else {
-              ipcRenderer.send('dl:pause');
+              ipcRenderer.send('download.pause');
               downloadInfo.paused = true
               downloadInfo = downloadInfo;
             }
@@ -96,7 +96,7 @@
             alt="{downloadInfo.paused ? _.act.RESUME : _.act.PAUSE}">
           </button>
           <button class="mini-btn" on:click={() => {
-            ipcRenderer.send('dl:cancel');
+            ipcRenderer.send('download.cancel');
             downloadsProm = downloadsAPI.get().then(allDls => allDls.slice(0, 8));
             // update the already done downloads
           }}>
