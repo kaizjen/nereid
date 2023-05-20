@@ -31,7 +31,7 @@
     display: flex;
     justify-content: center;
     align-content: center;
-    padding: 0.15rem;
+    padding: 0.325rem;
   }
   button img {
     height: 1.3rem;
