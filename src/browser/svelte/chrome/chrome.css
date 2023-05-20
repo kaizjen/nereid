@@ -37,13 +37,29 @@ span.host {
   justify-content: center;
   margin-inline: 1px;
   border-radius: 0.15rem;
-  transition: cubic-bezier(0.57, 0.2, 1, 1) 0.2s;
+  transition: var(--easing) 0.2s;
 }
 .tool:hover {
   background: var(--t-white-2);
 }
 .tool:hover:active, .tool.open {
   background: var(--t-white-4);
+  transition: 0s;
+}
+.widebutton {
+  display: flex;
+  padding: 0.5rem;
+  align-items: center;
+  border-radius: 0.15rem;
+  transition: var(--easing) 0.15s;
+  opacity: 0.85;
+  width: -webkit-fill-available;
+}
+.widebutton:hover {
+  background: var(--t-white-3);
+}
+.widebutton:hover:active {
+  background: var(--t-white-6);
   transition: 0s;
 }
 .dropdown-box {
@@ -69,7 +85,7 @@ span.host {
   border: 1px solid var(--t-white-3);
   display: block;
   position: absolute;
-  border-radius: 0.25rem;
+  border-radius: 0.2rem;
   max-width: 21.4rem;
   cursor: default;
   top: calc(100% + 0.625rem);
@@ -112,6 +128,12 @@ input.input:focus-visible {
   }
   .tool:hover:active, .tool.open {
     background: var(--t-black-2);
+  }
+  .widebutton:hover {
+    background: var(--t-black-2);
+  }
+  .widebutton:hover:active {
+    background: var(--t-black-4);
   }
   .dialog {
     background: var(--light-9);

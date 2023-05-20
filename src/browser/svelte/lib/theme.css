@@ -84,25 +84,28 @@ a:active {
 }
 
 :root {
-  --dark-1: #181b20;
-  --dark-2: #24282f;
-  --dark-3: #30353e;
-  --dark-4: #3b424d;
-  --dark-5: #47505c;
-  --dark-6: #535d6b;
-  --dark-7: #5f6a7a;
-  --dark-8: #6a7789;
-  --dark-9: #768498;
-  
-  --light-1: #737b89;
-  --light-2: #808895;
-  --light-3: #8e95a0;
-  --light-4: #9ba1ac;
-  --light-5: #a9aeb8;
-  --light-6: #b6bbc3;
+  --easing: cubic-bezier(0.47, 0, 0.75, 0.72); /* `in - sine` transition in devtools */
+
+
+  --dark-1: #1f2124;
+  --dark-2: #303236;
+  --dark-3: #3d4042;
+  --dark-4: #45484c;
+  --dark-5: #585d62;
+  --dark-6: #666b70;
+  --dark-7: #787d85;
+  --dark-8: #7f848b;
+  --dark-9: #858a93;
+
+  --light-1: #7b818b;
+  --light-2: #8b9099;
+  --light-3: #9599a1;
+  --light-4: #a6aab1;
+  --light-5: #b0b4bb;
+  --light-6: #b5b9bf;
   --light-7: #c3c8cf;
   --light-8: #d1d4da;
-  --light-9: #dee1e6;
+  --light-9: #ebecef;
 
   --gray-1: #465062;
   --gray-2: #525c6d;

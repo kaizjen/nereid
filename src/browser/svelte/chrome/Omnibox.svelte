@@ -3,8 +3,7 @@
     display: flex;
     flex-direction: column;
     width: -webkit-fill-available;
-    transition: box-shadow 0.1s;
-    border-radius: 0.2rem;
+    border-radius: 0.15rem;
     -webkit-app-region: no-drag;
     margin-inline: 0.375rem;
     overflow: hidden;
@@ -43,7 +42,7 @@
     display: flex;
     align-items: center;
     padding-inline: 0.75rem;
-    border-radius: 0.2rem;
+    border-radius: 0.15rem;
     transition: 0.25s;
     cursor: default;
     height: 100%;

@@ -3,8 +3,8 @@
     padding: 0.5rem;
     padding-inline: 0.7rem;
     min-width: 80px;
-    border-radius: 0.2rem;
-    transition: .25s;
+    border-radius: 0.15rem;
+    transition: var(--easing) 0.2s;
   }
   button.with-bg {
     background: var(--t-white-base);

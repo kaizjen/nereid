@@ -24,22 +24,6 @@
   .buttons {
     margin-top: 1rem;
   }
-  .widebutton {
-    display: flex;
-    padding: 0.5rem;
-    align-items: center;
-    border-radius: 0.25rem;
-    transition: .25s;
-    opacity: 0.85;
-    width: -webkit-fill-available;
-  }
-  .widebutton:hover {
-    background: var(--t-white-3);
-  }
-  .widebutton:hover:active {
-    background: var(--t-white-5);
-    transition: 0s;
-  }
   .widebutton > img {
     margin-right: 0.3rem;
   }
@@ -48,16 +32,6 @@
     margin-top: 1rem;
     display: flex;
     justify-content: flex-end;
-  }
-
-
-  @media (prefers-color-scheme: light) {
-    .widebutton:hover {
-      background: var(--t-black-2);
-    }
-    .widebutton:hover:active {
-      background: var(--t-black-4);
-    }
   }
 </style>
 

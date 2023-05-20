@@ -20,22 +20,6 @@
     margin-bottom: 1.25rem;
     margin-top: 0.937rem;
   }
-  button {
-    display: flex;
-    padding: 0.5rem;
-    align-items: center;
-    border-radius: 0.25rem;
-    transition: .25s;
-    opacity: 0.85;
-    width: -webkit-fill-available;
-  }
-  button:hover {
-    background: var(--t-white-3);
-  }
-  button:hover:active {
-    background: var(--t-white-6);
-    transition: 0s;
-  }
   button > img {
     margin-right: 0.5rem;
   }
@@ -49,12 +33,6 @@
     }
     .more_info {
       opacity: 1;
-    }
-    button:hover {
-      background: var(--t-black-2);
-    }
-    button:hover:active {
-      background: var(--t-black-4);
     }
   }
 </style>
@@ -139,7 +117,7 @@
         tab.security == 'internal' ? `n-res://${$colorTheme}/nereid.svg` : 
         tab.security == 'local' ? `n-res://${$colorTheme}/file.svg` :
         `n-res://${$colorTheme}/insecure.svg`
-      } alt="">
+      } alt="" style:margin-right={tab.security == 'internal' ? '0.25rem' : ''}>
       <span>{
         tab.security === true ? _.msg.SECURE : 
         tab.security == 'internal' ? _.msg.INTERNAL : 
@@ -153,10 +131,16 @@
       </div>
       <div class="separator"></div>
       {#if tab.security === true}
-        <button on:click={showCertificate}><img src="n-res://{$colorTheme}/certificate.svg" alt=""> {_.btn.CERT}</button>
+        <button class="widebutton" on:click={showCertificate}><img src="n-res://{$colorTheme}/certificate.svg" alt="">
+          {_.btn.CERT}
+        </button>
       {/if}
-      <button on:click={showCookies}><img src="n-res://{$colorTheme}/cookie.svg" alt=""> {_.btn.COOKIE}</button>
-      <button on:click={siteSettings}><img src="n-res://{$colorTheme}/sitesettings.svg" alt=""> {_.btn.SETTS}</button>
+      <button class="widebutton" on:click={showCookies}><img src="n-res://{$colorTheme}/cookie.svg" alt="">
+        {_.btn.COOKIE}
+      </button>
+      <button class="widebutton" on:click={siteSettings}><img src="n-res://{$colorTheme}/sitesettings.svg" alt="">
+        {_.btn.SETTS}
+      </button>
 
       {#if hostname in sitePermissions}
         <h3 class="perm-title">{_.PERMISSIONS(hostname)}</h3>
