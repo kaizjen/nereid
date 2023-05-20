@@ -580,8 +580,8 @@ export function registerSession(ses: Session) {
         name: string
         hostname: string
       }
-      function handleIPC(_e: Electron.Event, _ch: string, data: {
-        allow: boolean|null, tabUID: number, permission: PermissionIPC
+      function handleIPC(_e: Electron.Event, data: {
+        allow: boolean | null, tabUID: number, permission: PermissionIPC
       }) {
         if (
           data.tabUID != uid ||
