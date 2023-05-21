@@ -91,6 +91,7 @@ span.host {
   top: calc(100% + 0.625rem);
   overflow: auto;
   max-height: 31.88rem;
+  box-shadow: 0px 5px 15px -5px black;
 }
 .dialog-content {
   padding: 0.68rem;
@@ -111,6 +112,44 @@ input.input:focus-visible {
   outline: none;
   box-shadow: 0 0 0 1px var(--accent-5);
   border-color: var(--accent-5);
+}
+
+input[type="radio" i] {
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  border: 1px solid var(--gray-5);
+  margin: 0;
+  margin-right: 0.3rem;
+  transition: var(--easing) 0.2s;
+}
+input[type="radio" i]:checked {
+  border-color: var(--accent-5);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.07rem;
+  transition: 0s;
+}
+input[type="radio" i]:checked:after {
+  content: '';
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: var(--accent-5);
+  border-radius: 50%;
+  transition: var(--easing) 0.2s;
+}
+input[type="radio" i]:checked:hover:after {
+  background: var(--accent-7);
+}
+input[type="radio" i]:not(:checked):hover {
+  background: var(--t-white-3);
+}
+input[type="radio" i]:not(:checked):hover:active {
+  background: var(--t-white-5);
+  transition: 0s;
 }
 
 @media (prefers-color-scheme: light) {
@@ -146,6 +185,12 @@ input.input:focus-visible {
   input.input:focus-visible {
     box-shadow: 0 0 0 1px var(--accent-5);
     border-color: var(--accent-5);
+  }
+  input[type="radio" i]:not(:checked):hover {
+    background: var(--t-black-2);
+  }
+  input[type="radio" i]:not(:checked):hover:active {
+    background: var(--t-black-4);
   }
 }
 

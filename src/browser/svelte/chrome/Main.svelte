@@ -207,7 +207,7 @@
     }
   })
 
-  ipcRenderer.on('addTab', (_e, opts) => {
+  ipcRenderer.on('addTab', (_e, opts, chromeData = {}) => {
     console.log('added', opts);
     tabs.splice(opts.position ?? tabs.length, 0, {
       background: opts.background,
@@ -224,7 +224,8 @@
       uid: opts.uid ?? NaN,
       crashDetails: null,
       isPlaying: false,
-      isMuted: false
+      isMuted: false,
+      chromeData
     })
     tabs = tabs;
 
@@ -280,24 +281,8 @@
   })
 
 
-  let dialogsMap = {};
-
-  ipcRenderer.on('dialog-open', (_e, uID, type, arg) => {
-    console.log('openDialog', uID, type, arg);
-    dialogsMap[uID] = {
-      type, arg
-    }
-    dialogsMap = dialogsMap;
-
-    ipcRenderer.send('chrome.setTop', true) // needs to not actually capture any mouse events
-  })
-  ipcRenderer.on('dialog-close', (_e, uID) => {
-    console.log('closeDialog', uID);
-    delete dialogsMap[uID];
-    dialogsMap = dialogsMap;
-
-    ipcRenderer.send('chrome.setTop', false)
-  })
+  $: if (tabs[currentTabIndex]?.chromeData.alert) ipcRenderer.send('setTop', true)
+  else ipcRenderer.send('setTop', false)
 
   let wco = {}
   ipcRenderer.on('wco', (_e, bounds) => {
@@ -338,13 +323,13 @@
     ($colorTheme == 'light' ? "border-bottom-color: var(--purple-8);" : "border-bottom-color: var(--purple-1);")
     : ''
   }">
-  {#if tabs[currentTabIndex]?.uid in dialogsMap}
-    <PagePopup tab={tabs[currentTabIndex]} dialog={dialogsMap[tabs[currentTabIndex]?.uid]} />
+  {#if tabs[currentTabIndex]?.chromeData.alert}
+    <PagePopup tab={tabs[currentTabIndex]} dialog={tabs[currentTabIndex]?.chromeData.alert} />
   {/if}
   <Tools tab={tabs[currentTabIndex]} />
   <BookmarkBar pageURL={tabs[currentTabIndex]?.url} />
   <PermissionAccessor tab={tabs[currentTabIndex]} />
-  <FindInPage index={currentTabIndex} {tabs} />
+  <FindInPage {currentTabIndex} {tabs} />
   {#if $config?.welcomePhase <= 4}
     <div class="dropdown-box">
       <span>

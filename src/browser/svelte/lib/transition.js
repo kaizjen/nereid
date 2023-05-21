@@ -59,7 +59,6 @@ export function appear(node, { delay = 0, duration = 400, easing: easing$1 = eas
   };
 }
 
-
 export function modalPageAnimations(node, { animationControls, duration = 200, easing = 'ease-out' }) {
   let firstHeight;
   let lastHeight;
@@ -108,4 +107,39 @@ export function modalPageAnimations(node, { animationControls, duration = 200, e
       lastWidth = null;
     }, duration)
   }
+}
+
+export function widen(node, { delay = 0, duration = 800, easing: easing$1 = easing.cubicOut, opacity = 0, width = 0 } = {}) {
+  const style = getComputedStyle(node);
+
+  const oppositeWidth = 1 - width
+
+  let finalWidth = node.getBoundingClientRect().width
+    - parseFloat(style.borderLeft) - parseFloat(style.borderRight)
+  ;
+
+  if (duration != 0) {
+    // If duration is 0, do nothing
+    node.style.padding = '0';
+    node.style.transition = '0s';
+    node.style.opacity = opacity + '';
+  }
+
+  return {
+    delay,
+    duration: duration / 2,
+    easing: easing$1,
+    css: (_, u) => `
+      width: ${finalWidth - ((finalWidth * oppositeWidth) * u)}px;
+    `,
+    tick(t) {
+      if (t != 1) return;
+
+      node.style.padding = '';
+      setTimeout(() => {
+        node.style.transition = '';
+        node.style.opacity = '';
+      }, duration)
+    }
+  };
 }

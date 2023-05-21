@@ -19,24 +19,29 @@ import { commands } from "./commands";
 
 const URLParse = $.URLParse
 
-export function createDialog(wc: WebContents, type: string, arg: any): Promise<string | null | boolean> {
+export function createDialog(tab: RealTab, type: string, arg: any): Promise<string | null | boolean> {
   return new Promise(resolve => {
-    let win = BrowserWindow.fromWebContents(wc) as TabWindow;
+    let win = BrowserWindow.fromWebContents(tab.webContents);
     if (!win || !isTabWindow(win)) { resolve(null); return; }
 
-    let { uniqueID: id } = win.tabs.find(tab => (tab as RealTab).webContents == wc);
+    // (item as RealTab) is fine here because we're not doing anything to the webContents
+    let { uniqueID: id } = win.tabs.find(item => (item as RealTab).webContents == tab.webContents);
     if (id == -1) { resolve(null); return; }
 
-    function handleResponse(_e, channel: string, tabUID: number, response: string | null | boolean) {
-      if (channel != 'dialog-response' || tabUID != id) return;
+    function handleResponse(_e: Electron.Event, tabUID: number, response: string | null | boolean) {
+      if (tabUID != id) return;
 
       resolve(response);
-      win.chrome.webContents.off('ipc-message', handleResponse)
-      win.chrome.webContents.send('dialog-close', id);
+      ipcMain.off('alertResponse', handleResponse)
+
+      delete tab.chromeData.alert;
+      // The tab might've been moved at this point, so we don't use `win`
+      tabManager.updateChromeData(tab.owner, { tab })
     }
 
-    win.chrome.webContents.send('dialog-open', id, type, arg);
-    win.chrome.webContents.on('ipc-message', handleResponse)
+    tab.chromeData.alert = { type, arg };
+    tabManager.updateChromeData(win, { tab })
+    ipcMain.on('alertResponse', handleResponse)
   })
 }
 
@@ -186,7 +191,8 @@ export function init() {
     })
   })
   onCurrentTab('currentTab.stopFind', (wc, _w, _e, clearSelection) => {
-    wc.stopFindInPage(clearSelection ? 'clearSelection' : 'keepSelection')
+    wc.stopFindInPage(clearSelection ? 'clearSelection' : 'keepSelection');
+    wc.focus();
   })
 
 
@@ -223,6 +229,15 @@ export function init() {
       }
       win.setTopBrowserView(win.currentTab)
     }
+  })
+  onWindow('chrome.saveData', (_, _e, tabUID: number, data: Record<string, any>, overwrite: boolean) => {
+    const tab = tabManager.getTabByUID(tabUID);
+    if (!tab) throw "No tab in window";
+
+    if (overwrite) {
+      Object.assign(tab.chromeData, data);
+
+    } else tab.chromeData = data;
   })
   onWindow('chrome.movePanes', (win, _e, x: number) => {
     if (!win.currentPaneView) return console.warn("Tried to move panes without a pane view.");
@@ -513,14 +528,14 @@ export function init() {
 
   onTabSync('prompt', async (e, msg: string, defaultValue: string) => {
     e.returnValue = await createDialog(
-      e.sender,
+      tabManager.getTabByWebContents(e.sender),
       'prompt',
       { msg, defaultValue }
     );
   })
   onTabSync('alert', async (e, msg: string) => {
     console.log('al:', await createDialog(
-      e.sender,
+      tabManager.getTabByWebContents(e.sender),
       'alert',
       { msg }
     ))
@@ -528,7 +543,7 @@ export function init() {
   })
   onTabSync('confirm', async (e, msg: string) => {
     e.returnValue = await createDialog(
-      e.sender,
+      tabManager.getTabByWebContents(e.sender),
       'confirm',
       { msg }
     );

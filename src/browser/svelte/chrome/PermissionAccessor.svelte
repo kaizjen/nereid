@@ -34,36 +34,17 @@
   }
 
   export let tab;
-  let permissionPendingMap = {};
   let currentTabPermissions = [];
-  $: currentTabPermissions = permissionPendingMap[tab?.uid] || []
+  $: currentTabPermissions = tab?.chromeData.permissions || []
   let thisPerm;
   $: thisPerm = currentTabPermissions[0]
 
-  function updateMap() {
-    permissionPendingMap = permissionPendingMap;
+  $: {
+    currentTabPermissions;
     requestAnimationFrame(() => {
       ipcRenderer.send('chrome.setHeight', document.body.getBoundingClientRect().height)
     })
   }
-
-  ipcRenderer.on('askPermission', (_e, tabUID, permObject) => {
-    if (tabUID in permissionPendingMap) {
-      permissionPendingMap[tabUID].push(permObject);
-      
-    } else {
-      permissionPendingMap[tabUID] = [ permObject ]
-    }
-    updateMap()
-  })
-  ipcRenderer.on('removePermission', (_e, tabUID, { name, hostname }) => {
-    let perms = permissionPendingMap[tabUID];
-    let id = perms.find(o => o.name == name && o.hostname == hostname);
-    if (id == -1) return;
-
-    perms.splice(id, 1);
-    updateMap()
-  })
 
   function sendAllow() {
     ipcRenderer.send('setPermission', {

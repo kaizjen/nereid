@@ -125,6 +125,12 @@ type TabProperties = {
   currentHistoryIndex?: number
   /** The pane view that this tab is in */
   paneView?: PaneView
+  /**
+   * Tab's data that is used by the chrome, like the find in page query, or the dialogs.
+   * 
+   * **Only serializable objects must be passed through here!**
+   */
+  chromeData?: Record<string, any>
 }
 /**
  * Upon starting Nereid, instead of loading all tabs at once,

@@ -183,6 +183,15 @@ ui:
       notReady: The page was loaded before the adblocker, so not all ads and trackers
         were blocked
       button-reload: Reload the page
+  popupBlocked:
+    info: Pop-up blocked
+    dialog:
+      title: "Pop-ups were blocked on this page:"
+      openThis: Open this pop-up
+      option-alwaysAllow: Always allow pop-ups on ${hostname}
+      option-block: Continue blocking
+      option-silentlyBlock: Block silently
+      manage: Manage in settings
   zoom:
     altMessage: Zoom is ${zoom}%
     infoMessage: "Zoom: ${zoom}%"

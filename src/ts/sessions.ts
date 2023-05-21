@@ -9,6 +9,7 @@ import { getAllTabWindows, isTabWindow } from './windows';
 import { config, downloads, userdataDirectory, control } from "./userdata";
 import fetch from "electron-fetch";
 import { matchRequest } from "./adblocker";
+import { getTabByWebContents, updateChromeData } from "./tabs";
 
 const URLParse = $.URLParse;
 
@@ -192,6 +193,78 @@ async function getProtocol(req: Electron.ProtocolRequest, respond: (response: El
   } catch (err) {
     respond({ data: err + '', error: -2 })
   }
+}
+
+
+function checkPermissionAgainst(permission: string, obj: Permissions | Partial<Permissions>, mediaType: string): boolean | null | undefined {
+  switch (permission) {
+    case 'notifications': {
+      return obj.notifications
+    }
+    case 'geolocation': {
+      return obj.geolocation
+    }
+    case 'media': {
+      if (mediaType == 'audio') {
+        return obj['media.audio']
+
+      } else if (mediaType == 'video') {
+        return obj['media.video']
+
+      } else return false
+    }
+    case 'mediaKeySystem': {
+      return obj.DRM
+    }
+    case 'midi': {
+      return obj.midi
+    }
+    case 'pointerLock': {
+      return obj.pointerLock
+    }
+    case 'openExternal': {
+      return obj.openExternal
+    }
+    case 'display-capture': {
+      return obj.displayCapture
+    }
+    case 'idle-detection': {
+      return obj.idleDetection
+    }
+    case 'popups': {
+      return obj.popups
+    }
+    case 'clipboard-sanitized-write': {
+      return !control.options.disallow_clipboard_write?.value
+    }
+
+
+    default: return false // unknown permission
+  }
+}
+
+export function checkPermission(
+  _: unknown, permission: string, originalOrigin: string,
+  details: Electron.PermissionCheckHandlerHandlerDetails, allowNull?: boolean
+) {
+  const { privacy } = config.get();
+  let { defaultPermissions, sitePermissions, denyCrossOriginPermissions } = privacy;
+  let { origin, hostname } = URLParse(originalOrigin)
+
+  if (denyCrossOriginPermissions && !details.isMainFrame && (origin != details.embeddingOrigin)) return false;
+
+  if (hostname in sitePermissions) {
+    let check = checkPermissionAgainst(permission, sitePermissions[hostname], details.mediaType);
+    switch (check) {
+      case true: return true
+      case false: return false
+      case undefined: // site is going to ask us anyway
+    }
+  }
+
+  let defaultCheck = checkPermissionAgainst(permission, defaultPermissions, details.mediaType)
+  // there is no way to return 'prompt' or 'default' so we just say no usually
+  return defaultCheck == undefined ? (allowNull ? null : fakeAskValueForPermCheck) : defaultCheck
 }
 
 export function registerSession(ses: Session) {
@@ -400,70 +473,7 @@ export function registerSession(ses: Session) {
     })
   })
 
-  ses.setPermissionCheckHandler((_wc, permission, originalOrigin, details) => {
-    const { privacy } = config.get();
-    let { defaultPermissions, sitePermissions, denyCrossOriginPermissions } = privacy;
-    let { origin, hostname } = URLParse(originalOrigin)
-
-    if (denyCrossOriginPermissions && !details.isMainFrame && (origin != details.embeddingOrigin)) return false;
-
-    function checkPermission(obj: Permissions | Partial<Permissions>): boolean | null | undefined {
-      switch (permission) {
-        case 'notifications': {
-          return obj.notifications
-        }
-        case 'geolocation': {
-          return obj.geolocation
-        }
-        case 'media': {
-          if (details.mediaType == 'audio') {
-            return obj['media.audio']
-
-          } else if (details.mediaType == 'video') {
-            return obj['media.video']
-
-          } else return false
-        }
-        case 'mediaKeySystem': {
-          return obj.DRM
-        }
-        case 'midi': {
-          return obj.midi
-        }
-        case 'pointerLock': {
-          return obj.pointerLock
-        }
-        case 'openExternal': {
-          return obj.openExternal
-        }
-        case 'display-capture': {
-          return obj.displayCapture
-        }
-        case 'idle-detection': {
-          return obj.idleDetection
-        }
-        case 'clipboard-sanitized-write': {
-          return !control.options.disallow_clipboard_write?.value
-        }
-
-
-        default: return false // unknown permission
-      }
-    }
-
-    if (hostname in sitePermissions) {
-      let check = checkPermission(sitePermissions[hostname]);
-      switch (check) {
-        case true: return true
-        case false: return false
-        case undefined: // site is going to ask us anyway
-      }
-    }
-
-    let defaultCheck = checkPermission(defaultPermissions)
-    // there is no way to return 'prompt' or 'default' so we just say no usually
-    return defaultCheck == undefined ? fakeAskValueForPermCheck : defaultCheck
-  })
+  ses.setPermissionCheckHandler(checkPermission)
 
   ses.setPermissionRequestHandler((wc, permission, callback, details) => {
     console.log('requested permission %o with details %o', permission, details);
@@ -570,11 +580,19 @@ export function registerSession(ses: Session) {
       let uid = win.tabs.find(t => (t as RealTab).webContents == wc)?.uniqueID;
       if (uid == undefined) throw(new Error("No tab in window. This should NOT happen!"));
 
-      win.chrome.webContents.send('askPermission', uid, {
+      const tab = getTabByWebContents(wc);
+      const permissionObject = {
         name: getValidName(permission),
         hostname,
-        externalURL: details.externalURL
-      })
+        externalURL: details.externalURL,
+      }
+      if (tab.chromeData.permissions) {
+        tab.chromeData.permissions.push(permissionObject)
+
+      } else {
+        tab.chromeData.permissions = [permissionObject]
+      }
+      updateChromeData(win, { tab })
 
       type PermissionIPC = {
         name: string
@@ -585,22 +603,28 @@ export function registerSession(ses: Session) {
       }) {
         if (
           data.tabUID != uid ||
-          data.permission.name != getValidName(permission)
+          data.permission.name != permissionObject.name ||
+          data.permission.hostname != hostname
         ) return;
 
-        win.chrome.webContents.ipc.off('setPermission', handleIPC);
+        ipcMain.off('setPermission', handleIPC);
+        // Electron bug: when you don't call the callback, it will query that permission over and over again until
+        // there's an answer
         if (data.allow != null) {
           callback(data.allow)
           writePermission((data.allow && permission == 'openExternal') ? null : data.allow)
           // openExternal isn't saved due to security reasons: a site that has this permission can open
           // ANY app that has a protocol handler
         }
-        win.chrome.webContents.send('removePermission', uid, {
-          name: getValidName(permission),
-          hostname
-        })
+        tab.chromeData.permissions.splice(
+          tab.chromeData.permissions.findIndex(perm => $.propsEqual(perm, permissionObject)), 1
+        );
+        if (tab.chromeData.permissions.length == 0) {
+          delete tab.chromeData.permissions;
+        }
+        updateChromeData(tab.owner, { tab });
       }
-      win.chrome.webContents.ipc.on('setPermission', handleIPC)
+      ipcMain.on('setPermission', handleIPC)
     }
 
     if (hostname in sitePermissions) {

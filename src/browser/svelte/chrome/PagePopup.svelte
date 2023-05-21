@@ -79,15 +79,17 @@
 
 
   function sendYes() {
+    ipcRenderer.send('chrome.setTop', false)
     console.log('sent yes');
-    ipcRenderer.send('dialog-response', tab.uid, dialog.type == 'prompt' ?
+    ipcRenderer.send('alertResponse', tab.uid, dialog.type == 'prompt' ?
       value :
       true
     )
   }
   function sendNo() {
+    ipcRenderer.send('chrome.setTop', false)
     console.log('sent no');
-    ipcRenderer.send('dialog-response', tab.uid, dialog.type == 'prompt' ?
+    ipcRenderer.send('alertResponse', tab.uid, dialog.type == 'prompt' ?
       null :
       false
     )

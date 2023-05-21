@@ -1,14 +1,14 @@
 // Tabs' creation, removal and whatever else
 
 import type { TabWindow, TabOptions, Tab, RealTab, PaneView } from "./types";
-import { BrowserView, BrowserViewConstructorOptions, BrowserWindow, dialog, nativeTheme, session, WebContents, WebPreferences } from "electron";
+import { BrowserView, BrowserViewConstructorOptions, BrowserWindow, dialog, ipcMain, nativeTheme, session, WebContents, WebPreferences } from "electron";
 import fetch from "electron-fetch";
 import * as userData from './userdata'
-import { DEFAULT_PARTITION, NO_CACHE_PARTITION, PRIVATE_PARTITION, validateDomainByURL } from './sessions'
+import { DEFAULT_PARTITION, NO_CACHE_PARTITION, PRIVATE_PARTITION, checkPermission, validateDomainByURL } from './sessions'
 import { handleNetError } from './net-error-analyzer'
 import $ from './common'
 import { showContextMenu } from "./menu";
-import { getAllTabWindows, newSingleTabWindow, newTabWindow, setCurrentTabBounds } from "./windows";
+import { getAllTabWindows, isTabWindow, newSingleTabWindow, newTabWindow, setCurrentTabBounds } from "./windows";
 import { t } from "./i18n";
 import { addTabToGroup, destroyEmptyGroups, getTabGroupByID, getTabGroupByTab } from "./tabgroups";
 import { EventEmitter } from "events";
@@ -69,6 +69,12 @@ type TabEvents = {
 }
 
 
+export const blockedPopups: Record<number, {
+  postBody: Electron.PostBody, url: string, features: string,
+  frameName: string, disposition: string, tab: RealTab
+}> = {};
+let blockedPopupsNumber = 0;
+
 export const tabEvents = new EventEmitter() as TypedEmitter<TabEvents>;
 /** Returns `true` if the event wasn't prevented */
 function emitPreventable<T extends keyof TabEvents>(
@@ -85,6 +91,21 @@ function emitPreventable<T extends keyof TabEvents>(
 
 export function getTabByUID(uid: number) {
   return tabUniqueIDs[uid];
+}
+export function getTabByWebContents(wc: WebContents): RealTab {
+  const win = BrowserWindow.fromWebContents(wc);
+  if (win && isTabWindow(win)) {
+    const found = win.tabs.find(tab => (tab as RealTab).webContents == wc);
+    if (!found) throw new Error("The WebContents passed are not of any tab in the window.");
+    return asRealTab(found);
+  }
+  for (const uid in tabUniqueIDs) {
+    const tab = tabUniqueIDs[uid];
+    if (!tab.isGhost) {
+      if (asRealTab(tab).webContents == wc) return asRealTab(tab);
+    }
+  }
+  throw new Error("The WebContents passed don't belong to a tab or were destroyed.");
 }
 export function asRealTab(tab: Tab) {
   // This function isn't used when we're checking all tabs (like `win.tabs.find(tab => (tab as RealTab).webContents == wc)`)
@@ -119,6 +140,17 @@ export function updateSavedTabsImmediately() {
         }
       ))
     })
+  })
+}
+
+function deleteBlockedPopupsOf(tab: Tab) {
+  delayExecution(() => {
+    for (const popupID in blockedPopups) {
+      const { tab: popupTab } = blockedPopups[popupID];
+      if (popupTab == tab) {
+        delete blockedPopups[popupID]
+      }
+    }
   })
 }
 
@@ -345,6 +377,7 @@ export function createBrowserView(
   tab.isGhost = false;
   tab.history = [];
   tab.currentHistoryIndex = -1;
+  tab.chromeData = {};
 
   tabEvents.emit('browserViewCreated', { browserView: tab });
 
@@ -362,6 +395,8 @@ export function destroyWebContents(bv: RealTab) {
     }
 
     if (!bv.private) return;
+
+    deleteBlockedPopupsOf(bv)
 
     for (const uniqueID in tabUniqueIDs) {
       const tab = tabUniqueIDs[uniqueID];
@@ -409,7 +444,7 @@ export function addTab(win: TabWindow, tab: Tab, opts: TabOptions, addOptions = 
   } else {
     win.tabs.push(tab);
   }
-  win.chrome.webContents.send('addTab', opts)
+  win.chrome.webContents.send('addTab', opts, tab.chromeData)
 
   win.tabGroups.forEach(g => {
     if (win.tabs.indexOf(tab) <= g.startIndex) {
@@ -507,7 +542,8 @@ export function updateTabState(win: TabWindow, { tab, index }: { tab?: Tab, inde
         url: tab.url,
         private: tab.private,
         uid: tab.uniqueID,
-        favicon: tab.faviconDataURL || tab.faviconURL
+        favicon: tab.faviconDataURL || tab.faviconURL,
+        chromeData: tab.chromeData
       }
     })
 
@@ -526,10 +562,21 @@ export function updateTabState(win: TabWindow, { tab, index }: { tab?: Tab, inde
         isMuted: asRealTab(tab).webContents.isAudioMuted(),
         private: tab.private,
         uid: tab.uniqueID,
-        favicon: tab.faviconDataURL || tab.faviconURL
+        favicon: tab.faviconDataURL || tab.faviconURL,
+        chromeData: tab.chromeData
       }
     })
   }
+}
+
+export function updateChromeData(win: TabWindow, { tab, index }: { tab?: Tab, index?: number }) {
+  if (tab) {
+    index = win.tabs.indexOf(tab);
+    if (index == -1) throw (new Error(`tabManager.updateTabState: no tab found in window`))
+  }
+  tab = tab || win.tabs[index];
+
+  win.chrome.webContents.send('tabUpdate', { index, state: { chromeData: tab.chromeData } });
 }
 
 export function attach(win: TabWindow, tab: RealTab) {
@@ -605,19 +652,58 @@ export function attach(win: TabWindow, tab: RealTab) {
     return { action: 'allow' }
   })
   // Undocumented listener for when a new WebContents are created
+  // `newWebContents` may be null because we call this listener ourselves as well
   tab.webContents.on('-add-new-contents' as any, async (
-    _e: Electron.Event, newWebContents: Electron.WebContents, disposition: string,
+    _e: Electron.Event, newWebContents: Electron.WebContents | null, disposition: string,
     userGesture: boolean, _left: number, _top: number, _width: number, _height: number, url: string, frameName: string,
-    _referrer: Electron.Referrer, features: string
+    _referrer: Electron.Referrer, features: string, postBody: Electron.PostBody
   ) => {
     console.log('window.open:', { userGesture, disposition, url, features, frameName });
+
+    const { origin, hostname } = URLParse(tab.webContents.getURL());
 
     if (!userGesture) {
       // We only get the `userGesture` parameter here, so we have to resort
       // to closing the webContents.
-      // TODO: implement a permission-based system
-      newWebContents.close();
-      return console.log("Refused to open a window without user interaction.");
+      const permissionResult = checkPermission(
+        null, 'popups', origin,
+        { isMainFrame: _referrer.url == tab.webContents.getURL() }, true
+      )
+      if (permissionResult == undefined) {
+        const { privacy } = userData.config.get();
+
+        if (hostname in privacy.sitePermissions) {
+          privacy.sitePermissions[hostname].popups = null;
+        } else {
+          privacy.sitePermissions[hostname] = { popups: null }
+        }
+
+        blockedPopups[blockedPopupsNumber] = {
+          url, features, postBody,
+          disposition, frameName, tab
+        }
+        const dataObject = {
+          uid: tab.uniqueID, origin, url,
+          blockedPopupID: blockedPopupsNumber
+        }
+        if (tab.chromeData.blockedPopups) {
+          tab.chromeData.blockedPopups.push(dataObject)
+
+        } else {
+          tab.chromeData.blockedPopups = [dataObject]
+        }
+        blockedPopupsNumber++;
+
+        updateChromeData(win, { tab });
+
+        newWebContents?.close();
+        return console.log("Refused to open a window without user interaction.");
+
+      } else if (permissionResult == false) {
+        newWebContents?.close();
+        return console.log("Refused to open a window because it was blocked.");
+      }
+      // Else, proceed with opening the window
     }
 
     const { windowOptions, webPreferences } = $.parseWindowOpenFeatures(features);
@@ -628,7 +714,7 @@ export function attach(win: TabWindow, tab: RealTab) {
     switch (disposition) {
       case 'foreground-tab':
       case 'default': {
-        if (frameName && URLParse(tab.webContents.getURL()).origin == URLParse(url).origin) {
+        if (frameName && origin == URLParse(url).origin) {
           const targetTab = win.tabs.find(t => t.targetFrameName == frameName);
 
           function doesURLMatch() {
@@ -952,6 +1038,8 @@ export function attach(win: TabWindow, tab: RealTab) {
         removeTab(win, { tab });
       })
 
+      deleteBlockedPopupsOf(tab)
+
     } catch (error) {
       console.log(`Couldn't close the tab: ${error + ''}`);
     }
@@ -1134,7 +1222,8 @@ export function createTab(window: TabWindow, options: TabOptions, createBrowserV
       isOpenedAtStart: options.isOpenedAtStart,
       owner: window,
       history: [],
-      currentHistoryIndex: -1
+      currentHistoryIndex: -1,
+      chromeData: {}
     }
     tabUniqueIDs[options.uid] = tab;
 
@@ -1360,3 +1449,23 @@ export function openUniqueNereidTab(win: TabWindow, page: string, nextToCurrentT
 let backupIntervalFlag = options.backup_tabs_interval;
 
 setInterval(updateSavedTabs, backupIntervalFlag?.type == 'num' ? backupIntervalFlag.value : 30000)
+
+ipcMain.on('reopenBlockedWindow', (e, blockedPopupID: number) => {
+  if (!(blockedPopupID in blockedPopups)) return console.warn("The chrome tried to open a blocked window that doesn't exist.")
+
+  const popup = blockedPopups[blockedPopupID];
+  const tab = popup.tab;
+
+  tab.webContents.emit('-add-new-contents',
+    e, undefined, popup.disposition,
+    true, 0, 0, 0, 0, popup.url, popup.frameName,
+    { url: '', policy: '' }, popup.features, popup.postBody
+  )
+
+  delete blockedPopups[blockedPopupID];
+
+  const chromeArray = tab.chromeData.blockedPopups;
+  chromeArray.splice(chromeArray.findIndex(o => o.blockedPopupID == blockedPopupID), 1);
+
+  updateChromeData(tab.owner, { tab })
+})

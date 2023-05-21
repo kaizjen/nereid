@@ -91,7 +91,7 @@
 <script>
   import { getContext } from "svelte";
 
-  export let index;
+  export let currentTabIndex;
   export let tabs;
 
   const { ipcRenderer } = window.nereid;
@@ -105,69 +105,64 @@
     DONE: t('common.done'),
     LOADING: t('common.loading')
   }
-  let tabsWithSearchActive = [];
-  let values = {};
+  $: chromeData = tabs[currentTabIndex]?.chromeData || {};
+  $: findInPage = chromeData.findInPage || {};
   let caseSensitive = false;
 
   let inputRef;
 
   let shouldStop = false;
 
-  let totalMatchesPerTab = {};
-  let matchIndexes = {};
-
   function stop(clear = false) {
     ipcRenderer.send('currentTab.stopFind', clear)
     shouldStop = true;
   }
 
-  ipcRenderer.on('toggleFindInPage', () => {
-    if (tabsWithSearchActive.includes(index)) {
-      tabsWithSearchActive.splice(tabsWithSearchActive.indexOf(index), 1);
-      
+  function toggle() {
+    if (findInPage?.active) {
+      chromeData.findInPage.active = false;
+
     } else {
-      tabsWithSearchActive.push(index);
+      if (chromeData.findInPage) {
+        chromeData.findInPage.active = true
+
+      } else {
+        chromeData.findInPage = { active: true, value: '' }
+      }
       requestAnimationFrame(() => {
         inputRef.focus();
+        inputRef.select();
       })
     }
-    tabsWithSearchActive = tabsWithSearchActive;
-  })
+    ipcRenderer.send('chrome.saveData', tabs[currentTabIndex].uid, { findInPage })
+  }
+
+  ipcRenderer.on('toggleFindInPage', toggle)
 
   document.addEventListener('keyup', e => {
-    if (e.key == 'Escape' && tabsWithSearchActive.includes(index)) {
-      tabsWithSearchActive.splice(tabsWithSearchActive.indexOf(index), 1);
-      tabsWithSearchActive = tabsWithSearchActive;
+    if (e.key == 'Escape' && findInPage?.active) {
+      toggle()
     }
   })
 
-  $: {
-    tabsWithSearchActive.forEach((i, index2) => {
-      if (!tabs[i]) {
-        tabsWithSearchActive.splice(index2, 1)
-        delete values[i];
-        delete totalMatchesPerTab[i];
-        delete matchIndexes[i];
-      }
-    })
-  }
-
-  $: if (values[index] == '') {
+  $: if (findInPage?.value == '') {
     stop(true)
   }
 
   ipcRenderer.on('found', (_e, idx, { activeMatchOrdinal, matches }) => {
-    if (idx != index) return;
+    if (idx != currentTabIndex) return;
 
     if (shouldStop) stop()
     // sometimes, user says stop before the find request completes
 
-    matchIndexes[index] = activeMatchOrdinal;
-    totalMatchesPerTab[index] = matches;
+    findInPage.ordinal = activeMatchOrdinal;
+    findInPage.total = matches;
+
+    ipcRenderer.send('chrome.saveData', tabs[currentTabIndex].uid, { findInPage })
   })
 
   $: {
-    if (!tabsWithSearchActive.includes(index)) {
+    if (!findInPage?.active) {
       stop()
     }
     requestAnimationFrame(() => {
@@ -176,22 +171,23 @@
   }
 
   function startSearch() {
-    if (!values[index]) return;
+    if (!findInPage.value) return;
 
     shouldStop = false;
-    ipcRenderer.send('currentTab.find', values[index], { newSearch: true, caseSensitive })
+    ipcRenderer.send('currentTab.find', findInPage.value, { newSearch: true, caseSensitive })
   }
   function findNextF(forward) {
     return () => {
-      if (!values[index]) return;
-      ipcRenderer.send('currentTab.find', values[index], { forward, newSearch: false, caseSensitive })
+      if (!findInPage.value) return;
+
+      ipcRenderer.send('currentTab.find', findInPage.value, { forward, newSearch: false, caseSensitive })
     }
   }
 
   $: {caseSensitive; startSearch()}
 </script>
 
-{#if tabsWithSearchActive.includes(index)}
+{#if findInPage?.active}
   <div class="dropdown-box">
     <button
       class="case-toggle"
@@ -203,12 +199,12 @@
     </button>
     <input
       class="bar" type="text"
-      bind:value={values[index]} bind:this={inputRef}
+      bind:value={findInPage.value} bind:this={inputRef}
       on:input={startSearch} placeholder={_.PLACEHOLDER}
     >
-    <span class="results" class:null={totalMatchesPerTab[index] == 0}>
-      {#if values[index]}
-        {matchIndexes[index]} / {totalMatchesPerTab[index]}
+    <span class="results" class:null={findInPage.total == 0}>
+      {#if findInPage.value}
+        {findInPage.ordinal} / {findInPage.total}
       {/if}
     </span>
     <button class="tool" on:click={findNextF(false)}>
@@ -217,10 +213,7 @@
     <button class="tool" on:click={findNextF(true)}>
       <img src="n-res://{$colorTheme}/arrow.svg" class="down" alt="{_.NEXT}">
     </button>
-    <button class="tool" style="margin-left: 10px" on:click={() => {
-      tabsWithSearchActive.splice(tabsWithSearchActive.indexOf(index), 1);
-      tabsWithSearchActive = tabsWithSearchActive;
-    }}>
+    <button class="tool" style="margin-left: 10px" on:click={toggle}>
       <img src="n-res://{$colorTheme}/cross.svg" alt="{_.DONE}">
     </button>
   </div>

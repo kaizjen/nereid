@@ -38,6 +38,11 @@
     background: none !important;
     box-shadow: none !important;
   }
+  .state-text {
+    white-space: nowrap;
+    overflow: hidden;
+    margin-right: 0.5rem;
+  }
   .tab-state {
     display: flex;
     align-items: center;
@@ -136,7 +141,7 @@
 </style>
 
 <script>
-  export let tab = {};
+  export let tab;
   const { ipcRenderer } = window.nereid
   import Hints from "./Hints.svelte"
   import Security from "./popups/Security.svelte"
@@ -144,6 +149,8 @@
   import ZoomPopup from "./popups/Zoom.svelte";
   import BookmarksModal from "./popups/BookmarksModal.svelte";
   import AdBlocker from "./popups/AdBlocker.svelte";
+  import BlockedPopup from "./popups/BlockedPopup.svelte";
+  import { widen } from "//lib/transition.js";
 
   export let disabled = false;
 
@@ -157,6 +164,7 @@
     ADBLOCK_GOOD: t('ui.adblocker.status-good'),
     ADBLOCK_BAD: t('ui.adblocker.status-bad'),
     ADBLOCK_NEUTRAL: t('ui.adblocker.status-neutral'),
+    POPUP_BLOCKED: t('ui.popupBlocked.info'),
   }
 
   const URLParse = getContext('URLParse')
@@ -194,8 +202,9 @@
   let zoomDialog = false;
   let bookmarkDialog = false;
   let adblockerDialog = false;
+  let blockedPopupDialog = false;
   // ALL DIALOGS
-  $: anyDialog = securityDialog || zoomDialog || bookmarkDialog || adblockerDialog;
+  $: anyDialog = securityDialog || zoomDialog || bookmarkDialog || adblockerDialog || blockedPopupDialog;
 
   function recieveKey({ key, code, ctrlKey }) {
     if (key.length > 1) return;
@@ -391,6 +400,24 @@
       selectionText: inputRef?.value.slice(inputRef?.selectionStart, inputRef?.selectionEnd)
     })
   }
+
+  let _recentlyAddedBlockedPopup = false;
+  $: if (tab?.chromeData.blockedPopups) {
+    if (
+      (tab?.chromeData._previousBlockedPopupsLength || 0) == 0 &&
+      tab.chromeData.blockedPopups.length == 1
+    ) {
+      _recentlyAddedBlockedPopup = true;
+      setTimeout(() => {
+        _recentlyAddedBlockedPopup = false;
+      }, 2000);
+    }
+    if (tab.chromeData.blockedPopups.length != tab.chromeData._previousBlockedPopupsLength) {
+      // If the count changed, update it
+      tab.chromeData._previousBlockedPopupsLength = tab.chromeData.blockedPopups.length;
+      ipcRenderer.send('chrome.saveData', tab.uid, tab.chromeData)
+    }
+  }
 </script>
 <svelte:window on:keydown={e => {
   if (e.key != "Escape") return;
@@ -402,6 +429,7 @@
   zoomDialog = false;
   bookmarkDialog = false;
   adblockerDialog = false;
+  blockedPopupDialog = false;
 }} />
 <div class="omnibox"
   class:disabled
@@ -421,9 +449,9 @@
       <button on:click={({ currentTarget }) => securityDialog = currentTarget.getBoundingClientRect()} class="tab-state sec" class:open={securityDialog}>
         <img alt={_.SECURITY}
           src={
-            tab.security === true ? `n-res://${$colorTheme}/secure.svg` : 
-            tab.security == 'internal' ? `n-res://${$colorTheme}/nereid-monochrome.svg` : 
-            tab.security == 'local' ? `n-res://${$colorTheme}/file.svg` :
+            tab?.security === true ? `n-res://${$colorTheme}/secure.svg` : 
+            tab?.security == 'internal' ? `n-res://${$colorTheme}/nereid-monochrome.svg` : 
+            tab?.security == 'local' ? `n-res://${$colorTheme}/file.svg` :
             `n-res://${$colorTheme}/insecure.svg`
           }
         >
@@ -461,6 +489,24 @@
         }}
         on:mouseup={handleMouseUp}
       >
+    {/if}
+
+    {#if tab?.chromeData.blockedPopups && tab?.chromeData.blockedPopups.length > 0}
+      <button
+        class="tab-state"
+        on:click={({ currentTarget }) => blockedPopupDialog = currentTarget.getBoundingClientRect()}
+        class:open={blockedPopupDialog}
+        in:widen={{ duration: _recentlyAddedBlockedPopup ? 700 : 0 }}
+      >
+        {#if _recentlyAddedBlockedPopup}
+          <span out:widen={{ opacity: 1 }} class="state-text">{_.POPUP_BLOCKED}</span>
+        {/if}
+        <img
+          src="n-res://{$colorTheme}/noopen.svg"
+          alt={_.POPUP_BLOCKED}
+          title={_.POPUP_BLOCKED}
+        >
+      </button>
     {/if}
     {#if $globalZoom != $config?.ui.defaultZoomFactor}
       <button
@@ -519,5 +565,8 @@
   {/if}
   {#if adblockerDialog}
     <AdBlocker bind:open={adblockerDialog} hostname={url.hostname} protocol={url.protocol} triggerRect={adblockerDialog} />
+  {/if}
+  {#if blockedPopupDialog}
+    <BlockedPopup bind:open={blockedPopupDialog} hostname={url.hostname} bind:popups={tab.chromeData.blockedPopups} triggerRect={blockedPopupDialog} />
   {/if}
 </div>
