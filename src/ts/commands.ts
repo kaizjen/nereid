@@ -297,7 +297,7 @@ registerCommand({
 
     if (config.get().behaviour.keyboardOpensTabNearby) {
       createTab(win, {
-        url: $.newTabUrl,
+        url:'nereid://private',
         position: win.tabs.indexOf(win.currentTab) + 1,
         private: true
       })
@@ -307,13 +307,13 @@ registerCommand({
       if (tabGroup && config.get().ui.onlyShowCurrentTabGroup) {
         // In this case, open the tab at the end of the tab group
         createTab(win, {
-          url: $.newTabUrl,
+          url: 'nereid://private',
           position: tabGroup.endIndex,
           groupID: tabGroup.id,
           private: true
         })
 
-      } else createTab(win, { url: $.newTabUrl, private: true });
+      } else createTab(win, { url: 'nereid://private', private: true });
     }
     focusChrome(win)
   }
