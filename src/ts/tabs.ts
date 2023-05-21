@@ -143,17 +143,6 @@ export function updateSavedTabsImmediately() {
   })
 }
 
-function deleteBlockedPopupsOf(tab: Tab) {
-  delayExecution(() => {
-    for (const popupID in blockedPopups) {
-      const { tab: popupTab } = blockedPopups[popupID];
-      if (popupTab == tab) {
-        delete blockedPopups[popupID]
-      }
-    }
-  })
-}
-
 function displayPreventUnloadDialog(win: BrowserWindow, url: string, sync?: boolean) {
   // this function has to be synchronous D:
   const options = {
@@ -396,7 +385,13 @@ export function destroyWebContents(bv: RealTab) {
 
     if (!bv.private) return;
 
-    deleteBlockedPopupsOf(bv)
+    // Cleanup the blockedPopups
+    for (const popupID in blockedPopups) {
+      const { tab: popupTab } = blockedPopups[popupID];
+      if (popupTab == bv) {
+        delete blockedPopups[popupID]
+      }
+    }
 
     for (const uniqueID in tabUniqueIDs) {
       const tab = tabUniqueIDs[uniqueID];
@@ -1036,9 +1031,8 @@ export function attach(win: TabWindow, tab: RealTab) {
       setImmediate(() => {
         // If not for the `setImmediate()`, it just crashes
         removeTab(win, { tab });
+        destroyWebContents(tab)
       })
-
-      deleteBlockedPopupsOf(tab)
 
     } catch (error) {
       console.log(`Couldn't close the tab: ${error + ''}`);
