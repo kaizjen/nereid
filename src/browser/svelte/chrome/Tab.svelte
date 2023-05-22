@@ -352,6 +352,8 @@
     class="close-tab"
     on:mousedown|stopPropagation={()=>null}
     on:click={() => { console.log('clicked close'); ipcRenderer.send('closeTab', index) }}
+    draggable="true"
+    on:dragstart|stopPropagation|preventDefault={()=>null}
   >
     <img alt="Close tab" src="n-res://{$colorTheme}/cross.svg" >
   </button>
