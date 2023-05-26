@@ -248,7 +248,7 @@
   ipcRenderer.on('tabUpdate', (_e, { index, state }) => {
     console.log('updating tab %o with state %o', index, state);
     if (index == -1) {
-      console.warn('update not registered: index is -1 (ignored)');
+      return console.warn('update not registered: index is -1 (ignored)');
     }
     Object.assign(tabs[index], state)
     tabs = tabs;
