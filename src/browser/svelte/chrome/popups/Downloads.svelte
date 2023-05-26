@@ -135,7 +135,7 @@
 
     <div class="btn-container">
       <Button on:click={() => {
-        ipcRenderer.send('newTab', { url: 'nereid://downloads' });
+        ipcRenderer.send('openUniqueNereidTab', 'downloads', true);
         open = false;
       }}>
         {_.OPEN_PAGE}
