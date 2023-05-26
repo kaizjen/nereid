@@ -281,10 +281,6 @@ async function pushToHistory(tab: Tab, responseCode: number = 0) {
   const url = asRealTab(tab).webContents.getURL();
 
   if (tab.private) return; // obviously
-  if (tab.isOpenedAtStart) {
-    tab.isOpenedAtStart = false;
-    return;
-  }
 
   let history = await userData.history.get();
   if (
@@ -362,7 +358,6 @@ export function createBrowserView(
   tab.setBackgroundColor('#ffffffff'); // doesn't work for some reason
 
   tab.private = opts.private
-  tab.isOpenedAtStart = opts.isOpenedAtStart
   tab.isGhost = false;
   tab.history = [];
   tab.currentHistoryIndex = -1;
@@ -1091,8 +1086,7 @@ export function toRealTab(tab: Tab) {
   let realTab = createBrowserView({
     url: tab.url,
     uid: tab.uniqueID,
-    private: tab.private,
-    isOpenedAtStart: tab.isOpenedAtStart
+    private: tab.private
   });
   owner.tabs[index] = realTab;
   owner.chrome.webContents.send('tabUpdate', {
@@ -1213,7 +1207,6 @@ export function createTab(window: TabWindow, options: TabOptions, createBrowserV
       faviconURL: options.initialFavicon,
       uniqueID: options.uid,
       private: options.private,
-      isOpenedAtStart: options.isOpenedAtStart,
       owner: window,
       history: [],
       currentHistoryIndex: -1,

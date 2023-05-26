@@ -100,29 +100,28 @@ type NavigationReason = 'redirect' | 'input-url' | 'other' | 'created' | `search
 type TabProperties = {
   /** A window that was opened with `window.open()` */
   childWindow?: BrowserWindow
-  private?: boolean
+  private: boolean
   /** The URL of the favicon */
-  faviconURL?: string
+  faviconURL: string
   /** The data URL of the fetched favicon */
   faviconDataURL?: string
   /** A session-wide unique ID of the tab */
-  uniqueID?: number
+  uniqueID: number
   /** The reason for the last navigation of the tab */
   lastNavigationReason?: NavigationReason
   isFullScreen?: boolean
   /** The window that this tab is in. */
   owner?: TabWindow
-  isOpenedAtStart?: boolean
   /** The frame name, if the tab was opened using a `<a target="framename">` link */
   targetFrameName?: string
   /** The tab history, every entry corresponds to the Chromium's history index. */
-  history?: {
+  history: {
     title: string
     url: string
     faviconURL: string
   }[]
   /** The current index of the `Tab.history` array */
-  currentHistoryIndex?: number
+  currentHistoryIndex: number
   /** The pane view that this tab is in */
   paneView?: PaneView
   /**
@@ -130,7 +129,7 @@ type TabProperties = {
    * 
    * **Only serializable objects must be passed through here!**
    */
-  chromeData?: Record<string, any>
+  chromeData: Record<string, any>
 }
 /**
  * Upon starting Nereid, instead of loading all tabs at once,
