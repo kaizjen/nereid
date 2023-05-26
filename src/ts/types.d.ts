@@ -136,7 +136,7 @@ type TabProperties = {
  * only one tab is loaded, the others are all loaded as ghost tabs.
  *
  * Ghost Tabs don't have a `BrowserView`, they exist as a skeleton
- * to load one upon selecting.
+ * to load one upon being selected.
  */
 export type GhostTab = ({ isGhost: true, url: string, title: string, owner: TabWindow } & TabProperties)
 export type RealTab = ({ isGhost?: false | undefined } & BrowserView & TabProperties)
