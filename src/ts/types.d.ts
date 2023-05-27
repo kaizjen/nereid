@@ -130,6 +130,8 @@ type TabProperties = {
    * **Only serializable objects must be passed through here!**
    */
   chromeData: Record<string, any>
+  /** All the URLs that this page has requested while it's active. */
+  requestedURLs: string[]
 }
 /**
  * Upon starting Nereid, instead of loading all tabs at once,

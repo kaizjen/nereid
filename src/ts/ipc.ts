@@ -800,30 +800,35 @@ export function init() {
       filters: options.filters
     })
   })
-  function onCookies(channel: string, handler: (e: Electron.IpcMainInvokeEvent, cookies: Electron.Cookies, options: any) => any) {
+  function onCookies(channel: string, handler: (e: Electron.IpcMainInvokeEvent, currentTab: RealTab, cookies: Electron.Cookies, options: any) => any) {
     onInternal('cookies.' + channel, (e, options) => {
       const modalWindow = BrowserWindow.fromWebContents(e.sender);
       const window = modalWindow.getParentWindow();
       if (!window || !isTabWindow(window)) return;
 
       const { cookies } = window.currentTab.private ? session.fromPartition(PRIVATE_PARTITION) : session.fromPartition(DEFAULT_PARTITION);
-      return handler(e, cookies, options)
+      return handler(e, window.currentTab, cookies, options)
     })
   }
-  onCookies('get', async (_, cookies, options) => {
-    return await cookies.get({
-      url: options.url, domain: options.domain, name: options.name,
-      path: options.path, secure: options.secure, session: options.session
-    })
+  onCookies('get', async (_, currentTab, cookies) => {
+    const result: Electron.Cookie[] = [];
+    // We do this here because we want to get all cookies that were loaded by this page,
+    // and cookies.get({ url }) does not return us third-party cookies.
+    for (const url of currentTab.requestedURLs) {
+      result.push(...(
+        await cookies.get({ url })
+      ))
+    }
+    return $.mutFilter(result, $.uniqBy((c1, c2) => c1.name == c2.name && c1.path == c2.path));
   })
-  onCookies('set', async (_, cookies, options) => {
+  onCookies('set', async (_e, _t, cookies, options) => {
     return await cookies.set({
       url: options.url, domain: options.domain, name: options.name,
       path: options.path, secure: options.secure, value: options.value,
       sameSite: options.sameSite, httpOnly: options.httpOnly, expirationDate: options.expirationDate
     })
   })
-  onCookies('remove', async (_, cookies, options) => {
+  onCookies('remove', async (_e, _t, cookies, options) => {
     return await cookies.remove(options.url, options.name)
   })
 

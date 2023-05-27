@@ -362,47 +362,52 @@ export function createBrowserView(
   tab.history = [];
   tab.currentHistoryIndex = -1;
   tab.chromeData = {};
+  tab.requestedURLs = [];
 
   tabEvents.emit('browserViewCreated', { browserView: tab });
 
   return tab;
 }
 
-export function destroyWebContents(bv: RealTab) {
-  delayExecution(() => {
-    if (bv.webContents && !bv.webContents.isDestroyed()) {
-      bv.webContents.close();
-    }
-
-    if (bv.childWindow) {
-      bv.childWindow.close();
-    }
-
-    if (!bv.private) return;
-
-    // Cleanup the blockedPopups
-    for (const popupID in blockedPopups) {
-      const { tab: popupTab } = blockedPopups[popupID];
-      if (popupTab == bv) {
-        delete blockedPopups[popupID]
+/** @returns {Promise<RealTab>} A Promise that resolves with the same tab, after it was destroyed */
+export function destroyWebContents(bv: RealTab): Promise<RealTab> {
+  return new Promise(resolve => {
+    delayExecution(() => {
+      if (bv.webContents && !bv.webContents.isDestroyed()) {
+        bv.webContents.close();
       }
-    }
 
-    for (const uniqueID in tabUniqueIDs) {
-      const tab = tabUniqueIDs[uniqueID];
+      if (bv.childWindow) {
+        bv.childWindow.close();
+      }
 
-      if (tab.private) return;
-    }
-    // if there are no private tabs, clear all session data
-    let ses = session.fromPartition(PRIVATE_PARTITION);
-    ses.clearStorageData()
-    ses.clearAuthCache()
-    ses.clearCache()
-    ses.clearHostResolverCache()
-    ses.closeAllConnections()
-    console.log('cleared all private data');
+      resolve(bv);
+
+      // Cleanup the blockedPopups
+      for (const popupID in blockedPopups) {
+        const { tab: popupTab } = blockedPopups[popupID];
+        if (popupTab == bv) {
+          delete blockedPopups[popupID]
+        }
+      }
+
+      if (!bv.private) return;
+
+      for (const uniqueID in tabUniqueIDs) {
+        const tab = tabUniqueIDs[uniqueID];
+
+        if (tab.private) return;
+      }
+      // if there are no private tabs, clear all session data
+      let ses = session.fromPartition(PRIVATE_PARTITION);
+      ses.clearStorageData()
+      ses.clearAuthCache()
+      ses.clearCache()
+      ses.clearHostResolverCache()
+      ses.closeAllConnections()
+      console.log('cleared all private data');
+    })
   })
-  return bv;
 }
 
 /**
@@ -911,6 +916,7 @@ export function attach(win: TabWindow, tab: RealTab) {
     tab.history.push({ title: tab.webContents.getTitle(), url, faviconURL: tab.faviconURL })
     tab.currentHistoryIndex++;
     tab.targetFrameName = null;
+    tab.requestedURLs = [];
 
     sendUpdate({ security: checkSecurity(url) })
 
@@ -1210,7 +1216,8 @@ export function createTab(window: TabWindow, options: TabOptions, createBrowserV
       owner: window,
       history: [],
       currentHistoryIndex: -1,
-      chromeData: {}
+      chromeData: {},
+      requestedURLs: []
     }
     tabUniqueIDs[options.uid] = tab;
 
@@ -1242,7 +1249,7 @@ export function closeTab(win: TabWindow, desc: { tab?: Tab, index?: number }, ke
 
   if (!emitPreventable('closeTab', { win, tab: desc.tab })) return false;
 
-  function close() {
+  async function close() {
     beingClosed.splice(beingClosed.indexOf(desc.tab), 1);
 
     let lastTabGroup = getTabGroupByTab(desc.tab);
@@ -1265,10 +1272,10 @@ export function closeTab(win: TabWindow, desc: { tab?: Tab, index?: number }, ke
       detach(asRealTab(desc.tab))
       lastURL = asRealTab(desc.tab).webContents.getURL()
       lastTitle = asRealTab(desc.tab).webContents.getTitle()
-      tab = destroyWebContents(asRealTab(desc.tab));
+      tab = await destroyWebContents(asRealTab(desc.tab));
     }
+    delete tabUniqueIDs[tab.uniqueID];
     if (tab.private) {
-      delete tabUniqueIDs[tab.uniqueID];
       return tab;
 
     } else {
@@ -1280,7 +1287,6 @@ export function closeTab(win: TabWindow, desc: { tab?: Tab, index?: number }, ke
         lastTabGroupID
       });
       if (win.recentlyClosed.length > userData.config.get().behaviour.maxRecentTabs) {
-        delete tabUniqueIDs[win.recentlyClosed[0].UID];
         win.recentlyClosed.shift();
       }
       return tab;

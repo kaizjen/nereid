@@ -315,6 +315,14 @@ export function registerSession(ses: Session) {
     return callback({ cancel: false })
   })
 
+  ses.webRequest.onSendHeaders({ urls: ['*://*/*'] }, (details) => {
+    if (!details.webContents || details.webContents.isDestroyed()) return;
+
+    const tab = getTabByWebContents(details.webContents);
+    if (tab.requestedURLs.includes(details.url)) return;
+    tab.requestedURLs.push(details.url);
+  })
+
   ses.setCertificateVerifyProc(async (req, next) => {
     certificateCache[req.hostname] = req;
 
