@@ -161,10 +161,13 @@
     ipcRenderer.send('chrome.saveData', tabs[currentTabIndex].uid, { findInPage })
   })
 
+  let _previousFindInPage = false;
   $: {
-    if (!findInPage?.active) {
+    if (!findInPage?.active && _previousFindInPage) {
       stop()
     }
+    // This should be updated AFTER the if statement
+    _previousFindInPage = findInPage?.active ?? false;
     requestAnimationFrame(() => {
       ipcRenderer.send('chrome.setHeight', document.body.getBoundingClientRect().height)
     })
