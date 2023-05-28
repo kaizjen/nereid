@@ -801,11 +801,14 @@ export function attach(win: TabWindow, tab: RealTab) {
   })
   tab.webContents.on('did-start-loading', () => sendUpdate({ isLoading: true }))
   tab.webContents.on('did-stop-loading', () => sendUpdate({ isLoading: false }))
-  // Here we assume that the media that's playing now includes sound,
-  // so that the playing icon appears immediately, however, an actual check
-  // would be performed by the setInterval at the bottom, because
-  // the isCurrentlyAudible is updated after the 'media-started-playing' event is emitted
-  tab.webContents.on('media-started-playing', () => sendUpdate({ isPlaying: true }))
+  tab.webContents.on('media-started-playing', () => {
+    // Here we assume that the media that's playing now includes sound,
+    // so that the playing icon appears immediately, however, an actual check
+    // would be performed by the setInterval at the bottom, because
+    // the isCurrentlyAudible is updated after the 'media-started-playing' event is emitted
+    sendUpdate({ isPlaying: true });
+    tab.chromeData._lastCurrentlyAudible = true;
+  })
 
   tab.webContents.on('focus', () => {
     // when this tab is a part of a PaneView, it needs to update the address bar URL
@@ -1453,8 +1456,8 @@ setInterval(updateSavedTabs, backupIntervalFlag?.type == 'num' ? backupIntervalF
 
 let audibleCheckedTimes = 0;
 setInterval(() => {
-  // We check non-focused tabs every 500 ms, focused tabs - every 100
-  let shouldCheckNonFocusedTabs = audibleCheckedTimes % 5;
+  // We check non-focused tabs every 900 ms, focused tabs - every 300
+  let shouldCheckNonFocusedTabs = audibleCheckedTimes % 3 == 0;
   if (shouldCheckNonFocusedTabs) {
     audibleCheckedTimes = 0;
   }
@@ -1478,7 +1481,7 @@ setInterval(() => {
       })
     })
   })
-}, 200)
+}, 300)
 
 ipcMain.on('reopenBlockedWindow', (e, blockedPopupID: number) => {
   if (!(blockedPopupID in blockedPopups)) return console.warn("The chrome tried to open a blocked window that doesn't exist.")
