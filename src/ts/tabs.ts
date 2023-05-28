@@ -102,7 +102,13 @@ export function getTabByWebContents(wc: WebContents): RealTab {
   for (const uid in tabUniqueIDs) {
     const tab = tabUniqueIDs[uid];
     if (!tab.isGhost) {
-      if (asRealTab(tab).webContents == wc) return asRealTab(tab);
+      // I'd really like to use the asRealTab() function here, but
+      // for some reason (i have no clue why this is happening) there are
+      // tabs which don't have webContents, but aren't ghost tabs. :(
+      // The closeTab() function correctly removes all tabs immediately
+      // after destroying their webContents, and createBrowserView()
+      // never creates a tab without webContents, so idk what's happening here...
+      if ((tab as RealTab).webContents == wc) return asRealTab(tab);
     }
   }
   throw new Error("The WebContents passed don't belong to a tab or were destroyed.");
