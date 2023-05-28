@@ -200,7 +200,10 @@ export function init() {
     wc.downloadURL(url)
   })
   onWindow('chrome.setHeight', (win, _e, value: number) => {
-    win.chromeHeight = Math.round(value * win.chrome.webContents.zoomFactor);
+    const newHeight = Math.round(value * win.chrome.webContents.zoomFactor);
+    if (win.chromeHeight == newHeight) return;
+
+    win.chromeHeight = newHeight;
     console.log('height being set to', win.chromeHeight);
 
     win.setSheetOffset(win.chromeHeight);
