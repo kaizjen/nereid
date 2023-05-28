@@ -795,8 +795,11 @@ export function attach(win: TabWindow, tab: RealTab) {
   })
   tab.webContents.on('did-start-loading', () => sendUpdate({ isLoading: true }))
   tab.webContents.on('did-stop-loading', () => sendUpdate({ isLoading: false }))
+  // Here we assume that the media that's playing now includes sound,
+  // so that the playing icon appears immediately, however, an actual check
+  // would be performed by the setInterval at the bottom, because
+  // the isCurrentlyAudible is updated after the 'media-started-playing' event is emitted
   tab.webContents.on('media-started-playing', () => sendUpdate({ isPlaying: true }))
-  tab.webContents.on('media-paused', () => sendUpdate({ isPlaying: false }))
 
   tab.webContents.on('focus', () => {
     // when this tab is a part of a PaneView, it needs to update the address bar URL
@@ -1049,7 +1052,6 @@ export function detach(tab: RealTab) {
     'did-start-loading',
     'did-stop-loading',
     'media-started-playing',
-    'media-paused',
     'focus',
     'page-title-updated',
     'page-favicon-updated',
@@ -1442,6 +1444,35 @@ export function openUniqueNereidTab(win: TabWindow, page: string, nextToCurrentT
 let backupIntervalFlag = options.backup_tabs_interval;
 
 setInterval(updateSavedTabs, backupIntervalFlag?.type == 'num' ? backupIntervalFlag.value : 30000)
+
+let audibleCheckedTimes = 0;
+setInterval(() => {
+  // We check non-focused tabs every 500 ms, focused tabs - every 100
+  let shouldCheckNonFocusedTabs = audibleCheckedTimes % 5;
+  if (shouldCheckNonFocusedTabs) {
+    audibleCheckedTimes = 0;
+  }
+  audibleCheckedTimes++;
+
+  getAllTabWindows().forEach(win => {
+    win.tabs.forEach((tab, index) => {
+      if (tab.isGhost) return;
+      if (!asRealTab(tab).webContents.isFocused() && !shouldCheckNonFocusedTabs) {
+        return;
+      }
+
+      // We don't have an event for when audio started playing,
+      // so we have to resort to this
+      if (tab.chromeData._lastCurrentlyAudible == asRealTab(tab).webContents.isCurrentlyAudible()) {
+        return;
+      }
+      tab.chromeData._lastCurrentlyAudible = asRealTab(tab).webContents.isCurrentlyAudible();
+      tab.owner.chrome.webContents.send('tabUpdate', {
+        index, state: { isPlaying: tab.chromeData._lastCurrentlyAudible }
+      })
+    })
+  })
+}, 200)
 
 ipcMain.on('reopenBlockedWindow', (e, blockedPopupID: number) => {
   if (!(blockedPopupID in blockedPopups)) return console.warn("The chrome tried to open a blocked window that doesn't exist.")
