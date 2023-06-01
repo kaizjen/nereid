@@ -9,11 +9,12 @@
     position: relative;
     white-space: nowrap;
     overflow: hidden;
-    width: var(--tab-width);
+    width: 14rem;
+    min-width: 11rem;
     font-size: 0.9rem;
     display: flex;
     align-items: center;
-    flex-shrink: 0;
+    flex-shrink: 1;
     border-bottom: var(--border-width) solid transparent !important;
     border-radius: 0.25rem 0.25rem 0 0;
     margin-top: 1px;
@@ -195,6 +196,8 @@
       css: (t, u) => `
         padding-inline: ${Math.round(pdi * t)}px;
         width: ${Math.round(w * t)}px;
+        min-width: 0;
+        flex-shrink: 0;
         opacity: ${target_opacity - (od * u)}
       `
     };

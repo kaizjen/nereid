@@ -632,7 +632,6 @@
         bind:this={tabGroupListElement}
         on:mousedown={e => (e.button == 1) /* middle mb */ ? e.preventDefault() : null}
         on:wheel={e => e.deltaX == 0 ? smoothlyScroll(e.currentTarget, e.deltaY) : null}
-        style="--tab-width: {Math.max(15 - Math.sqrt(tabsFromSelectedGroup.length), 9)}rem;"
       >
         <button
           on:click={e => editTabGroup(currentTabGroup, e.target)}
@@ -679,7 +678,6 @@
       bind:this={tabListElement}
       on:mousedown={e => (e.button == 1) /* middle mb */ ? e.preventDefault() : null}
       on:wheel={e => e.deltaX == 0 ? smoothlyScroll(e.currentTarget, e.deltaY) : null}
-      style="--tab-width: {Math.max(15 - Math.sqrt(tabs.length), 9)}rem;"
     >
       {#each tabs as tab, index (tab)}
         {@const group = getGroupAtIndex(index, tabGroups)}
