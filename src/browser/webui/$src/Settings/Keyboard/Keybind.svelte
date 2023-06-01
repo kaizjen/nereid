@@ -9,6 +9,10 @@
   kbd:not(.style) {
     font-family: inherit;
   }
+  span {
+    display: inline-flex;
+    align-items: baseline;
+  }
 </style>
 
 <script>
@@ -32,10 +36,12 @@
     {nkbText}
   {/if}
 {:else}
-  {#each segments as segm, i}
-    {#if i != 0}
-      +
-    {/if}
-    <kbd class:style>{stringFromSegment(segm)}</kbd>
-  {/each}
+  <span>
+    {#each segments as segm, i}
+      {#if i != 0}
+        +
+      {/if}
+      <kbd class:style>{stringFromSegment(segm)}</kbd>
+    {/each}
+  </span>
 {/if}
