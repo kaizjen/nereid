@@ -13,6 +13,7 @@
   import { getContext } from "svelte/internal";
   import Keybind from "./Keyboard/Keybind.svelte";
   import Rebinder from "./Keyboard/Rebinder.svelte";
+  import { stringFromSegment, getSegments } from "./Keyboard/accelerator-parser.js";
 
   export let update;
 
@@ -35,9 +36,26 @@
 
   let keybindDialog = false;
 
+  function compareAccelerators(accel1, accel2) {
+    return getSegments(accel1).map(stringFromSegment).join('+') == getSegments(accel2).map(stringFromSegment).join('+')
+  }
+
   let allCommands = [];
-  async function updateCommands(){
-    allCommands = await nereid.interface.getAllCommands();
+  async function updateCommands() {
+    const tempCommands = await nereid.interface.getAllCommands();
+    const scannedCommands = [];
+
+    tempCommands.forEach(cmd => {
+      if (!cmd.accelerator) return;
+
+      const conflictCommands = scannedCommands.filter(item => compareAccelerators(item.accelerator, cmd.accelerator));
+      if (conflictCommands.length > 0) {
+        conflictCommands.forEach(item => item.conflicting = true);
+        cmd.conflicting = true;
+      }
+      scannedCommands.push(cmd);
+    });
+    allCommands = tempCommands;
   }
   updateCommands()
 

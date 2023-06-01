@@ -151,7 +151,7 @@
 <div class="main">
   <Button
     on:click={() => beingRebound = !beingRebound}
-    style={beingRebound ? "border-color: var(--fds-accent-default)" : ""}
+    style={beingRebound ? "border-color: var(--fds-accent-default)" : (command.conflicting ? "border-color: red" : '')}
   >
     <Keybind style={false} accelerator={command.accelerator} />
   </Button>
