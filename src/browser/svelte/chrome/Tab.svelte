@@ -24,6 +24,7 @@
   .tab.pinned {
     --padding: 0.65rem;
     width: auto; /* can use auto here since no text is displayed */
+    min-width: auto;
   }
   :global(*:active) .tab {
     transition: 0s;
