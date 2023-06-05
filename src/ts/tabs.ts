@@ -96,7 +96,9 @@ export function getTabByWebContents(wc: WebContents): RealTab {
   const win = BrowserWindow.fromWebContents(wc);
   if (win && isTabWindow(win)) {
     const found = win.tabs.find(tab => (tab as RealTab).webContents == wc);
-    if (!found) throw new Error("The WebContents passed are not of any tab in the window.");
+    if (!found) throw new Error(
+      "The WebContents passed don't belong to a tab, though they may belong to DevTools or the chrome."
+    );
     return asRealTab(found);
   }
   for (const uid in tabUniqueIDs) {
@@ -105,8 +107,8 @@ export function getTabByWebContents(wc: WebContents): RealTab {
       // I'd really like to use the asRealTab() function here, but
       // for some reason (i have no clue why this is happening) there are
       // tabs which don't have webContents, but aren't ghost tabs. :(
-      // The closeTab() function correctly removes all tabs immediately
-      // after destroying their webContents, and createBrowserView()
+      // The closeTab() function correctly removes all tabs right
+      // before destroying their webContents, and createBrowserView()
       // never creates a tab without webContents, so idk what's happening here...
       if ((tab as RealTab).webContents == wc) return asRealTab(tab);
     }
@@ -375,45 +377,41 @@ export function createBrowserView(
   return tab;
 }
 
-/** @returns {Promise<RealTab>} A Promise that resolves with the same tab, after it was destroyed */
-export function destroyWebContents(bv: RealTab): Promise<RealTab> {
-  return new Promise(resolve => {
-    delayExecution(() => {
-      if (bv.webContents && !bv.webContents.isDestroyed()) {
-        bv.webContents.close();
-      }
+/** @returns {RealTab} The same tab */
+export function destroyWebContents(bv: RealTab): RealTab {
+  if (bv.webContents && !bv.webContents.isDestroyed()) {
+    bv.webContents.close();
+  }
 
-      if (bv.childWindow) {
-        bv.childWindow.close();
-      }
+  if (bv.childWindow) {
+    bv.childWindow.close();
+  }
 
-      resolve(bv);
+  // Cleanup the blockedPopups
+  for (const popupID in blockedPopups) {
+    const { tab: popupTab } = blockedPopups[popupID];
+    if (popupTab == bv) {
+      delete blockedPopups[popupID]
+    }
+  }
 
-      // Cleanup the blockedPopups
-      for (const popupID in blockedPopups) {
-        const { tab: popupTab } = blockedPopups[popupID];
-        if (popupTab == bv) {
-          delete blockedPopups[popupID]
-        }
-      }
+  if (!bv.private) return bv;
 
-      if (!bv.private) return;
+  for (const uniqueID in tabUniqueIDs) {
+    const tab = tabUniqueIDs[uniqueID];
 
-      for (const uniqueID in tabUniqueIDs) {
-        const tab = tabUniqueIDs[uniqueID];
+    if (tab.private) return bv;
+  }
+  // if there are no private tabs, clear all session data
+  let ses = session.fromPartition(PRIVATE_PARTITION);
+  ses.clearStorageData()
+  ses.clearAuthCache()
+  ses.clearCache()
+  ses.clearHostResolverCache()
+  ses.closeAllConnections()
+  console.log('cleared all private data');
 
-        if (tab.private) return;
-      }
-      // if there are no private tabs, clear all session data
-      let ses = session.fromPartition(PRIVATE_PARTITION);
-      ses.clearStorageData()
-      ses.clearAuthCache()
-      ses.clearCache()
-      ses.clearHostResolverCache()
-      ses.closeAllConnections()
-      console.log('cleared all private data');
-    })
-  })
+  return bv;
 }
 
 /**
@@ -1260,7 +1258,7 @@ export function closeTab(win: TabWindow, desc: { tab?: Tab, index?: number }, ke
 
   if (!emitPreventable('closeTab', { win, tab: desc.tab })) return false;
 
-  async function close() {
+  function close() {
     beingClosed.splice(beingClosed.indexOf(desc.tab), 1);
 
     let lastTabGroup = getTabGroupByTab(desc.tab);
@@ -1270,22 +1268,24 @@ export function closeTab(win: TabWindow, desc: { tab?: Tab, index?: number }, ke
     let remResult = removeTab(desc.tab.owner, desc, keepAlive);
     if (!remResult) return false;
 
+    const tab: Tab = desc.tab;
     let lastURL: string;
     let lastTitle: string;
-    let tab: Tab;
 
+    // We have to delete the tab from uniqueIDs here, because
+    // the code in destroyWebContents() requires this object not
+    // to have the tab being closed.
+    delete tabUniqueIDs[tab.uniqueID];
     if (desc.tab.isGhost) {
       lastURL = desc.tab.url
       lastTitle = desc.tab.title || desc.tab.url
-      tab = desc.tab;
 
     } else {
       detach(asRealTab(desc.tab))
       lastURL = asRealTab(desc.tab).webContents.getURL()
       lastTitle = asRealTab(desc.tab).webContents.getTitle()
-      tab = await destroyWebContents(asRealTab(desc.tab));
+      destroyWebContents(asRealTab(desc.tab));
     }
-    delete tabUniqueIDs[tab.uniqueID];
     if (tab.private) {
       return tab;
 
