@@ -36,30 +36,30 @@
       for (const key in o) {
         result[key] = o[key];
       }
-    
+
       return result;
     }
-    
+
     return function URLParse(str) {
       try {
         let urlObj = getAllProps(new URL(str));
-        
+
         let slashes = slashesRegex.test(str);
         let origin = urlObj.origin == 'null' ? '' : urlObj.origin
-    
+
         return {
           ...urlObj,
           slashes, origin
         };
-    
+
       } catch (e) {
         console.log('invalid url %o because %s', str, e);
-        
+
         return setToValue([
           'hash', 'slashes', 'host', 'hostname', 'href',
           'origin', 'protocol', 'username', 'password', 'port',
           'pathname', 'search', 'searchParams'
-        ], null)
+        ], '')
       }
     };
   })()
