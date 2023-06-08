@@ -92,13 +92,13 @@ function emitPreventable<T extends keyof TabEvents>(
 export function getTabByUID(uid: number) {
   return tabUniqueIDs[uid];
 }
+/** Gets the RealTab object by its webContents. Returns `null` if there is no tab with such webContents. */
 export function getTabByWebContents(wc: WebContents): RealTab {
   const win = BrowserWindow.fromWebContents(wc);
   if (win && isTabWindow(win)) {
     const found = win.tabs.find(tab => (tab as RealTab).webContents == wc);
-    if (!found) throw new Error(
-      "The WebContents passed don't belong to a tab, though they may belong to DevTools or the chrome."
-    );
+    if (!found) return null;
+
     return asRealTab(found);
   }
   for (const uid in tabUniqueIDs) {
@@ -113,7 +113,7 @@ export function getTabByWebContents(wc: WebContents): RealTab {
       if ((tab as RealTab).webContents == wc) return asRealTab(tab);
     }
   }
-  throw new Error("The WebContents passed don't belong to a tab or were destroyed.");
+  return null;
 }
 export function asRealTab(tab: Tab) {
   // This function isn't used when we're checking all tabs (like `win.tabs.find(tab => (tab as RealTab).webContents == wc)`)

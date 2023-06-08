@@ -319,6 +319,7 @@ export function registerSession(ses: Session) {
     if (!details.webContents || details.webContents.isDestroyed()) return;
 
     const tab = getTabByWebContents(details.webContents);
+    if (!tab) return;
     if (tab.requestedURLs.includes(details.url)) return;
     tab.requestedURLs.push(details.url);
   })
