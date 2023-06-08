@@ -6,7 +6,7 @@ import { isTabWindow, newTabWindow, setCurrentTabBounds } from './windows'
 import { bookmarks, config, control, downloads } from './userdata'
 import * as pathModule from "path";
 import * as fs from "fs"
-import { asRealTab, closeTab, createTab, dividePanes, moveTab, openClosedTab, openUniqueNereidTab, selectTab, setMutedTab, toRealTab, undividePanes } from './tabs'
+import { asRealTab, closeTab, createTab, dividePanes, moveTab, openClosedTab, openUniqueNereidTab, togglePinPane, selectTab, setMutedTab, toRealTab, undividePanes } from './tabs'
 import $ from './common'
 import fetch from "electron-fetch";
 import type { Response } from "electron-fetch"
@@ -304,6 +304,7 @@ function buildAppMenuImmediately() {
     }
   ])
   nereidMenu.append(commands.swapPanes.toAppMenuItem(hidden, clickToTrigger))
+  nereidMenu.append(commands.pinFocusedPane.toAppMenuItem(hidden, clickToTrigger))
   nereidMenu.append(commands.nextTab.toAppMenuItem(hidden, clickToTrigger))
   nereidMenu.append(commands.previousTab.toAppMenuItem(hidden, clickToTrigger))
   nereidMenu.append(commands.reloadAll.toAppMenuItem(hidden, clickToTrigger))
@@ -615,11 +616,11 @@ export async function showContextMenu(win: TabWindow, tab: RealTab, opts: Electr
     addItem(SEPARATOR)
     addItem({ label: $t('open.leftPane'), click() {
       const newTab = createContextTab({ url: opts.linkURL, background: true })
-      if (newTab) dividePanes(win, { left: newTab, right: tab })
+      if (newTab) dividePanes(win, { left: asRealTab(newTab), right: tab })
     } })
     addItem({ label: $t('open.rightPane'), click() {
       const newTab = createContextTab({ url: opts.linkURL, background: true })
-      if (newTab) dividePanes(win, { left: tab, right: newTab })
+      if (newTab) dividePanes(win, { left: tab, right: asRealTab(newTab) })
     } })
     addItem(SEPARATOR)
     addItem({ label: $t('copyLink'), click() { clipboard.writeText(opts.linkURL) } })
@@ -775,6 +776,20 @@ export async function showContextMenu(win: TabWindow, tab: RealTab, opts: Electr
   addItem({ label: $t('openDevTools'), click() { toggleDevTools(tab.webContents) }, accelerator: 'Ctrl+Shift+I' })
   if (tab.paneView) {
     addItem(SEPARATOR)
+    addItem({
+      label: $t('pinPane'), click() {
+        if (tab == tab.paneView.leftTab) {
+          togglePinPane(tab.paneView, 'left')
+
+        } else {
+          togglePinPane(tab.paneView, 'right')
+        }
+      },
+      type: 'checkbox',
+      checked:
+        (tab == tab.paneView.leftTab && tab.paneView.leftPanePinned) ||
+        (tab == tab.paneView.rightTab && tab.paneView.rightPanePinned)
+    })
     addItem({ label: $t('closePane'), click() {
       if (tab == tab.paneView.leftTab) {
         selectTab(win, { tab: tab.paneView.rightTab })
@@ -906,10 +921,10 @@ export function menuOfTab(win: TabWindow, tab: Tab) {
 
   } else {
     addItem({ label: $t('splitPaneLeft'), click() {
-      dividePanes(win, { left: tab, right: win.currentTab })
+      dividePanes(win, { left: toRealTab(tab), right: win.currentTab })
     } })
     addItem({ label: $t('splitPaneRight'), click() {
-      dividePanes(win, { left: win.currentTab, right: tab })
+      dividePanes(win, { left: win.currentTab, right: toRealTab(tab) })
     } })
   }
   addItem(SEPARATOR)

@@ -272,7 +272,6 @@ export async function newTabWindow(tabOptionsArray: TabOptions[]): Promise<TabWi
 
   w.winID = windows.push(w) - 1;
   w.tabs = []; // BrowserViews will be here
-  w.paneViews = [];
   w.tabGroups = [];
   w.pinnedTabsEndIndex = 0;
   w.recentlyClosed = [];
@@ -365,7 +364,6 @@ export async function newSingleTabWindow(tab: RealTab, windowOptions: Partial<Br
 
   w.winID = windows.push(w) - 1;
   w.tabs = [] as any;
-  w.paneViews = [];
   w.tabGroups = [];
   w.pinnedTabsEndIndex = 0;
   w.recentlyClosed = [];

@@ -409,6 +409,7 @@ menu:
   panes:
     close: Close panes
     switch: Swap panes
+    pinFocused: Pin active pane
   devTools: Developer tools
   taskManager: Task manager
   currentTab: This tab
@@ -482,6 +483,7 @@ menu:
     frame:
       reload: Reload frame
       viewSourceCode: View frame's source code
+    pinPane: Pin pane
     closePane: Close pane
   tabMenu:
     createNewTab: Create new tab

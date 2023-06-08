@@ -405,6 +405,7 @@ menu:
   panes:
     close: Закрыть панели
     switch: Поменять панели местами
+    pinFocused: Закрепить активную панель
   devTools: Developer tools
   taskManager: Диспетчер задач
   currentTab: Эта вкладка
@@ -478,6 +479,7 @@ menu:
     frame:
       reload: Перезагрузить фрейм
       viewSourceCode: Посмотреть исходный код фрейма
+    pinPane: Закрепить панель
     closePane: Закрыть панель
   tabMenu:
     createNewTab: Создать новую вкладку

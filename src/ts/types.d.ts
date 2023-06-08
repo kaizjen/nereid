@@ -21,8 +21,6 @@ export type TabWindow = ChromeWindow & {
   tabGroups: TabGroup[]
   /** The currently displayed pane view of the window. Is the same as `.currentTab.paneView` */
   currentPaneView: PaneView | null
-  /** All pane views in that window. No code should ever be dependent on the index */
-  paneViews: PaneView[]
   /** The first few tabs of each window are pinned tabs. This specifies the first non-pinned tab. */
   pinnedTabsEndIndex: number
   /** Unique ID of the window. These ID are be reused in the same session. */
@@ -60,6 +58,8 @@ export type TabGroup = {
 export type PaneView = {
   leftTab: RealTab
   rightTab: RealTab
+  leftPanePinned: boolean
+  rightPanePinned: boolean
   /** The part of space from the left occupied by the left pane. `0 < x < 1` */
   separatorPosition: number
 }

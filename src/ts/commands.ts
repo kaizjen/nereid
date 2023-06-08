@@ -6,7 +6,7 @@ import * as pathModule from "path"
 import { t } from "./i18n"
 import { isTabWindow, newTabWindow, openUtilityWindow, setCurrentTabBounds } from "./windows"
 import { config } from "./userdata"
-import { closeTab, createTab, dividePanes, openClosedTab, openUniqueNereidTab, selectTab, toRealTab, undividePanes } from "./tabs"
+import { closeTab, createTab, dividePanes, openClosedTab, openUniqueNereidTab, togglePinPane, selectTab, toRealTab, undividePanes, asRealTab } from "./tabs"
 import { getTabGroupByTab } from "./tabgroups"
 import { registerPedal } from "./omnibox"
 import isAccelerator from "electron-is-accelerator"
@@ -46,6 +46,7 @@ type KnownCmds = {
   fullscreen: Command<(win: BrowserWindow) => any>
   findInPage: Command<(win: BrowserWindow) => any>
   swapPanes: Command<(win: BrowserWindow) => any>
+  pinFocusedPane: Command<(win: BrowserWindow) => any>
   nextTab: Command<(win: BrowserWindow) => any>
   previousTab: Command<(win: BrowserWindow) => any>
   toggleDevTools: Command<(win: BrowserWindow) => any>
@@ -331,7 +332,11 @@ registerCommand({
       background: true
     })
     if (!newTab) return;
-    dividePanes(win, { left: newTab, right: win.currentTab })
+    dividePanes(win, {
+      left: asRealTab(newTab), right: win.currentTab,
+      pinRight: win.currentPaneView?.rightPanePinned,
+      separatorPosition: win.currentPaneView?.separatorPosition
+    })
     selectTab(win, { tab: newTab })
 
     focusChrome(win)
@@ -350,7 +355,11 @@ registerCommand({
       background: true
     })
     if (!newTab) return;
-    dividePanes(win, { left: win.currentTab, right: newTab })
+    dividePanes(win, {
+      left: win.currentTab, right: asRealTab(newTab),
+      pinLeft: win.currentPaneView?.leftPanePinned,
+      separatorPosition: win.currentPaneView?.separatorPosition
+    })
     selectTab(win, { tab: newTab })
 
     focusChrome(win)
@@ -366,8 +375,10 @@ registerCommand({
     if (win.tabs.indexOf(win.currentTab) - 1 < 0) return;
 
     dividePanes(win, {
-      left: win.tabs[win.tabs.indexOf(win.currentTab) - 1],
-      right: win.currentTab
+      left: toRealTab(win.tabs[win.tabs.indexOf(win.currentTab) - 1]),
+      right: win.currentTab,
+      pinRight: win.currentPaneView?.rightPanePinned,
+      separatorPosition: win.currentPaneView?.separatorPosition
     })
   }
 })
@@ -380,7 +391,9 @@ registerCommand({
 
     dividePanes(win, {
       left: win.currentTab,
-      right: win.tabs[win.tabs.indexOf(win.currentTab) - 1]
+      right: toRealTab(win.tabs[win.tabs.indexOf(win.currentTab) - 1]),
+      pinLeft: win.currentPaneView?.leftPanePinned,
+      separatorPosition: win.currentPaneView?.separatorPosition
     })
   }
 })
@@ -392,8 +405,10 @@ registerCommand({
     if (!win.tabs[win.tabs.indexOf(win.currentTab) + 1]) return;
 
     dividePanes(win, {
-      left: win.tabs[win.tabs.indexOf(win.currentTab) + 1],
-      right: win.currentTab
+      left: toRealTab(win.tabs[win.tabs.indexOf(win.currentTab) + 1]),
+      right: win.currentTab,
+      pinRight: win.currentPaneView?.rightPanePinned,
+      separatorPosition: win.currentPaneView?.separatorPosition
     })
   }
 })
@@ -407,7 +422,9 @@ registerCommand({
 
     dividePanes(win, {
       left: win.currentTab,
-      right: win.tabs[win.tabs.indexOf(win.currentTab) + 1]
+      right: toRealTab(win.tabs[win.tabs.indexOf(win.currentTab) + 1]),
+      pinLeft: win.currentPaneView?.leftPanePinned,
+      separatorPosition: win.currentPaneView?.separatorPosition
     })
   }
 })
@@ -574,8 +591,26 @@ registerCommand({
     dividePanes(win, {
       left: win.currentPaneView.rightTab,
       right: win.currentPaneView.leftTab,
-      separatorPosition: win.currentPaneView.separatorPosition
+      separatorPosition: win.currentPaneView.separatorPosition,
+      pinLeft: win.currentPaneView.rightPanePinned,
+      pinRight: win.currentPaneView.leftPanePinned
     })
+  }
+})
+
+registerCommand({
+  name: 'pinFocusedPane',
+  label: t('menu.panes.pinFocused'),
+  accelerator: 'CmdOrCtrl+Alt+P',
+  trigger(win: BrowserWindow) {
+    if (!isTabWindow(win)) return;
+    if (!win.currentPaneView) return;
+
+    togglePinPane(
+      win.currentPaneView,
+      win.currentTab == win.currentPaneView.leftTab ? 'left' : 'right'
+    )
+    console.log("should pin", win.currentTab == win.currentPaneView.leftTab ? 'left' : 'right');
   }
 })
 

@@ -25,20 +25,6 @@ const options = userData.control.options;
 const shouldUseExperimentalBeforeUnload = options.experimental_beforeunload?.value
 const autoplayWithDocumentActivation = options.autoplay_by_document_activation?.value
 
-const delayExecution = (function() {
-  let allExecutions: Function[] = [];
-  let currentTimeout: NodeJS.Timeout;
-
-  return function delayExecution(fn: Function, ms: number = 100) {
-    clearTimeout(currentTimeout)
-    allExecutions.push(fn)
-    currentTimeout = setTimeout(() => {
-      allExecutions.forEach(f => f())
-      allExecutions = [];
-    }, ms)
-  }
-})()
-
 type ChromeTabState = {
   background: boolean
   url: string
@@ -478,6 +464,7 @@ export function removeTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: n
         otherTab = tab.paneView.leftTab
       }
 
+      undividePanes(win, tab.paneView)
       selectTab(win, { tab: otherTab })
 
     } else {
@@ -1118,47 +1105,74 @@ export function toRealTab(tab: Tab) {
  * 
  * Returns `false` if the tab selection was prevented by the `selectTab` event handler
  */
-export function selectTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: number }): Tab | false {
-  if (tab) {
-    index = win.tabs.indexOf(tab);
+export function selectTab(win: TabWindow, { tab: _tab, index }: { tab?: Tab, index?: number }): Tab | false {
+  if (_tab) {
+    index = win.tabs.indexOf(_tab);
     if (index == -1) throw(new Error(`tabManager.selectTab: no tab found in window`))
   }
-  tab = tab || win.tabs[index];
+  _tab = _tab || win.tabs[index];
 
-  if (!emitPreventable('selectTab', { win, tab })) return false;
+  if (!emitPreventable('selectTab', { win, tab: _tab })) return false;
 
   if (!win.tabs[index]) throw new Error(`tabManager.selectTab: tab #${index} is not in window`)
 
-  if (win.currentPaneView) {
-    // We don't want to remove, then re-add the other pane
-    // because it messes with the focus.
-    if (win.currentPaneView.leftTab != tab) win.removeBrowserView(win.currentPaneView.leftTab);
-    if (win.currentPaneView.rightTab != tab) win.removeBrowserView(win.currentPaneView.rightTab);
-    win.currentTab = null; // So we don't call `removeBrowserView` twice
-  }
-  if (win.currentTab) win.removeBrowserView(win.currentTab);
+  let tab = _tab as RealTab;
   if (tab.isGhost) {
     tab = toRealTab(tab);
   }
 
+  if (win.currentPaneView) {
+    // We don't want to remove, then re-add the other pane
+    // because it messes with the focus.
+    win.currentTab = null; // So that `dividePanes()` won't call `selectTab()` again,
+                           // Plus, we already remove all needed BrowserViews
+    if (win.currentPaneView.leftTab != tab) {
+      if (win.currentPaneView.leftPanePinned) {
+        dividePanes(win, {
+          right: tab,
+          left: win.currentPaneView.leftTab,
+          separatorPosition: win.currentPaneView.separatorPosition,
+          pinLeft: true
+        })
+
+      } else if (win.currentPaneView.leftTab != tab.paneView?.leftTab)
+        win.removeBrowserView(win.currentPaneView.leftTab)
+      ;
+    }
+    if (win.currentPaneView.rightTab != tab) {
+      if (win.currentPaneView.rightPanePinned) {
+        dividePanes(win, {
+          right: win.currentPaneView.rightTab,
+          left: tab,
+          separatorPosition: win.currentPaneView.separatorPosition,
+          pinRight: true
+        })
+
+      } else if (win.currentPaneView.rightTab != tab.paneView?.rightTab)
+        win.removeBrowserView(win.currentPaneView.rightTab)
+      ;
+    }
+  }
+  if (win.currentTab) win.removeBrowserView(win.currentTab);
+
   win.currentPaneView = null;
   if (tab.paneView) {
     if (tab == tab.paneView.leftTab) {
-      win.addBrowserView(asRealTab(tab.paneView.rightTab))
+      win.addBrowserView(tab.paneView.rightTab)
 
     } else {
-      win.addBrowserView(asRealTab(tab.paneView.leftTab))
+      win.addBrowserView(tab.paneView.leftTab)
     }
     win.currentPaneView = tab.paneView;
   }
 
-  win.addBrowserView(asRealTab(tab))
-  win.currentTab = asRealTab(tab);
+  win.addBrowserView(tab)
 
+  win.currentTab = tab;
   setCurrentTabBounds(win)
-  win.setTopBrowserView(asRealTab(tab));
+  win.setTopBrowserView(tab);
   win.chrome.webContents.send('tabChange', index)
-  win.chrome.webContents.send('zoomUpdate', asRealTab(tab).webContents.zoomFactor)
+  win.chrome.webContents.send('zoomUpdate', tab.webContents.zoomFactor)
     // Zoom is global and changed every time the tab is changed
     // That's because chrome has a same-origin zoom policy.
   //
@@ -1169,35 +1183,47 @@ export function selectTab(win: TabWindow, { tab, index }: { tab?: Tab, index?: n
   return tab;
 }
 
-export function dividePanes(win: TabWindow, panes: { right: Tab, left: Tab, separatorPosition?: number }) {
-  const right = toRealTab(panes.right);
-  const left = toRealTab(panes.left);
+/** Creates a new `PaneView` and returns it. */
+export function dividePanes(win: TabWindow, panes: {
+  right: RealTab, left: RealTab, separatorPosition?: number, pinRight?: boolean, pinLeft?: boolean
+}) {
+  const { right, left } = panes;
 
   if (right.paneView) undividePanes(win, right.paneView)
   if (left.paneView) undividePanes(win, left.paneView)
 
   const separatorPosition = panes.separatorPosition ?? 0.5;
 
-  const paneView = { rightTab: right, leftTab: left, separatorPosition };
-
-  win.paneViews.push(paneView);
+  const paneView: PaneView = {
+    rightTab: right, leftTab: left, separatorPosition,
+    rightPanePinned: panes.pinRight ?? false,
+    leftPanePinned: panes.pinLeft ?? false
+  };
 
   right.paneView = left.paneView = paneView;
 
-  // If the current tab is a part of the newly created pane view, this display it correctly
-  selectTab(win, { tab: win.currentTab })
+  if (win.currentTab == right || win.currentTab == left) {
+    // This makes the pane view display correctly
+    selectTab(win, { tab: win.currentTab })
+  }
+  return paneView;
 }
 
 export function undividePanes(win: TabWindow, paneView: PaneView) {
-  if (!win.paneViews.includes(paneView)) throw new Error("No PaneView found in window")
-
-  win.paneViews.splice(win.paneViews.indexOf(paneView), 1);
-
   paneView.leftTab.paneView = paneView.rightTab.paneView = null;
-  win.removeBrowserView(paneView.leftTab)
-  win.removeBrowserView(paneView.rightTab)
 
-  selectTab(win, { tab: win.currentTab })
+  if (win.currentTab == paneView.rightTab || win.currentTab == paneView.leftTab) {
+    selectTab(win, { tab: win.currentTab })
+  }
+}
+
+export function togglePinPane(paneView: PaneView, pane: 'left' | 'right') {
+  if (pane == 'left') {
+    paneView.leftPanePinned = !paneView.leftPanePinned;
+
+  } else {
+    paneView.rightPanePinned = !paneView.rightPanePinned;
+  }
 }
 
 /**
