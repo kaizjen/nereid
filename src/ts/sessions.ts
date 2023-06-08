@@ -343,7 +343,7 @@ export function registerSession(ses: Session) {
 
           let url = tab.webContents.getURL();
           if (URLParse(url).hostname == req.hostname) {
-            tab.webContents.send('tabUpdate', { index, state: { security: true } })
+            win.chrome.webContents.send('tabUpdate', { index, state: { security: true } })
           }
         })
       })
