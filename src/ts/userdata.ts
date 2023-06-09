@@ -423,12 +423,24 @@ function parseHistory(array: any[]) {
 let historyLock: Promise<void> | null = null
 let currentSetCall = -1;
 export let history = {
-  getSync(): History {
-    return parseHistory(JSON.parse(fs.readFileSync(historyPath, 'utf-8')));
+  getSync(): History | false {
+    try {
+      return parseHistory(JSON.parse(fs.readFileSync(historyPath, 'utf-8')));
+
+    } catch(error) {
+      if (error.constructor == SyntaxError) return false;
+      throw error;
+    }
   },
-  async get(): Promise<History> {
+  async get(): Promise<History | false> {
     if (historyLock) await historyLock;
-    return parseHistory(JSON.parse(await fs.promises.readFile(historyPath, 'utf-8')));
+    try {
+      return parseHistory(JSON.parse(await fs.promises.readFile(historyPath, 'utf-8')));
+
+    } catch (error) {
+      if (error.constructor == SyntaxError) return false;
+      throw error;
+    }
   },
   setSync(obj: History) {
     fs.writeFileSync(historyPath, JSON.stringify(compressHistory(obj)))

@@ -277,6 +277,8 @@ async function pushToHistory(tab: Tab, responseCode: number = 0) {
   if (tab.private) return; // obviously
 
   let history = await userData.history.get();
+  if (!history) return;
+
   if (
     history.length > 0 &&
     history[0].url == url &&
@@ -810,6 +812,8 @@ export function attach(win: TabWindow, tab: RealTab) {
 
     setImmediate(async() => {
       const history = await userData.history.get();
+      if (!history) return;
+
       let entry = history.find(item =>
         item.sessionUUID == global.SESSION_UUID &&
         item.tabUID == tab.uniqueID &&
@@ -847,6 +851,7 @@ export function attach(win: TabWindow, tab: RealTab) {
 
     setImmediate(async () => {
       let history = await userData.history.get();
+      if (!history) return;
       if (!tab.webContents) return; // sometimes the tab is already closed at this point
 
       const thisPage = history.find(entry =>

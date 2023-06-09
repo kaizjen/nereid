@@ -611,6 +611,7 @@ export function init() {
 
   onInternal('userData.history.get', async (_, obj: { offset: number, entries: number }) => {
     let history = await userData.history.get();
+    if (!history) return null;
     if (obj.offset) {
       history = history.slice(obj.offset)
     }
@@ -623,17 +624,21 @@ export function init() {
   })
   onInternal('userData.history.setAt', async (_, index: number, obj) => {
     let history = await userData.history.get();
+    if (!history) return false;
     history[index] = obj;
     return await userData.history.set(history)
   })
   onInternal('userData.history.delAt', async (_, index: number) => {
     let history = await userData.history.get();
+    if (!history) return false;
     history.splice(index, 1);
     return await userData.history.set(history)
   })
   onInternal('userData.history.find', async (_, query: { type: 'text', text: string } | { type: 'date', date: number, compare: 'lt' | 'gt' | 'eq' }) => {
     // TODO: use Fuse for this
     let history = await userData.history.get();
+    if (!history) return false;
+
     let i: number[];
     function occurrences(string: string, subString: string, allowOverlapping?: boolean) {
       // source: https://stackoverflow.com/a/7924240
@@ -690,7 +695,7 @@ export function init() {
             date1.getFullYear() == date2.getFullYear();
         }
 
-      }).map(el => history.indexOf(el))
+      }).map(el => (history as any[]).indexOf(el))
     }
     return i;
   })
