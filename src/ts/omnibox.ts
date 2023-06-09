@@ -428,6 +428,7 @@ export function init() {
 
     try {
       let entries = await history.get();
+      if (!entries) throw "SyntaxError while getting history hints.";
 
       if (isDone()) return [];
 
@@ -541,6 +542,7 @@ export function init() {
     if (query.length <= MAX_SHORT_QUERY_LEN) return [];
 
     const entries = await history.get();
+    if (!entries) throw "SyntaxError while getting history hints. (long)";
 
     if (isDone()) return [];
 
