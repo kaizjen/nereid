@@ -352,7 +352,7 @@ export function init() {
     const win = BrowserWindow.fromWebContents(e.sender);
     if (!isTabWindow(win)) return;
 
-    return webContentsABMap[win.currentTab?.webContents.id] || {};
+    return webContentsABMap.get(win.currentTab?.webContents) || {};
   })
   ipcMain.handle('getAdblockerStatus', () => {
     return {

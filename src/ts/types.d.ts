@@ -201,6 +201,7 @@ export interface Configuration {
     sitePermissions: {
       [hostname: string]: Partial<Permissions>
     }
+    adblockerEnabled: boolean
     adblockerWhitelist: string[]
   }
   behaviour: {

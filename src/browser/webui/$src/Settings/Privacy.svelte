@@ -26,6 +26,13 @@
   })
   $: {noCOPermissions; updateCOPs()}
 
+  let adblocker = $config.privacy.adblockerEnabled;
+  const updateAB = noFirstTime(() => {
+    $config.privacy.adblockerEnabled = adblocker;
+    update()
+  })
+  $: {adblocker; updateAB()}
+
   let useHintingService = $config.privacy.useSuggestions;
   const updateHintingService = noFirstTime(() => {
     $config.privacy.useSuggestions = useHintingService;
@@ -76,6 +83,15 @@
     </TextBlock>
   </TextBlock>
   <ToggleSwitch bind:checked={noCOPermissions} />
+</div>
+<div class="s-option">
+  <TextBlock>
+    {t('pages.settings.privacy.adblocker.title')} <br>
+    <TextBlock variant="caption" style="color: gray;">
+      {t('pages.settings.privacy.adblocker.description')}
+    </TextBlock>
+  </TextBlock>
+  <ToggleSwitch bind:checked={adblocker} />
 </div>
 <div class="separator"></div>
 

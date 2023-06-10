@@ -72,8 +72,7 @@ app.on('ready', () => {
 
   userData.lastlaunch.set({ launchFailed: false, exitedSafely: false })
 
-  console.log('Starting adblock...')
-  setup().then(() => console.log('Adblock started!'))
+  setup()
 })
 
 let tray: Tray;

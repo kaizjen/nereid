@@ -386,9 +386,12 @@
 
   let abError = false;
   let abEnabled = false;
+  $: abEnabledGlobally = $config?.privacy.adblockerEnabled ?? true;
   $: {
     tab;
     void async function () {
+      if (!abEnabledGlobally) return;
+
       abError = (await ipcRenderer.invoke('getAdblockerStatus')).adBlockerError
       abEnabled = !$config?.privacy.adblockerWhitelist.includes(url.protocol + url.hostname);
     }()
@@ -521,7 +524,7 @@
         >
       </button>
     {/if}
-    {#if url.protocol.startsWith('http')}
+    {#if url.protocol.startsWith('http') && abEnabledGlobally}
       <button
         class="tab-state"
         on:click={({ currentTarget }) => adblockerDialog = currentTarget.getBoundingClientRect()}

@@ -179,9 +179,10 @@ ui:
       inactive: Ads and trackers on ${hostname} are not being blocked because you have
         whitelisted the website. Unless the adblock is hurting performance or
         functionality of ${hostname}, it's recommended to turn it on.
-      malfunction: A critical error occured while the adblocker was loading.
-      notReady: The page was loaded before the adblocker, so not all ads and trackers
-        were blocked
+      malfunction: A critical error occured while the adblocker was loading. We'll
+        retry in a moment.
+      notReady: The page was loaded before the adblocker was ready, so not all ads and
+        trackers were blocked
       button-reload: Reload the page
   popupBlocked:
     info: Pop-up blocked
@@ -601,6 +602,9 @@ pages:
       denyCrossOriginPermissions:
         title: Deny cross origin permissions
         description: Sites embedded in other sites won't be able to request permissions
+      adblocker:
+        title: Enable adblocker
+        description: The adblocker will block known ads and trackers on all sites.
       useHintingService:
         title: Use the default search engine hinting service
         description: That will send requests to its server each time you're typing in

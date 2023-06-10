@@ -57,6 +57,7 @@
       fullscreen: true
     },
     sitePermissions: {},
+    adblockerEnabled: true,
     adblockerWhitelist: []
   },
   behaviour: {

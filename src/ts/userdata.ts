@@ -306,6 +306,7 @@ try {
           '*': bool_null,
         }
       },
+      adblockerEnabled: 'boolean',
       adblockerWhitelist: [['string']]
     },
     behaviour: {
