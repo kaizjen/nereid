@@ -1,7 +1,6 @@
 import { t } from "./i18n";
 import $ from "./common";
 import { config, control, history } from "./userdata";
-import Fuse from "fuse.js";
 import fetch from "electron-fetch";
 import { BrowserWindow, ipcMain, session } from "electron";
 import { DEFAULT_PARTITION, NO_CACHE_PARTITION } from "./sessions";
@@ -177,19 +176,25 @@ let pedalIDMap: ReadonlyArray<Pedal> = []
 /** Queues the manipulation of hints so that if
  * multiple hint providers finish at the same time, 
  * the hints would be sent only once. */
+let isSortQueued = false;
 const queueSort = (() => {
-  let isQueued = false;
   let hints: Hint[] = [];
 
-  return function(newHints: Hint[], updateHints: (hints: Hint[]) => any) {
+  return function(newHints: Hint[], updateHints: (sortedHints: Hint[]) => any) {
     hints = newHints;
-    if (isQueued) return;
+    if (isSortQueued) return;
 
-    isQueued = true;
+    isSortQueued = true;
     setImmediate(() => {
-      isQueued = false;
+      isSortQueued = false;
 
-      hints = hints.sort(({ relevance: rel1, privileged: p1 }, { relevance: rel2, privileged: p2 }) => {
+      // We need ALL hints to be saved before sorting them, because
+      // sometimes a provider will have a lot of hints in the cache
+      // and in the next run end up with less hints. We don't want
+      // hints from other providers to be lost then
+      hints = hints.slice()
+
+      hints.sort(({ relevance: rel1, privileged: p1 }, { relevance: rel2, privileged: p2 }) => {
         if ((p1 && p2) || (!p1 && !p2)) {
           return rel2 - rel1;
 
@@ -226,7 +231,7 @@ export async function getHints(query: string, updateHints: (hints: Hint[]) => an
         return console.warn(`The hints for "${query}" weren't sent because the query was updated.`)
       ;
       updateHints(sortedHints);
-      previousHints = hints;
+      if (!params.disableEntropy) previousHints = sortedHints;
     });
   }
 
@@ -255,6 +260,7 @@ export async function getHints(query: string, updateHints: (hints: Hint[]) => an
           if (isNaN(h.relevance)) h.relevance = 0;
           h.navigationReason ||= 'input-url';
         })
+        $.mutFilter(provHints, hint => hint.relevance > 0);
         $.mutFilter(hints, hint => hint.provider != name); // Remove all previous hints of this p-er
         hints.push(...provHints);
 
@@ -298,19 +304,47 @@ function allOccurences(string: string, subString: string) {
   return result;
 }
 
+const getWords = (query: string) => $.mutFilter(query.toLowerCase().split(/[\s,]/), item => item);
+
+function findMatches(words: string[], title: string, url: string) {
+  const titleMatches: [number, number][] = [];
+  const urlMatches: [number, number][] = [];
+
+  title = title.toLocaleLowerCase();
+  url = url.toLocaleLowerCase();
+
+  let prevTitleIndex = -1;
+  let prevURLIndex = -1;
+  words.forEach(wd => {
+    const wdTitleIndex = title.indexOf(wd, prevTitleIndex + 1);
+    const wdURLIndex = url.indexOf(wd, prevURLIndex + 1);
+
+    if (wdTitleIndex != -1) {
+      titleMatches.push([wdTitleIndex, wdTitleIndex + wd.length]);
+      prevTitleIndex = wdTitleIndex + wd.length;
+
+    } else {
+      // Every word that doesnt match should subtract from the relevance
+      titleMatches.push([0, -wd.length])
+    }
+    if (wdURLIndex != -1) {
+      urlMatches.push([wdURLIndex, wdURLIndex + wd.length]);
+      prevURLIndex = wdURLIndex + wd.length;
+
+    } else {
+      urlMatches.push([0, -wd.length])
+    }
+  });
+
+  return { titleMatches, urlMatches }
+}
+
 function matchReducer(array: [number, number][]) {
   let num = 0;
   array.forEach(([beginning, end]) => num += end - beginning);
-  return num;
+  return Math.max(num, 0);
 }
 
-/** Multiply the relevance by this number */
-const HISTORY_HINT_MULTIPLIER = 850
-/**
- * After that length, the query will be considered "long".
- * MUST NOT BE > 32 because of a Fuse.js bug with `includeMatches`
- */
-const MAX_SHORT_QUERY_LEN = 25
 export function init() {
   ipcMain.on('triggerPedal', (e, pedalID) => {
     // MAYBE: move this to ipc.ts??
@@ -419,128 +453,6 @@ export function init() {
     }
   })
   addHintProvider("History", async (query, _, { isDone }) => {
-    const hints: Hint[] = [];
-
-    if (query.length > MAX_SHORT_QUERY_LEN) {
-      // Long queries are handled by HistoryLong for perf reasons
-      return [];
-    }
-
-    try {
-      let entries = await history.get();
-      if (!entries) throw "SyntaxError while getting history hints.";
-
-      if (isDone()) return [];
-
-      if (entries.length > maxHistoryHintLength) {
-        entries.length = maxHistoryHintLength;
-      }
-
-      let fuseInstance = new Fuse(entries, {
-        shouldSort: false,
-        ignoreLocation: true,
-        includeMatches: true,
-        includeScore: true,
-        keys: ['url', 'title'],
-        threshold: 0.3,
-        minMatchCharLength: 2,
-        ignoreFieldNorm: true
-      })
-
-      let matches = fuseInstance.search(query);
-
-      let merged: Hint[] = $.mutFilter(
-        matches.map(({ item, score, matches }): Hint => {
-          const contents: RichText = [];
-
-          if (item.reason.startsWith('searched:')) {
-            // TODO: move this section to a different provider so that these results
-            // don't come up when the query is the search engine URL
-            const text = item.reason.slice("searched:".length);
-
-            const allOccs = allOccurences(text, query);
-
-            let prevIndex = 0;
-            allOccs.forEach(occ => {
-              contents.push({ text: text.slice(prevIndex, occ), bold: true });
-              contents.push({ text: text.slice(occ, occ + query.length) });
-
-              prevIndex = occ + query.length;
-            });
-            contents.push({ text: text.slice(prevIndex), bold: true });
-
-            return {
-              contents,
-              desc: [{ text: ' - ' + t('ui.hints.prev-search', { site: URLParse(item.url).hostname }), gray: true }],
-              icon: '::search',
-              url: item.url,
-              omniboxValue: text,
-              relevance: (1 - score) * HISTORY_HINT_MULTIPLIER * 1.45, // amplify this even further
-              navigationReason: `searched:${text}`
-            }
-          }
-
-          const urlRT: RichText = []
-
-          const titleMatches = matches.find(m => m.key == 'title');
-          const urlMatches = matches.find(m => m.key == 'url');
-
-          if (titleMatches) {
-            let prevIndex = 0;
-            titleMatches.indices.forEach(match => {
-              contents.push({ text: titleMatches.value.slice(prevIndex, match[0]) });
-              contents.push({ text: titleMatches.value.slice(match[0], match[1] + 1), bold: true });
-
-              prevIndex = match[1] + 1;
-            })
-            contents.push({ text: titleMatches.value.slice(prevIndex) });
-
-          } else {
-            contents.push({ text: item.title })
-          }
-
-          if (urlMatches) {
-            let prevIndex = 0;
-            urlMatches.indices.forEach(match => {
-              urlRT.push({ text: urlMatches.value.slice(prevIndex, match[0]), blue: true });
-              urlRT.push({ text: urlMatches.value.slice(match[0], match[1] + 1), bold: true, blue: true });
-
-              prevIndex = match[1] + 1;
-            })
-            urlRT.push({ text: urlMatches.value.slice(prevIndex), blue: true });
-
-          } else {
-            urlRT.push({ text: item.url, blue: true })
-          }
-
-          return {
-            contents,
-            desc: urlRT,
-            url: item.url,
-            icon: item.faviconURL,
-            relevance: (1 - score) * HISTORY_HINT_MULTIPLIER
-          }
-        }),
-        $.uniqBy((val1, val2) =>
-          val1.url == val2.url
-        )
-      );
-
-      hints.push(...merged)
-
-      return hints;
-
-    } catch (e) {
-      console.log('There was an error while trying to get history-based hints:', e);
-      return [];
-    }
-  })
-  addHintProvider("HistoryLong", async (query, _, { isDone }) => {
-    // This provider only handles long queries
-    // and uses plain indexOf() search instead of the fuzzy seach
-    // algorithm as it gets really slow (~500 ms/query) on long queries.
-    if (query.length <= MAX_SHORT_QUERY_LEN) return [];
-
     const entries = await history.get();
     if (!entries) throw "SyntaxError while getting history hints. (long)";
 
@@ -549,36 +461,25 @@ export function init() {
     if (entries.length > maxHistoryHintLength) {
       entries.length = maxHistoryHintLength;
     }
+    // We'd use this function on the entire entries array
+    // (original length), but it's too slow that way
+    $.mutFilter(entries, $.uniqBy((e1, e2) => e1.url == e2.url));
 
-    const words = $.mutFilter(query.toLowerCase().split(/\s/), item => item);
+    const words = getWords(query);
 
     const hints: Hint[] = [];
     entries.forEach(entry => {
-      const titleMatches: [number, number][] = [];
-      const urlMatches: [number, number][] = [];
+      const { titleMatches, urlMatches } = findMatches(words, entry.title, entry.url);
 
-      let prevTitleIndex = -1;
-      let prevURLIndex = -1;
-      words.forEach(wd => {
-        const wdTitleIndex = entry.title.toLowerCase().indexOf(wd, prevTitleIndex + 1);
-        const wdURLIndex = entry.url.toLowerCase().indexOf(wd, prevURLIndex + 1);
-
-        if (wdTitleIndex != -1) {
-          titleMatches.push([wdTitleIndex, wdTitleIndex + wd.length]);
-          prevTitleIndex = wdTitleIndex + wd.length;
-        }
-        if (wdURLIndex != -1) {
-          urlMatches.push([wdURLIndex, wdURLIndex + wd.length]);
-          prevURLIndex = wdURLIndex + wd.length;
-        }
-      });
       if (titleMatches.length == 0 && urlMatches.length == 0) return;
 
-      const relevance = ((matchReducer(titleMatches) + matchReducer(urlMatches)) / 1.5) * 75;
-      if (relevance < 300) return;
+      const relevance = (matchReducer(titleMatches) + (matchReducer(urlMatches) * 0.3)) * 100;
 
       const contents: RichText = [];
       const urlRT: RichText = [];
+
+      $.mutFilter(titleMatches, match => match[1] > 0)
+      $.mutFilter(urlMatches, match => match[1] > 0)
 
       let prevIndex = 0;
       titleMatches.forEach(match => {
@@ -612,38 +513,24 @@ export function init() {
   addHintProvider("Tabs", (query) => {
     const tabs = getAllTabWindows().map(w => w.tabs).flat();
 
-    const words = $.mutFilter(query.toLowerCase().split(/\s/), item => item);
+    const words = getWords(query);
 
     const hints: Hint[] = [];
     tabs.forEach(tab => {
-      const titleMatches: [number, number][] = [];
-      const urlMatches: [number, number][] = [];
-
       const title = tab.isGhost ? tab.title : asRealTab(tab).webContents.getTitle();
       const url = tab.isGhost ? tab.url : asRealTab(tab).webContents.getURL();
 
-      let prevTitleIndex = -1;
-      let prevURLIndex = -1;
-      words.forEach(wd => {
-        const wdTitleIndex = title.toLowerCase().indexOf(wd, prevTitleIndex + 1);
-        const wdURLIndex = url.toLowerCase().indexOf(wd, prevURLIndex + 1);
+      const { titleMatches, urlMatches } = findMatches(words, title, url)
 
-        if (wdTitleIndex != -1) {
-          titleMatches.push([wdTitleIndex, wdTitleIndex + wd.length]);
-          prevTitleIndex = wdTitleIndex + wd.length;
-        }
-        if (wdURLIndex != -1) {
-          urlMatches.push([wdURLIndex, wdURLIndex + wd.length]);
-          prevURLIndex = wdURLIndex + wd.length;
-        }
-      });
       if (titleMatches.length == 0 && urlMatches.length == 0) return;
 
-      const relevance = 400 + ((matchReducer(titleMatches) + (matchReducer(urlMatches) * 0.3)) * 30);
-      if (relevance == 400) return;
+      const relevance = (matchReducer(titleMatches) + (matchReducer(urlMatches) * 0.3)) * 75;
 
       const titleRT: RichText = [];
       const urlRT: RichText = [];
+
+      $.mutFilter(titleMatches, match => match[1] > 0)
+      $.mutFilter(urlMatches, match => match[1] > 0)
 
       let prevIndex = 0;
       titleMatches.forEach(match => {
