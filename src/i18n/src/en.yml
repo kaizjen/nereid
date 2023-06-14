@@ -261,6 +261,7 @@ windows:
       windowDevTools: Window developer tools (window ID ${id})
       windowUI: Window UI Process (ID ${id})
       helperWindowUI: "Window: ${title}"
+      serviceView: UI Service Process
       gpu: GPU process
     table:
       name: Name

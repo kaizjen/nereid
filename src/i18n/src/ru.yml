@@ -262,6 +262,7 @@ windows:
       windowDevTools: DevTools для окна (ID окна ${id})
       windowUI: Процесс интерфейса окна (ID ${id})
       helperWindowUI: "Окно: ${title}"
+      serviceView: Процесс помощника интерфейса
       gpu: Процесс графического процессора
     table:
       name: Название

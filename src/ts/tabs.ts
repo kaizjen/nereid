@@ -13,6 +13,7 @@ import { t } from "./i18n";
 import { addTabToGroup, destroyEmptyGroups, getTabGroupByID, getTabGroupByTab } from "./tabgroups";
 import { EventEmitter } from "events";
 import type TypedEmitter from "typed-emitter";
+import { showTargetURL } from "./serviceview";
 
 const { URLParse } = $
 
@@ -803,6 +804,9 @@ export function attach(win: TabWindow, tab: RealTab) {
 
     selectTab(win, { tab });
   })
+  tab.webContents.on('update-target-url', (_e, url) => {
+    showTargetURL(win, url)
+  })
   tab.webContents.on('page-title-updated', (_e, title, isExplicit) => {
     sendUpdate({ title });
     if (win.currentTab == tab) {
@@ -1052,6 +1056,7 @@ export function detach(tab: RealTab) {
     'did-stop-loading',
     'media-started-playing',
     'focus',
+    'update-target-url',
     'page-title-updated',
     'page-favicon-updated',
     'will-prevent-unload',

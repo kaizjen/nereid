@@ -16,6 +16,7 @@ import { kill } from "./process";
 import { addTabToGroup, createTabGroup, getTabGroupByID, getTabsFromTabGroup, ungroup } from "./tabgroups";
 import { getHints } from "./omnibox";
 import { commands } from "./commands";
+import { serviceView } from "./serviceview";
 
 const URLParse = $.URLParse
 
@@ -454,6 +455,10 @@ export function init() {
       if (isTabWindow(win)) return;
       PIDMap[win.webContents.getOSProcessId()] = $t('helperWindowUI', { title: win.getTitle() })
     })
+
+    if (serviceView) {
+      PIDMap[serviceView.webContents.getOSProcessId()] = $t('serviceView')
+    }
 
     const metrics = app.getAppMetrics();
     for (const process of metrics) {

@@ -74,6 +74,18 @@
       "value": 43200,
       "type": "num",
       "description": "How much time (in minutes) the adblock cache is valid before Nereid will re-download it."
+    },
+    "enable_service_view": {
+      "default": false,
+      "value": false,
+      "type": "bool",
+      "description": "Enables the ServiceView, which will show a tooltip when you hover over a link."
+    },
+    "service_view_devtools": {
+      "default": false,
+      "value": false,
+      "type": "bool",
+      "description": "Whether to open DevTools for the ServiceView. (The ServiceView is initialized on-demand, which means that its DevTools may open unexpectedly)"
     }
   }
 }
