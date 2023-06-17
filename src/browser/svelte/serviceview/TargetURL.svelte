@@ -18,7 +18,7 @@
 
   @media (prefers-color-scheme: light) {
     .url {
-      background: var(--light-2);
+      background: var(--light-9);
     }
   }
 </style>
