@@ -45,10 +45,14 @@
   const timeFmt = Intl.DateTimeFormat(navigator.language, { timeStyle: 'short', hourCycle: 'h23' })
   // 'h23' because `hour12: false` would show "0:30" as "24:30" (https://support.google.com/chrome/thread/29828561?hl=en)
   const dateFmt = Intl.DateTimeFormat(navigator.language, { dateStyle: 'full' })
-  let unixMs = Date.now();
-  setInterval(() => {
-    unixMs = Date.now()
-  }, 100)
+  let unixMs = 0;
+  function updateDateTime() {
+    if (document.visibilityState == 'hidden') return;
+
+    unixMs = Date.now();
+    setTimeout(updateDateTime, 100);
+  }
+  updateDateTime()
 
   let time;
   $: time = timeFmt.format(unixMs)
@@ -71,6 +75,8 @@
     nereid.tab.sendKeyToChrome({ code, key, ctrlKey });
   })
 </script>
+
+<svelte:window on:visibilitychange={updateDateTime} />
 
 <div class="app">
   <div class="time">
