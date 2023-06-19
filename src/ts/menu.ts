@@ -519,6 +519,8 @@ export async function showContextMenu(win: TabWindow, tab: RealTab, opts: Electr
   const createContextTab = createContextTabF(win, tab)
 
   let menu = new Menu();
+  /** `true` if clicked on a blank space and not on an image or link, etc. */
+  let isBlank = true;
 
   function addItem(obj: Electron.MenuItemConstructorOptions) {
     menu.append(new MenuItem(obj))
@@ -568,6 +570,8 @@ export async function showContextMenu(win: TabWindow, tab: RealTab, opts: Electr
   }
 
   if (opts.selectionText) {
+    isBlank = false;
+
     let searchConfig = config.get().search;
     let selectedSE = searchConfig.available[searchConfig.selectedIndex]
 
@@ -603,12 +607,16 @@ export async function showContextMenu(win: TabWindow, tab: RealTab, opts: Electr
     addItem(SEPARATOR)
   }
   if (opts.editFlags.canPaste) {
+    isBlank = false;
+
     addItem({ label: $t('paste'), role: 'paste', accelerator: 'CmdOrCtrl+V' })
     addItem({ label: $t('pasteAndMatchStyle'), role: 'pasteAndMatchStyle', accelerator: 'CmdOrCtrl+Shift+V' })
     addItem(SEPARATOR)
   }
 
   if (opts.linkURL) {
+    isBlank = false;
+
     addItem({ label: $t('open.newTab'), click() { createContextTab({ url: opts.linkURL }) } })
     addItem({ label: $t('open.newPrivateTab'), click() { createContextTab({ url: opts.linkURL, private: true }) } })
     addItem({ label: $t('open.newWindow'), click() { newTabWindow([{ url: opts.linkURL, private: tab.private }]) } })
@@ -629,78 +637,82 @@ export async function showContextMenu(win: TabWindow, tab: RealTab, opts: Electr
   }
 
   if (opts.mediaType == 'image') {
+    isBlank = false;
+
     if (opts.srcURL) {
       addItem({ label: $t('image.viewInNewTab'), click() { createContextTab({ url: opts.srcURL }) } })
       addItem({ label: $t('image.copyURL'), click() { clipboard.writeText(opts.srcURL) } })
       addItem(SEPARATOR)
-    }
-    addItem({ label: $t('image.saveAs'), async click() {
-      let response: Response;
-      try {
-        response = await fetch(opts.srcURL, {
-          session: session.fromPartition(tab.private ? PRIVATE_PARTITION : DEFAULT_PARTITION),
-          useSessionCookies: true
+      addItem({ label: $t('image.saveAs'), async click() {
+        let response: Response;
+        try {
+          response = await fetch(opts.srcURL, {
+            session: session.fromPartition(tab.private ? PRIVATE_PARTITION : DEFAULT_PARTITION),
+            useSessionCookies: true
+          });
+          // Unfortunately, the image will be fetched again, and if the server retrns another image, then oops.
+          // There's probably a way to do this with clipboard, but it's too messy even for me.
+  
+        } catch (e) {
+          console.error(`Fetching image failed:`, e);
+          dialog.showErrorBox($t('image.saving.error-title'), `Error: ${e}.`)
+          return;
+        }
+  
+        let contentType = response.headers.get('content-type') ?? '';
+        let extension = contentType.slice(6) || pathModule.extname(opts.srcURL).slice(1);
+  
+        if (extension == '' || (contentType && !contentType.startsWith('image'))) {
+          // maybe don't throw here?
+          console.error(`Content-Type is not an image, or the image has no extension`);
+          dialog.showErrorBox($t('image.saving.error-title'), $t('image.saving.error-notAnImage'))
+          return;
+        }
+  
+        let result = await dialog.showSaveDialog(win || null, {
+          title: $t('image.saving.dialog'),
+          properties: ['showHiddenFiles', 'createDirectory'],
+          defaultPath: pathModule.join(config.get().behaviour.downloadPath || app.getPath('downloads'), `image.${extension}`)
         });
-        // Unfortunately, the image will be fetched again, and if the server retrns another image, then oops.
-        // There's probably a way to do this with clipboard, but it's too messy even for me.
-
-      } catch (e) {
-        console.error(`Fetching image failed:`, e);
-        dialog.showErrorBox($t('image.saving.error-title'), `Error: ${e}.`)
-        return;
-      }
-
-      let contentType = response.headers.get('content-type') ?? '';
-      let extension = contentType.slice(6) || pathModule.extname(opts.srcURL).slice(1);
-
-      if (extension == '' || (contentType && !contentType.startsWith('image'))) {
-        // maybe don't throw here?
-        console.error(`Content-Type is not an image, or the image has no extension`);
-        dialog.showErrorBox($t('image.saving.error-title'), $t('image.saving.error-notAnImage'))
-        return;
-      }
-
-      let result = await dialog.showSaveDialog(win || null, {
-        title: $t('image.saving.dialog'),
-        properties: ['showHiddenFiles', 'createDirectory'],
-        defaultPath: pathModule.join(config.get().behaviour.downloadPath || app.getPath('downloads'), `image.${extension}`)
-      });
-
-      if (result.canceled) return;
-
-      if (!response.ok) {
-        console.error(`Fetching image failed: ${response.statusText} (${response.status})`);
-        dialog.showErrorBox($t('image.saving.error-title'), `Failed: ${response.status} - ${response.statusText}`)
-        return;
-      }
-
-      let buf = await response.buffer();
-
-      if (await exists(result.filePath)) {
-        console.error(`Saving image failed: File with that name already exists`);
-        dialog.showErrorBox($t('image.saving.error-title'), $t('image.saving.error-alreadyExists'))
-        return;
-
-      } else {
-        await fs.promises.writeFile(result.filePath, buf);
-        let dlData = await downloads.get();
-        dlData.unshift({
-          url: opts.srcURL,
-          urlChain: [ opts.srcURL ],
-          savePath: result.filePath,
-          status: 'completed',
-          offset: buf.byteLength,
-          length: buf.byteLength
-        })
-        await downloads.set(dlData)
-      }
-
-    } })
+  
+        if (result.canceled) return;
+  
+        if (!response.ok) {
+          console.error(`Fetching image failed: ${response.statusText} (${response.status})`);
+          dialog.showErrorBox($t('image.saving.error-title'), `Failed: ${response.status} - ${response.statusText}`)
+          return;
+        }
+  
+        let buf = await response.buffer();
+  
+        if (await exists(result.filePath)) {
+          console.error(`Saving image failed: File with that name already exists`);
+          dialog.showErrorBox($t('image.saving.error-title'), $t('image.saving.error-alreadyExists'))
+          return;
+  
+        } else {
+          await fs.promises.writeFile(result.filePath, buf);
+          let dlData = await downloads.get();
+          dlData.unshift({
+            url: opts.srcURL,
+            urlChain: [ opts.srcURL ],
+            savePath: result.filePath,
+            status: 'completed',
+            offset: buf.byteLength,
+            length: buf.byteLength
+          })
+          await downloads.set(dlData)
+        }
+  
+      } })
+    }
     addItem({ label: $t('image.copy'), click() { tab.webContents.copyImageAt(opts.x, opts.y) } })
     addItem(SEPARATOR)
   }
 
   if (opts.mediaType == 'audio' || opts.mediaType == 'video') {
+    isBlank = false;
+
     addItem({ label: $t('media.' + (opts.mediaFlags.isPaused ? 'play' : 'pause')), click() {
       executeCodeOnElement(
         opts.frame,
@@ -726,6 +738,8 @@ export async function showContextMenu(win: TabWindow, tab: RealTab, opts: Electr
   }
 
   if (opts.mediaType == 'video') {
+    isBlank = false;
+
     addItem({ label: $t('media.controls'), type: 'checkbox', checked: opts.mediaFlags.isControlsVisible, click() {
       executeCodeOnElement(opts.frame, `element.controls = ${opts.mediaFlags.isControlsVisible ? 'false' : 'true'}`)
     }, enabled: opts.mediaFlags.canToggleControls })
@@ -742,6 +756,8 @@ export async function showContextMenu(win: TabWindow, tab: RealTab, opts: Electr
   }
 
   if (opts.frame != tab.webContents.mainFrame) {
+    isBlank = false;
+
     addItem({ label: $t('frame.reload'), click() { opts.frame.reload() } })
     addItem({ label: $t('frame.viewSourceCode'), click() {
       createContextTab({ url: `view-source:${opts.frame.url}` })
@@ -749,29 +765,32 @@ export async function showContextMenu(win: TabWindow, tab: RealTab, opts: Electr
     addItem(SEPARATOR)
   }
 
-  addItem({ label: t('navigation.back'), enabled: tab.webContents.canGoBack(), click() { tab.webContents.goBack() } })
-  addItem({ label: t('navigation.forward'), enabled: tab.webContents.canGoForward(), click() { tab.webContents.goForward() } })
-  addItem({ label: t('navigation.reload'), click() { tab.webContents.reload() } })
-  addItem(SEPARATOR)
-  addItem({ label: $t('savePageAs'), async click() {
-    let result = await dialog.showSaveDialog(win || null, {
-      title: $t('savePage_dialog', { page: tab.webContents.getURL() }),
-      properties: [ 'showHiddenFiles', 'createDirectory' ],
-      defaultPath: pathModule.join(config.get().behaviour.downloadPath || '/', opts.suggestedFilename || 'page'),
-      filters: [ { extensions: ['html', 'htm'], name: 'HTML documents' } ]
-    });
-
-    if (result.canceled) return;
-
-    let pageType = control.options.save_complete_page.value ? "HTMLComplete" as const : "HTMLOnly" as const
-    tab.webContents.savePage(result.filePath, pageType)
-
-  }, accelerator: 'Ctrl+S' })
-  addItem({ label: $t('print'), click() {
-    // TODO: print page
-    dialog.showErrorBox("Not implemented", "Not implemented")
-  }, accelerator: 'Ctrl+Shift+P' })
-  addItem(SEPARATOR)
+  if (isBlank) {
+    addItem({ label: t('navigation.back'), enabled: tab.webContents.canGoBack(), click() { tab.webContents.goBack() } })
+    addItem({ label: t('navigation.forward'), enabled: tab.webContents.canGoForward(), click() { tab.webContents.goForward() } })
+    addItem({ label: t('navigation.reload'), click() { tab.webContents.reload() } })
+    addItem(SEPARATOR)
+    addItem({ label: $t('savePageAs'), async click() {
+      let result = await dialog.showSaveDialog(win || null, {
+        title: $t('savePage_dialog', { page: tab.webContents.getURL() }),
+        properties: [ 'showHiddenFiles', 'createDirectory' ],
+        defaultPath: pathModule.join(config.get().behaviour.downloadPath || '/', opts.suggestedFilename || 'page'),
+        filters: [ { extensions: ['html', 'htm'], name: 'HTML documents' } ]
+      });
+  
+      if (result.canceled) return;
+  
+      let pageType = control.options.save_complete_page.value ? "HTMLComplete" as const : "HTMLOnly" as const
+      tab.webContents.savePage(result.filePath, pageType)
+  
+    }, accelerator: 'Ctrl+S' })
+    addItem({ label: $t('print'), click() {
+      // TODO: print page
+      dialog.showErrorBox("Not implemented", "Not implemented")
+    }, accelerator: 'Ctrl+Shift+P' })
+  
+    addItem(SEPARATOR)
+  }
   addItem({ label: $t('viewSourceCode'), click() { createContextTab({ url: `view-source:${tab.webContents.getURL()}` }) } })
   addItem({ label: $t('openDevTools'), click() { toggleDevTools(tab.webContents) }, accelerator: 'Ctrl+Shift+I' })
   if (tab.paneView) {
