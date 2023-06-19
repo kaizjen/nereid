@@ -24,7 +24,7 @@
 </style>
 <script>
   import { getContext } from "svelte";
-    import { fade } from "svelte/transition";
+  import { fade } from "svelte/transition";
 
   const { ipcRenderer } = window.nereid;
 
