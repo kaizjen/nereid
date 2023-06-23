@@ -28,7 +28,7 @@ common:
       ignore: Ignore
       ask: Ask
       useDefault: Use default
-      defaultMark: (Default)
+      defaultMark: (default)
     geolocation:
       name: Geolocation (not working)
       desc: Provides access to your percise position
@@ -39,8 +39,8 @@ common:
       prompt: ${hostname} wants to use the fullscreen mode
     popups:
       name: Pop-up windows
-      desc: Allows to show pop-up windows
-      prompt: ${hostname} wants to pop-up a window
+      desc: Allows to show pop-up windows without your interaction
+      prompt: ${hostname} wants to be able to open pop-ups at any time
     media.video:
       name: Webcam access
       desc: Allows to access the webcam
@@ -71,8 +71,8 @@ common:
       prompt: ${hostname} wants to use MIDI devices
     pointerLock:
       name: Pointer lock
-      desc: Allows to control your mouse cursor
-      prompt: ${hostname} wants to lock your mouse cursor
+      desc: Allows to lock your mouse cursor (Press Esc to release it)
+      prompt: ${hostname} wants to lock your mouse cursor (Press Esc to release it)
     openExternal:
       name: Opening external apps
       desc: Allows opening an app on your device. Allowing this means the site will be
@@ -84,8 +84,8 @@ common:
       prompt: ${hostname} wants to be able to detect when you are idle
     screenWakeLock:
       name: Screen lock prevention
-      desc: Allows to prevent your device from automatically locking the screen
-      prompt: ${hostname} wants to be able to prevent automatic screen locking
+      desc: Allows to prevent your device from automatically falling asleep
+      prompt: ${hostname} wants to be able to prevent automatic sleep mode
 navigation:
   back: Back
   forward: Forward
@@ -290,11 +290,11 @@ net-error:
     local:
       - An unknown local error has occured
       - Something went wrong on this device, for example the browser ran out of
-        memory or a firewall blocked the request
+        memory or a firewall blocked the request.
     connection:
       - An unknown connection error has occured
       - Something went wrong while connecting to the server, for example the
-        connection was refused or you have connected to another network
+        connection was refused or you have connected to another network.
     certificate:
       - A certificate error has occured
       - We can't trust the certificate of the host <b>${host}</b>.
@@ -315,14 +315,14 @@ net-error:
     - >
       Here's what you can do:<br>
 
-      <ul><li>Check if there are any typos in the host name <b>"${hostname}"</b>.</li>
+      <ul><li>Check if there are any typos in the host name <b>"${hostname}"</b></li>
 
       <li>Run network diagnostics</li>
 
-      <li>Change DNS over HTTPS settings</li>
+      <li>Change DNS over HTTPS settings.</li>
   noFileAccess:
     - We can't get access to this file.
-    - Perhaps, file at '<b>${path}</b>' was moved or deleted
+    - Perhaps, file at '<b>${path}</b>' was moved or deleted.
   fileTooBig:
     - This file is too big
     - That thing is massive! Do you think I can handle opening it?
@@ -335,7 +335,7 @@ net-error:
       delete it.
   requestBlocked:
     - This request was blocked.
-    - Perhaps, an extension prevented the request.
+    - Perhaps, an extension or the adblocker prevented the request.
   netChange:
     - The network changed.
     - Perhaps, you connected to another Wi-Fi or Ethernet network.
@@ -384,7 +384,7 @@ menu:
   common:
     newWindow: New window
     newTab: New tab
-    newPrivateTab: New Private tab
+    newPrivateTab: New private tab
     quit: Quit
   tray:
     state-ready: Nereid is ready
@@ -470,8 +470,8 @@ menu:
       saveAs: Save image as...
       saving:
         dialog: Save image
-        error-title: Failed to download image
-        error-notAnImage: This is not an image.
+        error-title: Failed to download the image
+        error-notAnImage: The server didn't return an image.
         error-alreadyExists: File with that name already exists.
     media:
       play: Play
@@ -524,7 +524,7 @@ pages:
         language of Nereid. The websites will still be displayed in your
         selected language, but Nereid's interface will be in one that you have
         selected for it specifically.
-      noTranslation: "Nereid is not translated to your language. Pick a language for Nereid:"
+      noTranslation: "Nereid doesn't support this language. Pick a language for Nereid:"
       restartNotice: Nereid will restart when you apply the change
     themes:
       title: Choose your theme
@@ -592,7 +592,7 @@ pages:
             permissions-desc: Default settings for permissions
           sites:
             title: Sites
-            more: More sites...
+            search: Search sites...
             withPermissions: Sites with permissions
             reset: Reset all permissions of this site
           sitePage:
@@ -602,7 +602,7 @@ pages:
             title: Default permissions
       denyCrossOriginPermissions:
         title: Deny cross origin permissions
-        description: Sites embedded in other sites won't be able to request permissions
+        description: Sites embedded in other sites won't be able to request permissions.
       adblocker:
         title: Enable adblocker
         description: The adblocker will block known ads and trackers on all sites.
@@ -683,9 +683,9 @@ pages:
     favicon: Site's icon
     dialog:
       title: Clear browsing history
-      clear-button: Clear now
+      clear-button: Clear
       clearOnThisPage-button: Delete all on this page
-      timePeriod: Or clear based on a period of time
+      timePeriod: "Or clear based on a period of time:"
       option-hour: Past hour
       option-day: Past 24 hours
       option-week: Past 7 days

@@ -238,7 +238,7 @@
       <div class="space"></div>
 
       <div class="flex col">
-        <Button on:click={() => { pages.sitesOverview = false; pages.site = true; }}>{t('dialog.sites.more')}</Button>
+        <Button on:click={() => { pages.sitesOverview = false; pages.site = true; }}>{t('dialog.sites.search')}</Button>
       </div>
       <div class="space"></div>
 
