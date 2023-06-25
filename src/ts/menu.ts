@@ -308,6 +308,7 @@ function buildAppMenuImmediately() {
   nereidMenu.append(commands.nextTab.toAppMenuItem(hidden, clickToTrigger))
   nereidMenu.append(commands.previousTab.toAppMenuItem(hidden, clickToTrigger))
   nereidMenu.append(commands.reloadAll.toAppMenuItem(hidden, clickToTrigger))
+  nereidMenu.append(commands.closeAllPrivateTabs.toAppMenuItem(hidden, clickToTrigger))
 
 
   const fileMenu = new Menu();
@@ -962,6 +963,9 @@ export function menuOfTab(win: TabWindow, tab: Tab) {
       }
     }
   })
+  if (tab.private) {
+    menu.append(commands.closeAllPrivateTabs.toAppMenuItem(clickToTrigger))
+  }
   addItem({
     label: $t('close-others'), click() {
       win.tabs.forEach(async otherTab => {

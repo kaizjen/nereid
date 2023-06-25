@@ -391,6 +391,7 @@ menu:
     state-processing: Nereid is running background processes...
   tabs:
     close: Close tab
+    closeAllPrivate: Close all private tabs
     openClosed: Open closed tab
     hardReload: Hard refresh
     onePageUp: Go one page up

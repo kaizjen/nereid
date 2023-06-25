@@ -389,6 +389,7 @@ menu:
     state-processing: Nereid работает в фоне...
   tabs:
     close: Закрыть вкладку
+    closeAllPrivate: Закрыть все приватные вкладки
     openClosed: Открыть закрытую вкладку
     hardReload: Полная перезагрузка
     onePageUp: На сегмент назад

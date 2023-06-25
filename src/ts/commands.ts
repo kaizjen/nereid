@@ -33,6 +33,7 @@ type KnownCmds = {
   rightTabInRightPane: Command<(win: BrowserWindow) => any>
   closePanes: Command<(win: BrowserWindow) => any>
   closeTab: Command<(win: BrowserWindow) => any>
+  closeAllPrivateTabs: Command<(win: BrowserWindow) => any>
   openClosed: Command<(win: BrowserWindow) => any>
   newWindow: Command<() => any>
   openFile: Command<(win: BrowserWindow) => any>
@@ -448,6 +449,20 @@ registerCommand({
     if (!isTabWindow(win)) return;
 
     closeTab(win, { tab: win.currentTab })
+  }
+})
+registerCommand({
+  name: 'closeAllPrivateTabs',
+  label: t('menu.tabs.closeAllPrivate'),
+  trigger(win: BrowserWindow) {
+    if (!isTabWindow(win)) return;
+
+    let index = -1;
+    while (index++ < win.tabs.length - 1) {
+      if (!win.tabs[index].private) continue;
+
+      closeTab(win, { index }, true)
+    }
   }
 })
 registerCommand({
