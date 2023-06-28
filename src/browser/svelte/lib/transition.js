@@ -65,14 +65,7 @@ export function modalPageAnimations(node, { animationControls, duration = 200, e
   let firstWidth;
   let lastWidth;
 
-  animationControls.recordFirstSize = () => {
-    firstHeight = node.getBoundingClientRect().height
-    firstWidth = node.getBoundingClientRect().width
-  }
-  animationControls.recordLastSize = () => {
-    lastHeight = node.getBoundingClientRect().height
-    lastWidth = node.getBoundingClientRect().width
-  }
+  
   animationControls.setFirstSize = (rect) => {
     firstHeight = rect.height
     firstWidth = rect.width
@@ -80,6 +73,12 @@ export function modalPageAnimations(node, { animationControls, duration = 200, e
   animationControls.setLastSize = (rect) => {
     lastHeight = rect.height
     lastWidth = rect.width
+  }
+  animationControls.recordFirstSize = () => {
+    animationControls.setFirstSize(node.getBoundingClientRect());
+  }
+  animationControls.recordLastSize = () => {
+    animationControls.setLastSize(node.getBoundingClientRect());
   }
   animationControls.transition = () => {
     if (firstHeight == null || lastHeight == null)

@@ -127,7 +127,6 @@
   let page = 0;
 
   let animationControls = {};
-  let noAnimation = true;
   let page0;
   let page1;
   let page2;
@@ -172,22 +171,15 @@
   style:margin-right={marginRight}
 >
   {#if page == 0}
-    <!--
-      For some reason, svelte only allows dynamic parameters in in: and out: attrubutes
-      and not in the transition: attribute.
-    -->
     <div
       class="dialog-content"
-      in:fly={noAnimation ? { duration: 0 } : { duration: 200, x: -50, easing: cubicOut }}
-      out:fly={noAnimation ? { duration: 0 } : { duration: 200, x: -50, easing: cubicOut }}
+      transition:fly|local={{ duration: 200, x: -50, easing: cubicOut }}
       bind:this={page0}
       on:introstart={() => {
-        if (noAnimation) return noAnimation = false;
         animationControls.setLastSize(page0.getBoundingClientRect());
         animationControls.transition();
       }}
       on:outrostart={() => {
-        if (noAnimation) return;
         animationControls.setFirstSize(page0.getBoundingClientRect());
         page0.style.position = 'absolute';
       }}
@@ -223,7 +215,7 @@
         <span>{_.CREATE}</span>
       </button>
       <div class="footer">
-        <Button on:click={() => {noAnimation = true; open = false}}>
+        <Button on:click={() => open = false}>
           {_.DONE}
         </Button>
       </div>
@@ -238,7 +230,6 @@
         animationControls.transition();
       }}
       on:outrostart={() => {
-        if (noAnimation) return;
         animationControls.setFirstSize(page1.getBoundingClientRect());
         page1.style.position = 'absolute';
       }}
@@ -257,7 +248,6 @@
         animationControls.transition();
       }}
       on:outrostart={() => {
-        if (noAnimation) return;
         animationControls.setFirstSize(page2.getBoundingClientRect());
         page2.style.position = 'absolute';
       }}
@@ -274,4 +264,4 @@
   {/if}
 </div>
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class="blocker" on:click={() => {noAnimation = true; open = false}}></div>
+<div class="blocker" on:click={() => open = false}></div>
