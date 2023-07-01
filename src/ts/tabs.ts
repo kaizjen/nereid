@@ -141,7 +141,7 @@ export function updateSavedTabsImmediately() {
 function displayPreventUnloadDialog(win: BrowserWindow, url: string, sync?: boolean) {
   // this function has to be synchronous D:
   const options = {
-    type: 'question',
+    type: 'question' as const,
     title: `Are you sure you want to leave "${URLParse(url).hostname}"?`,
     message: "This site might have some unsaved data.",
     buttons: ["Leave", "Stay"],
