@@ -354,8 +354,8 @@ net-error:
     - The connection was reset.
     - >
       Something prevented Nereid from connecting to the host. Maybe your
-      firewall blocked the request, or your internet provider might've blocked
-      the connection, or the server unexpectedly stopped.
+      firewall or your internet provider blocked the connection, or the server
+      unexpectedly stopped.
   refused:
     - Connection refused.
   failed:
