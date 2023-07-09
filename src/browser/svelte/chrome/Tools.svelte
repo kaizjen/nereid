@@ -33,7 +33,7 @@
     position: absolute;
     bottom: 0;
     margin-bottom: 2px;
-    background: #3b3b3b70;
+    background: var(--t-black-5);
     width: 80%;
     height: 3px;
     overflow: hidden;
